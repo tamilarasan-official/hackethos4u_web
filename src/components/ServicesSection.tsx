@@ -53,26 +53,41 @@ const ServicesSection = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {services.map((service) => (
-            <div
-              key={service.id}
-              className="group bg-card rounded-3xl p-6 shadow-card hover:shadow-card-hover transition-smooth hover:scale-105"
-            >
-              <div className="mb-4 text-primary">{service.icon}</div>
-              <h3 className="text-xl font-semibold mb-3">{service.title}</h3>
-              <p className="text-muted-foreground text-sm mb-6 min-h-[60px]">
-                {service.description}
-              </p>
-              <Link to={`/services/${service.slug}`}>
-                <Button
-                  variant="outline"
-                  className="w-full rounded-full group-hover:bg-primary group-hover:text-primary-foreground transition-smooth"
-                >
-                  Explore Service
-                </Button>
-              </Link>
-            </div>
-          ))}
+          {services.map((service, index) => {
+            const gradients = [
+              "from-orange-500 to-red-500",
+              "from-orange-600 to-pink-500",
+              "from-orange-500 to-yellow-500",
+              "from-red-500 to-orange-600",
+            ];
+            return (
+              <div
+                key={service.id}
+                className="group relative bg-card rounded-3xl overflow-hidden shadow-card hover:shadow-card-hover transition-smooth hover:scale-105"
+              >
+                {/* Gradient overlay */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${gradients[index]} opacity-5 group-hover:opacity-10 transition-smooth`} />
+                
+                <div className="relative p-6">
+                  <div className={`inline-flex bg-gradient-to-br ${gradients[index]} text-white rounded-2xl p-3 mb-4 group-hover:scale-110 transition-smooth`}>
+                    {service.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3">{service.title}</h3>
+                  <p className="text-muted-foreground text-sm mb-6 min-h-[60px]">
+                    {service.description}
+                  </p>
+                  <Link to={`/services/${service.slug}`}>
+                    <Button
+                      variant="outline"
+                      className="w-full rounded-full group-hover:bg-primary group-hover:text-primary-foreground transition-smooth"
+                    >
+                      Explore Service
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
