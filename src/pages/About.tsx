@@ -209,7 +209,7 @@ const About = () => {
             <p className="text-lg mb-8 opacity-90">
               Be part of a network of security professionals and learners passionate about cybersecurity
             </p>
-            <Button size="lg" className="rounded-full bg-primary-foreground text-primary hover:bg-primary-foreground/90">
+            <Button size="lg" className="rounded-full bg-primary-foreground text-primary hover:bg-primary-foreground/90 hover:shadow-lg hover:scale-105 transition-all duration-300 border-2 border-transparent hover:border-white/20">
               Get Started Today
             </Button>
           </div>

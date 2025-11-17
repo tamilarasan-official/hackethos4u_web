@@ -304,38 +304,32 @@ const Courses = () => {
       <section className="relative py-16 md:py-20 bg-secondary/30">
         <FlowingLinesBackground variant="circuit" direction="ltr" />
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto bg-gradient-to-br from-primary via-accent to-primary rounded-3xl p-8 md:p-12 text-white text-center shadow-2xl relative overflow-hidden">
-            {/* Decorative circles */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-
-            <div className="relative z-10">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Start Your Cybersecurity Journey Today
-              </h2>
-              <p className="text-lg mb-8 opacity-95">
-                Join thousands of students who have transformed their careers with our expert-led courses
-              </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <Link to="/contact">
-                  <Button
-                    size="lg"
-                    className="rounded-full bg-white text-primary hover:bg-white/90 shadow-xl font-semibold"
-                  >
-                    Enroll Now
-                    <Icons.ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
-                <Link to="/course-selection">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="rounded-full border-2 border-white text-white bg-white/10 backdrop-blur-sm hover:bg-white hover:text-primary font-semibold"
-                  >
-                    Choose Learning Format
-                  </Button>
-                </Link>
-              </div>
+          <div className="max-w-4xl mx-auto bg-gradient-to-br from-primary to-orange-600 rounded-3xl p-8 md:p-12 text-primary-foreground text-center shadow-card-hover">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Start Your Cybersecurity Journey Today
+            </h2>
+            <p className="text-lg mb-8 opacity-90">
+              Join thousands of students who have transformed their careers with our expert-led courses
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Link to="/contact">
+                <Button
+                  size="lg"
+                  className="rounded-full bg-primary-foreground text-primary hover:bg-primary-foreground/90 hover:shadow-lg hover:scale-105 transition-all duration-300 font-semibold border-2 border-transparent hover:border-white/20"
+                >
+                  Enroll Now
+                  <Icons.ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+              <Link to="/course-selection">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="rounded-full border-2 border-primary-foreground bg-primary-foreground text-primary hover:bg-primary-foreground/90 hover:text-primary hover:shadow-lg hover:scale-105 transition-all duration-300 font-semibold"
+                >
+                  Choose Learning Format
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
