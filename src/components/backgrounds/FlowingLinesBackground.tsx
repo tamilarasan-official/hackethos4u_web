@@ -21,9 +21,14 @@ const FlowingLinesBackground: React.FC<FlowingLinesBackgroundProps> = ({
         ];
       case 'circuit':
         return [
+          // Left to center paths
           { d: 'M0,150 L200,150 L200,250 L400,250 L400,150 L600,150', delay: '0s', dasharray: '800' },
           { d: 'M100,50 L100,200 L300,200 L300,300 L500,300', delay: '0.7s', dasharray: '700' },
           { d: 'M0,350 L150,350 L150,200 L350,200 L350,400 L600,400', delay: '1.4s', dasharray: '900' },
+          // Right to center paths (mirrored)
+          { d: 'M1500,150 L1300,150 L1300,250 L1100,250 L1100,150 L900,150', delay: '0.3s', dasharray: '800' },
+          { d: 'M1400,50 L1400,200 L1200,200 L1200,300 L1000,300', delay: '1s', dasharray: '700' },
+          { d: 'M1500,350 L1350,350 L1350,200 L1150,200 L1150,400 L900,400', delay: '1.7s', dasharray: '900' },
         ];
       default:
         return [];
@@ -36,7 +41,7 @@ const FlowingLinesBackground: React.FC<FlowingLinesBackgroundProps> = ({
 
   return (
     <div className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}>
-      <svg className="absolute inset-0 w-full h-full opacity-20" preserveAspectRatio="none" style={{ mixBlendMode: 'screen' }}>
+      <svg className="absolute inset-0 w-full h-full opacity-40" preserveAspectRatio="none" style={{ mixBlendMode: 'screen' }}>
         <defs>
           <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="rgb(255, 107, 53)" stopOpacity="0" />
