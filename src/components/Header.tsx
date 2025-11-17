@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/Logo.png";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -35,9 +36,14 @@ const Header = () => {
           {/* Logo */}
           <Link
             to="/"
-            className="flex items-center gap-2 group"
+            className="flex items-center gap-3 group"
           >
-            <div className="text-2xl md:text-3xl font-black tracking-tighter">
+            <img
+              src={logo}
+              alt="Hackethos4U Logo"
+              className="h-10 md:h-12 w-auto rounded-lg bg-white p-1"
+            />
+            <div className="text-xl md:text-2xl font-bold">
               <span className="text-white">Hackethos</span>
               <span className="text-primary">4U</span>
             </div>
