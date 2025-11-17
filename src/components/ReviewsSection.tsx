@@ -1,84 +1,57 @@
-import { useState } from "react";
-import { Star, ChevronLeft, ChevronRight } from "lucide-react";
-
-interface Review {
-  id: number;
-  name: string;
-  role: string;
-  rating: number;
-  comment: string;
-  date: string;
-}
-
-const reviews: Review[] = [
-  {
-    id: 1,
-    name: "Rajesh Kumar",
-    role: "Security Analyst",
-    rating: 5,
-    comment: "The ethical hacking course was incredibly comprehensive. The hands-on labs and real-world scenarios helped me land my dream job in cybersecurity.",
-    date: "2 weeks ago",
-  },
-  {
-    id: 2,
-    name: "Priya Sharma",
-    role: "Penetration Tester",
-    rating: 5,
-    comment: "Best VAPT training I've taken. The instructors are industry experts and the course material is always up-to-date with latest techniques.",
-    date: "1 month ago",
-  },
-  {
-    id: 3,
-    name: "Amit Patel",
-    role: "Bug Bounty Hunter",
-    rating: 5,
-    comment: "The bug bounty bootcamp transformed my approach to vulnerability hunting. I earned my first bounty within 2 months of completing the course!",
-    date: "3 weeks ago",
-  },
-  {
-    id: 4,
-    name: "Sneha Reddy",
-    role: "Security Consultant",
-    rating: 5,
-    comment: "Professional training with excellent support. The practical approach and real-world projects made all the difference in understanding concepts.",
-    date: "1 week ago",
-  },
-];
+import { Star } from "lucide-react";
+import { FlowingLinesBackground } from "@/components/backgrounds";
+import { useData } from "@/contexts/DataContext";
 
 const ReviewsSection = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const { reviews } = useData();
+  const activeReviews = reviews.filter(r => r.isActive);
 
-  const nextReview = () => {
-    setCurrentIndex((prev) => (prev + 1) % reviews.length);
+  // Format date
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
+    return `${Math.floor(diffDays / 30)} month${Math.floor(diffDays / 30) > 1 ? 's' : ''} ago`;
   };
 
-  const prevReview = () => {
-    setCurrentIndex((prev) => (prev - 1 + reviews.length) % reviews.length);
-  };
+  // Duplicate reviews for infinite scroll effect if more than 3
+  const duplicatedReviews = activeReviews.length > 3 ? [...activeReviews, ...activeReviews] : activeReviews;
 
-  const visibleReviews = [
-    reviews[currentIndex],
-    reviews[(currentIndex + 1) % reviews.length],
-    reviews[(currentIndex + 2) % reviews.length],
-  ];
+  if (activeReviews.length === 0) {
+    return null;
+  }
+
+  const shouldAutoScroll = activeReviews.length > 3;
 
   return (
-    <section id="reviews" className="py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Student Reviews</h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+    <section id="reviews" className={`relative py-20 md:py-28 ${shouldAutoScroll ? 'overflow-hidden' : ''}`}>
+      <FlowingLinesBackground variant="wave" direction="rtl" />
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+            <Star className="w-4 h-4 text-primary fill-primary" />
+            <span className="text-primary text-sm font-semibold tracking-wide">
+              SUCCESS STORIES
+            </span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">Student Reviews</h2>
+          <p className="text-muted-foreground text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
             Hear from our successful students who transformed their careers
           </p>
         </div>
 
-        <div className="relative max-w-6xl mx-auto">
-          {/* Reviews Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {visibleReviews.map((review, index) => (
+        {/* Auto-scrolling container or grid */}
+        {shouldAutoScroll ? (
+          <div className="relative">
+            <div className="flex gap-6 animate-scroll">
+            {duplicatedReviews.map((review, index) => (
               <div
                 key={`${review.id}-${index}`}
-                className="bg-card rounded-3xl p-6 shadow-card hover:shadow-card-hover transition-smooth"
+                className="card-sleek p-6 flex-shrink-0 w-[380px]"
               >
                 {/* Stars */}
                 <div className="flex gap-1 mb-4">
@@ -105,32 +78,54 @@ const ReviewsSection = () => {
                       </p>
                     </div>
                     <span className="text-xs text-muted-foreground">
-                      {review.date}
+                      {formatDate(review.date)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+            {activeReviews.map((review) => (
+              <div
+                key={review.id}
+                className="card-sleek p-6"
+              >
+                {/* Stars */}
+                <div className="flex gap-1 mb-4">
+                  {[...Array(review.rating)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className="w-5 h-5 fill-primary text-primary"
+                    />
+                  ))}
+                </div>
+
+                {/* Comment */}
+                <p className="text-sm text-muted-foreground mb-6">
+                  "{review.comment}"
+                </p>
+
+                {/* Author Info */}
+                <div className="border-t border-border pt-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-sm">{review.name}</h4>
+                      <p className="text-xs text-muted-foreground">
+                        {review.role}
+                      </p>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {formatDate(review.date)}
                     </span>
                   </div>
                 </div>
               </div>
             ))}
           </div>
-
-          {/* Navigation Buttons */}
-          <div className="flex justify-center gap-4 mt-8">
-            <button
-              onClick={prevReview}
-              className="bg-card hover:bg-primary hover:text-primary-foreground rounded-full p-3 shadow-card transition-smooth"
-              aria-label="Previous reviews"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <button
-              onClick={nextReview}
-              className="bg-card hover:bg-primary hover:text-primary-foreground rounded-full p-3 shadow-card transition-smooth"
-              aria-label="Next reviews"
-            >
-              <ChevronRight size={20} />
-            </button>
-          </div>
-        </div>
+        )}
       </div>
     </section>
   );

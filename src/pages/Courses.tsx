@@ -1,259 +1,298 @@
-import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Clock, Users, TrendingUp, ArrowRight, Award, Video, BookOpen, Shield } from "lucide-react";
+import * as Icons from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-
-interface Course {
-  id: number;
-  title: string;
-  description: string;
-  duration: string;
-  students: number;
-  category: string;
-  level: string;
-  price: string;
-  gradient: string;
-  icon: React.ReactNode;
-  slug: string;
-}
-
-const courses: Course[] = [
-  {
-    id: 1,
-    title: "Ethical Hacking Masterclass",
-    description: "Complete 6-month program covering penetration testing, network security, and advanced hacking techniques.",
-    duration: "6 months",
-    students: 1250,
-    category: "Cybersecurity",
-    level: "Intermediate",
-    price: "₹15,000 - ₹40,000",
-    gradient: "from-orange-500 to-red-500",
-    icon: <Shield className="w-8 h-8" />,
-    slug: "ethical-hacking",
-  },
-  {
-    id: 2,
-    title: "VAPT Professional",
-    description: "Advanced vulnerability assessment and penetration testing techniques for security professionals.",
-    duration: "4 months",
-    students: 890,
-    category: "Cybersecurity",
-    level: "Advanced",
-    price: "₹15,000 - ₹35,000",
-    gradient: "from-orange-600 to-pink-500",
-    icon: <Shield className="w-8 h-8" />,
-    slug: "vapt",
-  },
-  {
-    id: 3,
-    title: "Bug Bounty Bootcamp",
-    description: "Learn to find vulnerabilities and earn through bug bounty programs with hands-on training.",
-    duration: "3 months",
-    students: 650,
-    category: "Cybersecurity",
-    level: "Intermediate",
-    price: "₹12,000 - ₹30,000",
-    gradient: "from-orange-500 to-yellow-500",
-    icon: <TrendingUp className="w-8 h-8" />,
-    slug: "bug-bounty",
-  },
-  {
-    id: 4,
-    title: "AR/VR Security",
-    description: "Security testing for augmented and virtual reality applications in the metaverse.",
-    duration: "2 months",
-    students: 320,
-    category: "AR VR",
-    level: "Beginner",
-    price: "₹10,000 - ₹25,000",
-    gradient: "from-purple-500 to-pink-500",
-    icon: <Video className="w-8 h-8" />,
-    slug: "ar-vr-security",
-  },
-  {
-    id: 5,
-    title: "Web Security Fundamentals",
-    description: "Learn the basics of web application security, OWASP Top 10, and secure coding practices.",
-    duration: "2 months",
-    students: 980,
-    category: "Cybersecurity",
-    level: "Beginner",
-    price: "₹8,000 - ₹20,000",
-    gradient: "from-blue-500 to-cyan-500",
-    icon: <BookOpen className="w-8 h-8" />,
-    slug: "web-security",
-  },
-  {
-    id: 6,
-    title: "Advanced Network Security",
-    description: "Deep dive into network protocols, firewalls, IDS/IPS, and infrastructure security.",
-    duration: "3 months",
-    students: 540,
-    category: "Cybersecurity",
-    level: "Advanced",
-    price: "₹18,000 - ₹42,000",
-    gradient: "from-green-500 to-emerald-600",
-    icon: <Shield className="w-8 h-8" />,
-    slug: "network-security",
-  },
-];
+import { useData } from "@/contexts/DataContext";
+import { TechBackground, GridBackground, FlowingLinesBackground, ParticleBackground } from "@/components/backgrounds";
 
 const Courses = () => {
-  const [activeTab, setActiveTab] = useState("All");
-  const tabs = ["All", "Cybersecurity", "AR VR"];
+  const { courses } = useData();
 
-  const filteredCourses =
-    activeTab === "All"
-      ? courses
-      : courses.filter((course) => course.category === activeTab);
+  const recordingCourses = courses.filter((c) => c.isActive && c.category === 'recording');
+  const liveCourses = courses.filter((c) => c.isActive && c.category === 'live');
+
+  const getIconComponent = (iconName: string) => {
+    const Icon = Icons[iconName as keyof typeof Icons] as React.ComponentType<{ className?: string }>;
+    return Icon ? <Icon className="w-8 h-8" /> : <Icons.Shield className="w-8 h-8" />;
+  };
+
+  const formatPrice = (course: { category: string; pricing: { oneToOne?: number; groupMin?: number; groupMax?: number }; sessionType?: string }) => {
+    if (course.category === 'recording') {
+      return 'Download from Play Store';
+    }
+
+    if (course.sessionType === 'both') {
+      return (
+        <div className="space-y-1">
+          <div className="text-sm opacity-90">₹{course.pricing.oneToOne?.toLocaleString()} - One-to-One</div>
+          <div className="text-sm opacity-90">
+            ₹{course.pricing.groupMin?.toLocaleString()} - ₹{course.pricing.groupMax?.toLocaleString()} - Group
+          </div>
+        </div>
+      );
+    }
+
+    return 'Contact for pricing';
+  };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-background via-secondary/20 to-background py-20 md:py-28 border-b">
-        <div className="container mx-auto px-4">
+      <div className="pt-16 md:pt-20">
+      {/* Hero Section with Professional Grid */}
+      <section className="relative hero-grid py-24 md:py-32 overflow-hidden">
+        <FlowingLinesBackground variant="circuit" direction="ltr" />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Learn Cybersecurity from Industry Experts
+            <div className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+              <Icons.GraduationCap className="w-4 h-4 text-primary" />
+              <span className="text-primary text-sm font-semibold tracking-wide">
+                EXPERT-LED TRAINING PROGRAMS
+              </span>
+            </div>
+            <h1 className="mb-6">
+              Master <span className="text-primary">Cybersecurity</span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8">
-              Transform your career with hands-on training in ethical hacking, penetration testing, and security analysis
+            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
+              Transform your career with hands-on training in ethical hacking, penetration testing, and security analysis from industry professionals
             </p>
-            <div className="flex flex-wrap justify-center gap-6 text-sm">
-              <div className="flex items-center gap-2">
-                <Award className="w-5 h-5 text-primary" />
-                <span>Industry Recognized Certificates</span>
+
+            {/* Stats */}
+            <div className="flex flex-wrap justify-center gap-8 mb-10">
+              <div className="flex items-center gap-3">
+                <div className="bg-primary/10 text-primary rounded-lg p-2.5 border border-primary/20">
+                  <Icons.Award className="w-5 h-5" />
+                </div>
+                <span className="text-sm font-medium">Industry Recognized</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Video className="w-5 h-5 text-primary" />
-                <span>Live & Recorded Sessions</span>
+              <div className="flex items-center gap-3">
+                <div className="bg-primary/10 text-primary rounded-lg p-2.5 border border-primary/20">
+                  <Icons.Video className="w-5 h-5" />
+                </div>
+                <span className="text-sm font-medium">Live & Recorded</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-primary" />
-                <span>3000+ Students Trained</span>
+              <div className="flex items-center gap-3">
+                <div className="bg-primary/10 text-primary rounded-lg p-2.5 border border-primary/20">
+                  <Icons.Users className="w-5 h-5" />
+                </div>
+                <span className="text-sm font-medium">3000+ Students</span>
               </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link to="/contact">
+                <Button size="lg" className="rounded-full px-8 bg-primary text-black hover:bg-primary/90 font-semibold shadow-lg">
+                  Enroll Now
+                  <Icons.ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+              <Link to="/course-selection">
+                <Button size="lg" variant="outline" className="rounded-full px-8 border-white/20 hover:border-primary/50 hover:bg-white/5 hover:text-white">
+                  View Formats
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Category Tabs */}
-      <section className="py-8 bg-secondary/30 sticky top-[73px] z-40 backdrop-blur-sm">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-center gap-2 flex-wrap">
-            {tabs.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-6 py-2.5 rounded-full font-medium transition-smooth ${
-                  activeTab === tab
-                    ? "bg-primary text-primary-foreground shadow-md scale-105"
-                    : "bg-card text-foreground hover:bg-primary/10 hover:scale-105"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Courses Grid */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredCourses.map((course) => (
-              <div
-                key={course.id}
-                className="group bg-card rounded-3xl overflow-hidden shadow-card hover:shadow-card-hover transition-smooth hover:scale-105"
-              >
-                {/* Gradient Header */}
-                <div className={`relative h-48 bg-gradient-to-br ${course.gradient} p-6 flex flex-col justify-between`}>
-                  <div className="flex justify-between items-start">
-                    <div className="bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 text-white text-xs font-medium">
-                      {course.level}
-                    </div>
-                    <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-3 text-white">
-                      {course.icon}
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-white mb-2">{course.title}</h3>
-                  </div>
+      {/* Recording Sessions */}
+      {recordingCourses.length > 0 && (
+        <section className="relative py-16 md:py-20">
+          <FlowingLinesBackground variant="wave" direction="rtl" />
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="mb-12">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="bg-gradient-to-br from-primary to-accent text-white rounded-xl p-2">
+                  <Icons.PlayCircle className="w-6 h-6" />
                 </div>
+                <h2 className="text-3xl md:text-4xl font-bold">Recording Sessions</h2>
+              </div>
+              <p className="text-muted-foreground text-lg">
+                Access pre-recorded comprehensive courses on your schedule. Download our app from Play Store.
+              </p>
+            </div>
 
-                {/* Content */}
-                <div className="p-6">
-                  <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              {recordingCourses.map((course) => (
+                <div
+                  key={course.id}
+                  className="group card-sleek p-6 relative overflow-hidden hover:border-white/20 transition-all duration-300"
+                >
+                  {/* Badges */}
+                  <div className="flex justify-between items-start mb-4 relative z-10">
+                    <Badge variant="outline" className="border-white/20 text-white/70 bg-white/5">
+                      {course.level}
+                    </Badge>
+                    <Badge variant="outline" className="border-white/10 text-white/60 bg-white/5">
+                      Recording
+                    </Badge>
+                  </div>
+
+                  {/* Content */}
+                  <h3 className="text-xl font-bold mb-3 text-white relative z-10">{course.title}</h3>
+                  <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
                     {course.description}
                   </p>
 
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4 pb-4 border-b border-border">
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-4 h-4" />
+                  {/* Meta Info */}
+                  <div className="space-y-2.5 mb-6 pb-6 border-b border-white/10">
+                    <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                      <div className="p-1.5 rounded-lg bg-white/5 border border-white/10">
+                        <Icons.Clock className="w-3.5 h-3.5 text-white/60" />
+                      </div>
                       <span>{course.duration}</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="w-4 h-4" />
-                      <span>{course.students}</span>
+                    {course.recordingsCount && (
+                      <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                        <div className="p-1.5 rounded-lg bg-white/5 border border-white/10">
+                          <Icons.Video className="w-3.5 h-3.5 text-white/60" />
+                        </div>
+                        <span>{course.recordingsCount} Video Lessons</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Play Store Link */}
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+                      <Icons.Smartphone className="w-3.5 h-3.5" />
+                      <span>Available on Play Store</span>
+                    </div>
+                    <a
+                      href={course.playStoreLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Button className="rounded-full w-full bg-primary text-black hover:bg-primary/90 font-semibold group/btn">
+                        Download App
+                        <Icons.Download className="w-4 h-4 ml-2 group-hover/btn:translate-y-0.5 transition-transform" />
+                      </Button>
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Live Sessions */}
+      {liveCourses.length > 0 && (
+        <section className="relative py-16 md:py-20 bg-secondary/30">
+          <FlowingLinesBackground variant="circuit" direction="ltr" />
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="mb-12">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="bg-gradient-to-br from-accent to-primary text-white rounded-xl p-2">
+                  <Icons.Video className="w-6 h-6" />
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold">Live Sessions</h2>
+              </div>
+              <p className="text-muted-foreground text-lg">
+                Interactive live classes with expert instructors. Choose between one-to-one mentorship or group learning.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              {liveCourses.map((course) => (
+                <div
+                  key={course.id}
+                  className="group card-sleek p-6 relative overflow-hidden hover:border-white/20 transition-all duration-300"
+                >
+                  {/* Badges */}
+                  <div className="flex justify-between items-start mb-4 relative z-10">
+                    <Badge variant="outline" className="border-white/20 text-white/70 bg-white/5">
+                      {course.level}
+                    </Badge>
+                    <div className="flex gap-2">
+                      <Badge variant="outline" className="border-white/10 text-white/60 bg-white/5">
+                        Live
+                      </Badge>
+                      {course.demoAvailable && (
+                        <Badge variant="outline" className="border-green-500/50 text-green-400 bg-green-500/10">
+                          Demo
+                        </Badge>
+                      )}
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Starting from</p>
-                      <p className="text-lg font-bold text-primary">{course.price}</p>
+                  {/* Content */}
+                  <h3 className="text-xl font-bold mb-3 text-white relative z-10">{course.title}</h3>
+                  <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+                    {course.description}
+                  </p>
+
+                  {/* Meta Info */}
+                  <div className="space-y-2.5 mb-6 pb-6 border-b border-white/10">
+                    <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                      <div className="p-1.5 rounded-lg bg-white/5 border border-white/10">
+                        <Icons.Clock className="w-3.5 h-3.5 text-white/60" />
+                      </div>
+                      <span>{course.duration}</span>
                     </div>
-                    <Link to="/contact">
-                      <Button className="rounded-full group-hover:scale-105 transition-smooth">
-                        Enroll Now
-                        <ArrowRight className="w-4 h-4 ml-2" />
+                    {course.sessionType && (
+                      <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                        <div className="p-1.5 rounded-lg bg-white/5 border border-white/10">
+                          <Icons.Users className="w-3.5 h-3.5 text-white/60" />
+                        </div>
+                        <span>{course.sessionType === 'both' ? 'One-to-One & Group' : course.sessionType}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Pricing */}
+                  <div className="mb-6">
+                    <p className="text-xs text-muted-foreground mb-2">Pricing</p>
+                    <div className="text-sm font-bold text-white/90">
+                      {formatPrice(course)}
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex flex-col gap-2">
+                    <Link to={`/courses/${course.slug}`}>
+                      <Button className="rounded-full w-full bg-primary text-black hover:bg-primary/90 font-semibold group/btn">
+                        View Details
+                        <Icons.ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
                       </Button>
                     </Link>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Features Section */}
-      <section className="py-16 md:py-24 bg-secondary/30">
-        <div className="container mx-auto px-4">
+      <section className="relative py-16 md:py-24">
+        <FlowingLinesBackground variant="wave" direction="rtl" />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Why Learn With Us</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-card rounded-2xl p-6 text-center shadow-card">
-                <div className="bg-primary/10 text-primary rounded-full w-14 h-14 flex items-center justify-center mx-auto mb-4">
-                  <Video className="w-7 h-7" />
-                </div>
-                <h3 className="font-semibold mb-2">Live Sessions</h3>
-                <p className="text-sm text-muted-foreground">Interactive classes with Q&A</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="border-l-2 border-primary pl-6">
+                <h3 className="font-bold mb-2 text-lg text-primary">Live Interactive Sessions</h3>
+                <p className="text-sm text-muted-foreground">Real-time learning with expert Q&A</p>
               </div>
-              <div className="bg-card rounded-2xl p-6 text-center shadow-card">
-                <div className="bg-primary/10 text-primary rounded-full w-14 h-14 flex items-center justify-center mx-auto mb-4">
-                  <BookOpen className="w-7 h-7" />
-                </div>
-                <h3 className="font-semibold mb-2">Study Materials</h3>
-                <p className="text-sm text-muted-foreground">Comprehensive notes & resources</p>
+
+              <div className="border-l-2 border-primary pl-6">
+                <h3 className="font-bold mb-2 text-lg text-primary">Comprehensive Materials</h3>
+                <p className="text-sm text-muted-foreground">Notes, recordings & resources</p>
               </div>
-              <div className="bg-card rounded-2xl p-6 text-center shadow-card">
-                <div className="bg-primary/10 text-primary rounded-full w-14 h-14 flex items-center justify-center mx-auto mb-4">
-                  <Award className="w-7 h-7" />
-                </div>
-                <h3 className="font-semibold mb-2">Certifications</h3>
-                <p className="text-sm text-muted-foreground">Industry-recognized certificates</p>
+
+              <div className="border-l-2 border-primary pl-6">
+                <h3 className="font-bold mb-2 text-lg text-primary">Industry Certifications</h3>
+                <p className="text-sm text-muted-foreground">Recognized certificates on completion</p>
               </div>
-              <div className="bg-card rounded-2xl p-6 text-center shadow-card">
-                <div className="bg-primary/10 text-primary rounded-full w-14 h-14 flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-7 h-7" />
-                </div>
-                <h3 className="font-semibold mb-2">Career Support</h3>
+
+              <div className="border-l-2 border-primary pl-6">
+                <h3 className="font-bold mb-2 text-lg text-primary">Career Support</h3>
                 <p className="text-sm text-muted-foreground">Job assistance & mentorship</p>
               </div>
             </div>
@@ -261,25 +300,47 @@ const Courses = () => {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-16 md:py-24 bg-secondary/20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto bg-card rounded-3xl p-8 md:p-12 text-center shadow-card-hover">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Start Your Cybersecurity Journey Today
-            </h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              Join thousands of students who have transformed their careers with our expert-led courses
-            </p>
-            <Link to="/course-selection">
-              <Button size="lg" className="rounded-full">
-                Choose Learning Format
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
+      {/* CTA Section */}
+      <section className="relative py-16 md:py-20 bg-secondary/30">
+        <FlowingLinesBackground variant="circuit" direction="ltr" />
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-4xl mx-auto bg-gradient-to-br from-primary via-accent to-primary rounded-3xl p-8 md:p-12 text-white text-center shadow-2xl relative overflow-hidden">
+            {/* Decorative circles */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+
+            <div className="relative z-10">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Start Your Cybersecurity Journey Today
+              </h2>
+              <p className="text-lg mb-8 opacity-95">
+                Join thousands of students who have transformed their careers with our expert-led courses
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <Link to="/contact">
+                  <Button
+                    size="lg"
+                    className="rounded-full bg-white text-primary hover:bg-white/90 shadow-xl font-semibold"
+                  >
+                    Enroll Now
+                    <Icons.ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+                <Link to="/course-selection">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="rounded-full border-2 border-white text-white bg-white/10 backdrop-blur-sm hover:bg-white hover:text-primary font-semibold"
+                  >
+                    Choose Learning Format
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
+      </div>
 
       <Footer />
     </div>

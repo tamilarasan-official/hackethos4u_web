@@ -3,20 +3,29 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Video, Download, Monitor, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { FlowingLinesBackground } from "@/components/backgrounds";
 
 const CourseSelection = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background grid-background">
       <Header />
 
+      <div className="pt-16 md:pt-20">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-background via-secondary/20 to-background py-20 md:py-28 border-b">
-        <div className="container mx-auto px-4">
+      <section className="relative hero-grid py-20 md:py-28 overflow-hidden">
+        <FlowingLinesBackground variant="circuit" direction="ltr" />
+
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Choose Your Learning Format
+            <div className="inline-block mb-6">
+              <span className="bg-primary/10 text-primary px-6 py-2 rounded-full text-sm font-semibold">
+                Course Formats
+              </span>
+            </div>
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6">
+              Choose Your <span className="text-primary">Learning Format</span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
               Select the format that best fits your learning style and schedule
             </p>
           </div>
@@ -24,8 +33,9 @@ const CourseSelection = () => {
       </section>
 
       {/* Selection Cards */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
+      <section className="relative py-16 md:py-24">
+        <FlowingLinesBackground variant="wave" direction="rtl" />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {/* Live Courses */}
             <div className="bg-card rounded-3xl p-8 md:p-10 shadow-card hover:shadow-card-hover transition-smooth border-2 border-primary/20 hover:border-primary">
@@ -162,6 +172,7 @@ const CourseSelection = () => {
           </div>
         </div>
       </section>
+      </div>
 
       <Footer />
     </div>

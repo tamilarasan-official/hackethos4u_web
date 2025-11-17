@@ -1,112 +1,143 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Shield, Smartphone, Cloud, Lock, ArrowRight, CheckCircle } from "lucide-react";
+import * as Icons from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-
-interface Service {
-  id: number;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  slug: string;
-  gradient: string;
-  features: string[];
-}
-
-const services: Service[] = [
-  {
-    id: 1,
-    title: "WPAT Testing",
-    description: "Comprehensive web and mobile application penetration testing to identify vulnerabilities before attackers do.",
-    icon: <Shield className="w-12 h-12" />,
-    slug: "wpat-testing",
-    gradient: "from-orange-500 to-red-500",
-    features: ["Web Application Testing", "Mobile App Testing", "OWASP Top 10", "Detailed Reports"],
-  },
-  {
-    id: 2,
-    title: "Mobile Security Testing",
-    description: "In-depth security analysis for iOS and Android applications with reverse engineering and runtime testing.",
-    icon: <Smartphone className="w-12 h-12" />,
-    slug: "mobile-security",
-    gradient: "from-orange-600 to-pink-500",
-    features: ["iOS & Android", "Static Analysis", "Dynamic Testing", "Code Review"],
-  },
-  {
-    id: 3,
-    title: "API Testing",
-    description: "Thorough testing of REST, GraphQL, and SOAP APIs to ensure secure data exchange and authentication.",
-    icon: <Cloud className="w-12 h-12" />,
-    slug: "api-testing",
-    gradient: "from-orange-500 to-yellow-500",
-    features: ["REST APIs", "GraphQL Testing", "SOAP Services", "Auth Testing"],
-  },
-  {
-    id: 4,
-    title: "OWASP Top 10 Testing",
-    description: "Complete assessment based on OWASP's most critical web application security risks and vulnerabilities.",
-    icon: <Lock className="w-12 h-12" />,
-    slug: "owasp-testing",
-    gradient: "from-red-500 to-orange-600",
-    features: ["Injection Testing", "XSS Detection", "Access Control", "Security Config"],
-  },
-];
+import { useData } from "@/contexts/DataContext";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { TechBackground, GridBackground, FlowingLinesBackground, ParticleBackground } from "@/components/backgrounds";
 
 const Services = () => {
+  const { services, clients } = useData();
+  const { toast } = useToast();
+  const activeServices = services.filter((s) => s.isActive);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    company: "",
+    service: "",
+    message: "",
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    // Simulate API call
+    setTimeout(() => {
+      toast({
+        title: "Quote Request Sent!",
+        description: "We'll get back to you within 24 hours.",
+      });
+      setFormData({
+        name: "",
+        email: "",
+        company: "",
+        service: "",
+        message: "",
+      });
+      setIsSubmitting(false);
+    }, 1500);
+  };
+
+  const getIconComponent = (iconName: string) => {
+    const Icon = Icons[iconName as keyof typeof Icons] as React.ComponentType<{ className?: string }>;
+    return Icon ? <Icon className="w-12 h-12" /> : <Icons.Shield className="w-12 h-12" />;
+  };
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-background via-secondary/20 to-background py-20 md:py-28 border-b">
-        <div className="container mx-auto px-4">
+      <div className="pt-16 md:pt-20">
+      {/* Hero Section with Professional Grid */}
+      <section className="relative hero-grid py-24 md:py-32 overflow-hidden">
+        <FlowingLinesBackground variant="circuit" direction="ltr" />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Professional Security Testing Services
+            <div className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+              <Icons.Shield className="w-4 h-4 text-primary" />
+              <span className="text-primary text-sm font-semibold tracking-wide">
+                PROFESSIONAL SECURITY TESTING
+              </span>
+            </div>
+            <h1 className="mb-6">
+              Secure Your <span className="text-primary">Digital Assets</span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8">
-              Protect your digital assets with comprehensive penetration testing and vulnerability assessments from certified security experts
+            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
+              Comprehensive penetration testing and vulnerability assessments from certified security experts to protect your business
             </p>
-            <Link to="/contact">
-              <Button size="lg" className="rounded-full">
-                Get a Quote
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link to="#contact">
+                <Button size="lg" className="rounded-full px-8 bg-primary text-black hover:bg-primary/90 font-semibold shadow-lg">
+                  Get a Free Quote
+                  <Icons.ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+              <Link to="/contact">
+                <Button size="lg" variant="outline" className="rounded-full px-8 border-white/20 hover:border-primary/50 hover:bg-white/5">
+                  Talk to Expert
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Services Grid */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {services.map((service, index) => (
+      <section className="relative py-20 md:py-28 bg-background">
+        <FlowingLinesBackground variant="wave" direction="rtl" />
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="mb-4">Our Services</h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Comprehensive security testing services tailored to your needs
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+            {activeServices.map((service) => (
               <div
                 key={service.id}
-                className="group relative bg-card rounded-3xl overflow-hidden shadow-card hover:shadow-card-hover transition-smooth"
+                className="group card-sleek p-8 relative overflow-hidden hover:border-white/20 transition-all duration-300"
               >
-                {/* Gradient Background */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-5 group-hover:opacity-10 transition-smooth`} />
-                
-                <div className="relative p-8 md:p-10">
-                  {/* Icon */}
-                  <div className={`inline-flex bg-gradient-to-br ${service.gradient} text-white rounded-2xl p-4 mb-6 group-hover:scale-110 transition-smooth`}>
-                    {service.icon}
+                {/* Icon */}
+                <div className="mb-6 inline-flex p-4 rounded-2xl bg-white/5 border border-white/10 group-hover:border-white/20 transition-all duration-300 text-white relative z-10">
+                  <div className="group-hover:scale-105 transition-transform duration-300">
+                    {getIconComponent(service.icon)}
                   </div>
+                </div>
 
-                  {/* Content */}
-                  <h3 className="text-2xl md:text-3xl font-bold mb-4">{service.title}</h3>
-                  <p className="text-muted-foreground mb-6 text-lg">
+                {/* Content */}
+                <div className="relative z-10">
+                  <h3 className="text-xl font-bold mb-3 text-white">
+                    {service.title}
+                  </h3>
+                  <p className="text-muted-foreground mb-6 leading-relaxed text-sm">
                     {service.description}
                   </p>
 
                   {/* Features */}
-                  <div className="grid grid-cols-2 gap-3 mb-6">
-                    {service.features.map((feature, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                  <div className="space-y-2.5 mb-8">
+                    {service.features.slice(0, 4).map((feature, idx) => (
+                      <div key={idx} className="flex items-start gap-2.5">
+                        <Icons.Check className="w-4 h-4 text-white/60 mt-0.5 flex-shrink-0" />
                         <span className="text-sm text-muted-foreground">{feature}</span>
                       </div>
                     ))}
@@ -114,9 +145,11 @@ const Services = () => {
 
                   {/* Button */}
                   <Link to={`/services/${service.slug}`}>
-                    <Button className="rounded-full w-full md:w-auto group-hover:scale-105 transition-smooth">
+                    <Button
+                      className="w-full rounded-full bg-white/5 text-white border border-white/10 hover:bg-primary hover:text-black hover:border-primary font-semibold transition-all duration-300 group/btn"
+                    >
                       Learn More
-                      <ArrowRight className="w-4 h-4 ml-2" />
+                      <Icons.ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
                     </Button>
                   </Link>
                 </div>
@@ -126,37 +159,59 @@ const Services = () => {
         </div>
       </section>
 
+      {/* Client Logos Section */}
+      {clients.length > 0 && (
+        <section className="relative py-16 md:py-20 bg-secondary/30">
+          <FlowingLinesBackground variant="circuit" direction="ltr" />
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl md:text-3xl font-bold mb-3">Trusted By Industry Leaders</h2>
+              <p className="text-muted-foreground">
+                Partnering with leading organizations to secure their digital infrastructure
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto items-center">
+              {clients.map((client) => (
+                <div
+                  key={client.id}
+                  className="flex items-center justify-center p-6 bg-card rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 hover:scale-105"
+                >
+                  <img
+                    src={client.logo}
+                    alt={client.name}
+                    className="max-h-12 w-auto opacity-70 hover:opacity-100 transition-opacity"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Why Choose Us */}
-      <section className="py-16 md:py-24 bg-secondary/30">
-        <div className="container mx-auto px-4">
+      <section className="relative py-16 md:py-24">
+        <FlowingLinesBackground variant="wave" direction="rtl" />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Why Choose Us</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="bg-primary/10 text-primary rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                  <Shield className="w-8 h-8" />
-                </div>
-                <h3 className="text-xl font-semibold mb-3">Certified Experts</h3>
-                <p className="text-muted-foreground">
-                  Our team holds industry-leading certifications including CEH, OSCP, and CISSP
+              <div className="border-l-2 border-primary pl-6">
+                <h3 className="text-xl font-bold mb-3 text-primary">Certified Experts</h3>
+                <p className="text-muted-foreground leading-relaxed text-sm">
+                  Our team holds industry-leading certifications including CEH, OSCP, and CISSP with years of practical experience
                 </p>
               </div>
-              <div className="text-center">
-                <div className="bg-primary/10 text-primary rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle className="w-8 h-8" />
-                </div>
-                <h3 className="text-xl font-semibold mb-3">Proven Methodology</h3>
-                <p className="text-muted-foreground">
-                  We follow industry-standard testing frameworks and best practices
+              <div className="border-l-2 border-primary pl-6">
+                <h3 className="text-xl font-bold mb-3 text-primary">Proven Methodology</h3>
+                <p className="text-muted-foreground leading-relaxed text-sm">
+                  We follow industry-standard testing frameworks including OWASP, NIST, and PTES for comprehensive assessments
                 </p>
               </div>
-              <div className="text-center">
-                <div className="bg-primary/10 text-primary rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                  <Lock className="w-8 h-8" />
-                </div>
-                <h3 className="text-xl font-semibold mb-3">100% Confidential</h3>
-                <p className="text-muted-foreground">
-                  Your data and findings are protected under strict NDA agreements
+              <div className="border-l-2 border-primary pl-6">
+                <h3 className="text-xl font-bold mb-3 text-primary">100% Confidential</h3>
+                <p className="text-muted-foreground leading-relaxed text-sm">
+                  Your data and findings are protected under strict NDA agreements with enterprise-grade security protocols
                 </p>
               </div>
             </div>
@@ -164,31 +219,159 @@ const Services = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto bg-gradient-to-br from-primary to-orange-600 rounded-3xl p-8 md:p-12 text-primary-foreground text-center shadow-card-hover">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Ready to Secure Your Application?
-            </h2>
-            <p className="text-lg mb-8 opacity-90">
-              Get started with a free consultation and learn how we can help protect your business
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Button size="lg" className="rounded-full bg-primary-foreground text-primary hover:bg-primary-foreground/90">
-                Schedule Consultation
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="rounded-full border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10"
-              >
-                Download Brochure
-              </Button>
+      {/* Contact Form */}
+      <section id="contact" className="relative py-16 md:py-24 bg-secondary/30">
+        <FlowingLinesBackground variant="circuit" direction="ltr" />
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Get a Free Quote</h2>
+              <p className="text-lg text-muted-foreground">
+                Tell us about your security needs and we'll get back to you within 24 hours
+              </p>
+            </div>
+
+            <div className="card-sleek p-8 md:p-10">
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-white" htmlFor="name">
+                      Full Name *
+                    </label>
+                    <Input
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      placeholder="John Doe"
+                      required
+                      className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-white" htmlFor="email">
+                      Email Address *
+                    </label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="john@company.com"
+                      required
+                      className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-white" htmlFor="company">
+                      Company Name
+                    </label>
+                    <Input
+                      id="company"
+                      name="company"
+                      value={formData.company}
+                      onChange={handleInputChange}
+                      placeholder="Your Company"
+                      className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-white" htmlFor="service">
+                      Service Interested In *
+                    </label>
+                    <select
+                      id="service"
+                      name="service"
+                      value={formData.service}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-2.5 rounded-lg border border-white/10 bg-black text-white focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors"
+                    >
+                      <option value="">Select a service</option>
+                      {activeServices.map((service) => (
+                        <option key={service.id} value={service.slug}>
+                          {service.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-white" htmlFor="message">
+                    Message *
+                  </label>
+                  <Textarea
+                    id="message"
+                    name="message"
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    placeholder="Tell us about your security requirements..."
+                    rows={5}
+                    required
+                    className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary resize-none"
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="rounded-full w-full md:w-auto px-8 bg-primary text-black hover:bg-primary/90 font-semibold"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Sending..." : "Send Quote Request"}
+                  {!isSubmitting && <Icons.Send className="w-4 h-4 ml-2" />}
+                </Button>
+              </form>
             </div>
           </div>
         </div>
       </section>
+
+      {/* CTA Section */}
+      <section className="relative py-16 md:py-20">
+        <FlowingLinesBackground variant="wave" direction="rtl" />
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-4xl mx-auto bg-gradient-to-br from-primary via-accent to-primary rounded-3xl p-8 md:p-12 text-white text-center shadow-2xl relative overflow-hidden">
+            {/* Decorative circles */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+
+            <div className="relative z-10">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Ready to Secure Your Application?
+              </h2>
+              <p className="text-lg mb-8 opacity-95">
+                Get started with a free consultation and learn how we can help protect your business from cyber threats
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <Link to="#contact">
+                  <Button
+                    size="lg"
+                    className="rounded-full bg-white text-primary hover:bg-white/90 shadow-xl font-semibold"
+                  >
+                    Schedule Consultation
+                  </Button>
+                </Link>
+                <Link to="/contact">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="rounded-full border-2 border-white text-white bg-white/10 backdrop-blur-sm hover:bg-white hover:text-primary font-semibold"
+                  >
+                    Contact Us
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      </div>
 
       <Footer />
     </div>

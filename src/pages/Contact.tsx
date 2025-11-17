@@ -4,20 +4,29 @@ import { Mail, Phone, MapPin, Clock, Send, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { TechBackground, GridBackground, FlowingLinesBackground, ParticleBackground } from "@/components/backgrounds";
 
 const Contact = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background grid-background">
       <Header />
 
-      {/* Hero Section */}
-      <section className="bg-primary text-primary-foreground py-20 md:py-28">
-        <div className="container mx-auto px-4">
+      <div className="pt-16 md:pt-20">
+      {/* Hero Section with Professional Grid */}
+      <section className="relative hero-grid py-24 md:py-32 overflow-hidden">
+        <FlowingLinesBackground variant="circuit" direction="ltr" />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Get In Touch
+            <div className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+              <MessageSquare className="w-4 h-4 text-primary" />
+              <span className="text-primary text-sm font-semibold tracking-wide">
+                CONTACT US
+              </span>
+            </div>
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6">
+              Get <span className="text-primary">In Touch</span>
             </h1>
-            <p className="text-lg md:text-xl opacity-90">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Have questions? We're here to help you start your cybersecurity journey
             </p>
           </div>
@@ -25,47 +34,48 @@ const Contact = () => {
       </section>
 
       {/* Contact Section */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
+      <section className="relative py-16 md:py-24">
+        <FlowingLinesBackground variant="wave" direction="rtl" />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
             {/* Contact Form */}
-            <div className="bg-card rounded-3xl p-8 md:p-10 shadow-card">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="bg-primary/10 text-primary rounded-full p-3">
-                  <MessageSquare className="w-6 h-6" />
+            <div className="card-sleek p-8 md:p-10">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="bg-primary/10 text-primary rounded-lg p-2.5 border border-primary/20">
+                  <MessageSquare className="w-5 h-5" />
                 </div>
-                <h2 className="text-2xl md:text-3xl font-bold">Send us a message</h2>
+                <h2 className="text-2xl font-bold">Send us a message</h2>
               </div>
-              <form className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <form className="space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">First Name</label>
-                    <Input placeholder="John" className="rounded-2xl" />
+                    <label className="text-sm font-medium text-white">First Name</label>
+                    <Input placeholder="John" className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary" />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Last Name</label>
-                    <Input placeholder="Doe" className="rounded-2xl" />
+                    <label className="text-sm font-medium text-white">Last Name</label>
+                    <Input placeholder="Doe" className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Email</label>
+                  <label className="text-sm font-medium text-white">Email</label>
                   <Input
                     type="email"
                     placeholder="john.doe@example.com"
-                    className="rounded-2xl"
+                    className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Phone</label>
+                  <label className="text-sm font-medium text-white">Phone</label>
                   <Input
                     type="tel"
                     placeholder="+91 XXXXX XXXXX"
-                    className="rounded-2xl"
+                    className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Subject</label>
-                  <select className="w-full px-4 py-2 rounded-2xl border border-input bg-background">
+                  <label className="text-sm font-medium text-white">Subject</label>
+                  <select className="w-full px-4 py-2.5 rounded-lg border border-white/10 bg-black text-white focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors">
                     <option>Course Inquiry</option>
                     <option>Service Inquiry</option>
                     <option>Partnership</option>
@@ -73,13 +83,13 @@ const Contact = () => {
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Message</label>
+                  <label className="text-sm font-medium text-white">Message</label>
                   <Textarea
                     placeholder="Tell us how we can help you..."
-                    className="rounded-2xl min-h-[140px]"
+                    className="rounded-lg min-h-[120px] bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary resize-none"
                   />
                 </div>
-                <Button className="w-full rounded-full" size="lg">
+                <Button className="w-full rounded-full bg-primary text-black hover:bg-primary/90 font-semibold" size="lg">
                   <Send className="w-4 h-4 mr-2" />
                   Send Message
                 </Button>
@@ -89,37 +99,37 @@ const Contact = () => {
             {/* Contact Info */}
             <div className="space-y-6">
               {/* Contact Details */}
-              <div className="bg-card rounded-3xl p-8 shadow-card">
-                <h3 className="text-2xl font-bold mb-6">Contact Information</h3>
-                <div className="space-y-6">
+              <div className="card-sleek p-8">
+                <h3 className="text-xl font-bold mb-6 text-white">Contact Information</h3>
+                <div className="space-y-5">
                   <div className="flex items-start gap-4">
-                    <div className="bg-gradient-to-br from-orange-500 to-red-500 text-white rounded-full p-3 flex-shrink-0">
-                      <Mail className="w-5 h-5" />
+                    <div className="bg-primary/10 text-primary rounded-lg p-2.5 border border-primary/20 flex-shrink-0">
+                      <Mail className="w-4 h-4" />
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-2">Email</h4>
+                      <h4 className="font-semibold mb-1.5 text-white text-sm">Email</h4>
                       <p className="text-muted-foreground text-sm">contact@hackethos4u.com</p>
                       <p className="text-muted-foreground text-sm">support@hackethos4u.com</p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-4">
-                    <div className="bg-gradient-to-br from-orange-600 to-pink-500 text-white rounded-full p-3 flex-shrink-0">
-                      <Phone className="w-5 h-5" />
+                    <div className="bg-primary/10 text-primary rounded-lg p-2.5 border border-primary/20 flex-shrink-0">
+                      <Phone className="w-4 h-4" />
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-2">Phone</h4>
+                      <h4 className="font-semibold mb-1.5 text-white text-sm">Phone</h4>
                       <p className="text-muted-foreground text-sm">+91 98765 43210</p>
                       <p className="text-muted-foreground text-sm">+91 87654 32109</p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-4">
-                    <div className="bg-gradient-to-br from-orange-500 to-yellow-500 text-white rounded-full p-3 flex-shrink-0">
-                      <MapPin className="w-5 h-5" />
+                    <div className="bg-primary/10 text-primary rounded-lg p-2.5 border border-primary/20 flex-shrink-0">
+                      <MapPin className="w-4 h-4" />
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-2">Address</h4>
+                      <h4 className="font-semibold mb-1.5 text-white text-sm">Address</h4>
                       <p className="text-muted-foreground text-sm">
                         Tech Park, Cyber City<br />
                         Bangalore, Karnataka 560001<br />
@@ -131,32 +141,32 @@ const Contact = () => {
               </div>
 
               {/* Office Hours */}
-              <div className="bg-gradient-to-br from-primary to-orange-600 text-primary-foreground rounded-3xl p-8 shadow-card">
-                <div className="flex items-center gap-3 mb-6">
-                  <Clock className="w-6 h-6" />
-                  <h3 className="text-2xl font-bold">Office Hours</h3>
+              <div className="bg-gradient-to-br from-primary to-accent text-black rounded-xl p-6 shadow-lg">
+                <div className="flex items-center gap-2.5 mb-5">
+                  <Clock className="w-5 h-5" />
+                  <h3 className="text-xl font-bold">Office Hours</h3>
                 </div>
                 <div className="space-y-3 text-sm">
-                  <div className="flex justify-between items-center pb-3 border-b border-primary-foreground/20">
-                    <span className="font-medium">Monday - Friday</span>
+                  <div className="flex justify-between items-center pb-3 border-b border-black/10">
+                    <span className="font-semibold">Monday - Friday</span>
                     <span>9:00 AM - 6:00 PM</span>
                   </div>
-                  <div className="flex justify-between items-center pb-3 border-b border-primary-foreground/20">
-                    <span className="font-medium">Saturday</span>
+                  <div className="flex justify-between items-center pb-3 border-b border-black/10">
+                    <span className="font-semibold">Saturday</span>
                     <span>10:00 AM - 4:00 PM</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="font-medium">Sunday</span>
+                    <span className="font-semibold">Sunday</span>
                     <span>Closed</span>
                   </div>
                 </div>
               </div>
 
               {/* Quick Response */}
-              <div className="bg-card rounded-3xl p-8 shadow-card">
-                <h4 className="font-semibold mb-3">Quick Response Time</h4>
-                <p className="text-muted-foreground text-sm mb-4">
-                  We typically respond to all inquiries within 24 hours during business days.
+              <div className="card-sleek p-6">
+                <h4 className="font-semibold mb-2.5 text-white text-sm">Quick Response Time</h4>
+                <p className="text-muted-foreground text-sm mb-3">
+                  We typically respond within 24 hours during business days.
                 </p>
                 <div className="flex items-center gap-2 text-sm text-primary">
                   <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
@@ -169,8 +179,9 @@ const Contact = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 md:py-24 bg-secondary/30">
-        <div className="container mx-auto px-4">
+      <section className="relative py-16 md:py-24 bg-secondary/30">
+        <FlowingLinesBackground variant="circuit" direction="ltr" />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Frequently Asked Questions</h2>
             <div className="space-y-4">
@@ -192,9 +203,9 @@ const Contact = () => {
                   a: "We offer a 7-day money-back guarantee if you're not satisfied with the course. Terms and conditions apply.",
                 },
               ].map((faq, index) => (
-                <div key={index} className="bg-card rounded-2xl p-6 shadow-card">
-                  <h3 className="font-semibold mb-2">{faq.q}</h3>
-                  <p className="text-muted-foreground text-sm">{faq.a}</p>
+                <div key={index} className="card-sleek p-6">
+                  <h3 className="font-semibold mb-2 text-white">{faq.q}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{faq.a}</p>
                 </div>
               ))}
             </div>
@@ -203,19 +214,24 @@ const Contact = () => {
       </section>
 
       {/* Map Placeholder */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
+      <section className="relative py-16">
+        <FlowingLinesBackground variant="wave" direction="rtl" />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-6xl mx-auto">
-            <div className="bg-gradient-to-br from-primary/10 to-orange-100 rounded-3xl h-[400px] flex items-center justify-center">
-              <div className="text-center">
-                <MapPin className="w-16 h-16 text-primary mx-auto mb-4" />
-                <h3 className="text-2xl font-bold mb-2">Visit Our Office</h3>
+            <div className="card-sleek h-[400px] flex items-center justify-center relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
+              <div className="text-center relative z-10">
+                <div className="inline-flex p-4 rounded-xl bg-primary/10 border border-primary/20 mb-4">
+                  <MapPin className="w-12 h-12 text-primary" />
+                </div>
+                <h3 className="text-2xl font-bold mb-2 text-white">Visit Our Office</h3>
                 <p className="text-muted-foreground">Tech Park, Cyber City, Bangalore</p>
               </div>
             </div>
           </div>
         </div>
       </section>
+      </div>
 
       <Footer />
     </div>

@@ -6,7 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-const serviceData: Record<string, any> = {
+interface ServiceData {
+  title: string;
+  description: string;
+  icon: React.ComponentType;
+  features: string[];
+  curriculum: string[];
+  clients: string[];
+}
+
+const serviceData: Record<string, ServiceData> = {
   "wpat-testing": {
     title: "Web & Mobile Application Penetration Testing",
     description: "Comprehensive security testing for web and mobile applications to identify and remediate vulnerabilities before they can be exploited.",
@@ -120,12 +129,18 @@ const ServiceDetail = () => {
   const Icon = service.icon;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background grid-background">
       <Header />
-      
+
+      <div className="pt-16 md:pt-20">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-background via-secondary/20 to-background py-16 md:py-24 border-b">
-        <div className="container mx-auto px-4">
+      <section className="relative hero-grid py-16 md:py-24 overflow-hidden">
+        {/* Animated gradient orbs */}
+        <div className="absolute -top-20 -left-20 w-[600px] h-[600px] bg-primary/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-20 -right-20 w-[600px] h-[600px] bg-accent/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1.5s'}} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-primary/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2.5s'}} />
+
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center gap-4 mb-6">
               <div className="bg-primary/10 text-primary rounded-2xl p-4">
@@ -248,6 +263,7 @@ const ServiceDetail = () => {
           </div>
         </div>
       </section>
+      </div>
 
       <Footer />
     </div>
