@@ -120,7 +120,7 @@ const CoursesSection = () => {
                   {course.description}
                 </p>
 
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+                <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 h-4" />
                     <span>{course.duration}</span>
@@ -130,24 +130,6 @@ const CoursesSection = () => {
                     <span>{course.students}</span>
                   </div>
                 </div>
-
-                {/* Progress Bar */}
-                {course.progress && (
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="text-muted-foreground">Progress</span>
-                      <span className="font-medium text-primary">
-                        {course.progress}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-secondary rounded-full h-1.5">
-                      <div
-                        className="bg-primary rounded-full h-1.5 transition-all"
-                        style={{ width: `${course.progress}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
 
                 <Link to={`/courses/${course.slug}`}>
                   <Button className="w-full rounded-full">View Course</Button>

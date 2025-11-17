@@ -1,7 +1,7 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Shield, CheckCircle, Target } from "lucide-react";
+import { Shield, CheckCircle, Target, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -107,7 +107,10 @@ const ServiceDetail = () => {
         <Header />
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-4xl font-bold mb-4">Service Not Found</h1>
-          <p className="text-muted-foreground">The service you're looking for doesn't exist.</p>
+          <p className="text-muted-foreground mb-8">The service you're looking for doesn't exist.</p>
+          <Link to="/services">
+            <Button className="rounded-full">Back to Services</Button>
+          </Link>
         </div>
         <Footer />
       </div>
@@ -121,14 +124,28 @@ const ServiceDetail = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="bg-primary text-primary-foreground py-16 md:py-24">
+      <section className="bg-gradient-to-br from-background via-secondary/20 to-background py-16 md:py-24 border-b">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex bg-primary-foreground/10 rounded-full p-6 mb-6">
-              <Icon className="w-12 h-12" />
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="bg-primary/10 text-primary rounded-2xl p-4">
+                <Icon className="w-10 h-10" />
+              </div>
+              <div>
+                <h1 className="text-4xl md:text-5xl font-bold mb-2">{service.title}</h1>
+              </div>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">{service.title}</h1>
-            <p className="text-lg md:text-xl opacity-90">{service.description}</p>
+            <p className="text-lg md:text-xl text-muted-foreground mb-8">
+              {service.description}
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link to="/contact">
+                <Button size="lg" className="rounded-full">
+                  Get a Quote
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
