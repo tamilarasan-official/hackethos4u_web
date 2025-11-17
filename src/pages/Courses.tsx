@@ -114,26 +114,26 @@ const Courses = () => {
       <Header />
 
       {/* Hero Section */}
-      <section className="bg-primary text-primary-foreground py-20 md:py-28">
+      <section className="bg-gradient-to-br from-background via-secondary/20 to-background py-20 md:py-28 border-b">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
               Learn Cybersecurity from Industry Experts
             </h1>
-            <p className="text-lg md:text-xl opacity-90 mb-8">
+            <p className="text-lg md:text-xl text-muted-foreground mb-8">
               Transform your career with hands-on training in ethical hacking, penetration testing, and security analysis
             </p>
             <div className="flex flex-wrap justify-center gap-6 text-sm">
               <div className="flex items-center gap-2">
-                <Award className="w-5 h-5" />
+                <Award className="w-5 h-5 text-primary" />
                 <span>Industry Recognized Certificates</span>
               </div>
               <div className="flex items-center gap-2">
-                <Video className="w-5 h-5" />
+                <Video className="w-5 h-5 text-primary" />
                 <span>Live & Recorded Sessions</span>
               </div>
               <div className="flex items-center gap-2">
-                <Users className="w-5 h-5" />
+                <Users className="w-5 h-5 text-primary" />
                 <span>3000+ Students Trained</span>
               </div>
             </div>
@@ -208,9 +208,9 @@ const Courses = () => {
                       <p className="text-xs text-muted-foreground mb-1">Starting from</p>
                       <p className="text-lg font-bold text-primary">{course.price}</p>
                     </div>
-                    <Link to={`/courses/${course.slug}`}>
+                    <Link to="/contact">
                       <Button className="rounded-full group-hover:scale-105 transition-smooth">
-                        View Course
+                        Enroll Now
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </Link>
@@ -262,19 +262,21 @@ const Courses = () => {
       </section>
 
       {/* CTA */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 bg-secondary/20">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto bg-gradient-to-br from-primary to-orange-600 rounded-3xl p-8 md:p-12 text-primary-foreground text-center shadow-card-hover">
+          <div className="max-w-4xl mx-auto bg-card rounded-3xl p-8 md:p-12 text-center shadow-card-hover">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Start Your Cybersecurity Journey Today
             </h2>
-            <p className="text-lg mb-8 opacity-90">
+            <p className="text-lg text-muted-foreground mb-8">
               Join thousands of students who have transformed their careers with our expert-led courses
             </p>
-            <Button size="lg" className="rounded-full bg-primary-foreground text-primary hover:bg-primary-foreground/90">
-              Browse All Courses
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+            <Link to="/course-selection">
+              <Button size="lg" className="rounded-full">
+                Choose Learning Format
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

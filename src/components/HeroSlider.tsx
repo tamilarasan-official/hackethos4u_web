@@ -93,9 +93,9 @@ const HeroSlider = () => {
 
                   {/* Countdown */}
                   {slide.countdown && (
-                    <div className="bg-foreground/20 backdrop-blur-sm rounded-2xl px-6 py-3 inline-flex items-center gap-4 mb-8 w-fit">
-                      <span className="text-sm font-medium">Offer Ends In:</span>
-                      <span className="text-xl font-bold">
+                    <div className="bg-primary rounded-2xl px-6 py-4 inline-flex items-center gap-4 mb-8 w-fit shadow-lg animate-pulse">
+                      <span className="text-lg font-bold text-primary-foreground">⏰ Offer Ends In:</span>
+                      <span className="text-2xl font-bold text-primary-foreground">
                         {slide.countdown.days}d {slide.countdown.hours}h
                       </span>
                     </div>

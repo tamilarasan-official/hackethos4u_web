@@ -59,27 +59,21 @@ const Services = () => {
       <Header />
 
       {/* Hero Section */}
-      <section className="bg-primary text-primary-foreground py-20 md:py-28">
+      <section className="bg-gradient-to-br from-background via-secondary/20 to-background py-20 md:py-28 border-b">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
               Professional Security Testing Services
             </h1>
-            <p className="text-lg md:text-xl opacity-90 mb-8">
+            <p className="text-lg md:text-xl text-muted-foreground mb-8">
               Protect your digital assets with comprehensive penetration testing and vulnerability assessments from certified security experts
             </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Button size="lg" className="rounded-full bg-primary-foreground text-primary hover:bg-primary-foreground/90">
+            <Link to="/contact">
+              <Button size="lg" className="rounded-full">
                 Get a Quote
+                <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="rounded-full border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10"
-              >
-                View Case Studies
-              </Button>
-            </div>
+            </Link>
           </div>
         </div>
       </section>
