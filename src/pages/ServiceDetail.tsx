@@ -5,6 +5,7 @@ import { Shield, CheckCircle, Target, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { FlowingLinesBackground } from "@/components/backgrounds";
 
 interface ServiceData {
   title: string;
@@ -135,10 +136,7 @@ const ServiceDetail = () => {
       <div className="pt-16 md:pt-20">
       {/* Hero Section */}
       <section className="relative hero-grid py-16 md:py-24 overflow-hidden">
-        {/* Animated gradient orbs */}
-        <div className="absolute -top-20 -left-20 w-[600px] h-[600px] bg-primary/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-20 -right-20 w-[600px] h-[600px] bg-accent/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1.5s'}} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-primary/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2.5s'}} />
+        <FlowingLinesBackground variant="circuit" direction="ltr" />
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto">
