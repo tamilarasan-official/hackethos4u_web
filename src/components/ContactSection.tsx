@@ -1,10 +1,54 @@
+import { useState } from "react";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FlowingLinesBackground } from "@/components/backgrounds";
+import { useData } from "@/contexts/DataContext";
 
 const ContactSection = () => {
+  const { addContact } = useData();
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!formData.name || !formData.email || !formData.message) {
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await addContact({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        message: formData.message,
+        source: 'home',
+        status: 'new',
+        date: new Date().toISOString(),
+      });
+
+      // Reset form
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        message: "",
+      });
+    } catch (error) {
+      console.error('Error submitting contact form:', error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <section id="contact" className="relative py-20 md:py-28 bg-secondary/30">
       <FlowingLinesBackground variant="circuit" direction="ltr" />
@@ -27,26 +71,34 @@ const ContactSection = () => {
           {/* Contact Form */}
           <div className="card-sleek p-8 md:p-10">
             <h3 className="text-2xl font-bold mb-6 text-white">Send us a message</h3>
-            <form className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-white">Name *</label>
                 <Input
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Your name"
                   className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary"
+                  required
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-white">Email *</label>
                 <Input
                   type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="your.email@example.com"
                   className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary"
+                  required
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-white">Phone</label>
                 <Input
                   type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   placeholder="+91 XXXXX XXXXX"
                   className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary"
                 />
@@ -54,12 +106,20 @@ const ContactSection = () => {
               <div className="space-y-2">
                 <label className="text-sm font-medium text-white">Message *</label>
                 <Textarea
+                  value={formData.message}
+                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   placeholder="Tell us about your requirements..."
                   className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary resize-none min-h-[120px]"
+                  required
                 />
               </div>
-              <Button className="w-full rounded-full bg-primary text-black hover:bg-primary/90 font-semibold" size="lg">
-                Send Message
+              <Button
+                type="submit"
+                disabled={submitting}
+                className="w-full rounded-full bg-primary text-black hover:bg-primary/90 font-semibold"
+                size="lg"
+              >
+                {submitting ? 'Sending...' : 'Send Message'}
               </Button>
             </form>
           </div>
@@ -75,8 +135,7 @@ const ContactSection = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-1.5 text-white text-sm">Email</h4>
-                    <p className="text-muted-foreground text-sm">contact@hackethos4u.com</p>
-                    <p className="text-muted-foreground text-sm">support@hackethos4u.com</p>
+                    <p className="text-muted-foreground text-sm">h4u.info@hackethos4u.com</p>
                   </div>
                 </div>
 
@@ -86,8 +145,7 @@ const ContactSection = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-1.5 text-white text-sm">Phone</h4>
-                    <p className="text-muted-foreground text-sm">+91 98765 43210</p>
-                    <p className="text-muted-foreground text-sm">+91 87654 32109</p>
+                    <p className="text-muted-foreground text-sm">+91 7095188315</p>
                   </div>
                 </div>
 
@@ -98,8 +156,8 @@ const ContactSection = () => {
                   <div>
                     <h4 className="font-semibold mb-1.5 text-white text-sm">Address</h4>
                     <p className="text-muted-foreground text-sm">
-                      Tech Park, Cyber City<br />
-                      Bangalore, Karnataka 560001<br />
+                      9G8C+PRQ, Dilsukhnagar<br />
+                      Hyderabad, Telangana<br />
                       India
                     </p>
                   </div>

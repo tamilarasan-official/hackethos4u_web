@@ -121,7 +121,7 @@ const Courses = () => {
               {recordingCourses.map((course) => (
                 <div
                   key={course.id}
-                  className="group card-sleek p-6 relative overflow-hidden hover:border-white/20 transition-all duration-300"
+                  className="group card-sleek p-6 relative overflow-hidden hover:border-white/20 transition-all duration-300 flex flex-col min-h-[520px]"
                 >
                   {/* Badges */}
                   <div className="flex justify-between items-start mb-4 relative z-10">
@@ -135,12 +135,12 @@ const Courses = () => {
 
                   {/* Content */}
                   <h3 className="text-xl font-bold mb-3 text-white relative z-10">{course.title}</h3>
-                  <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+                  <p className="text-muted-foreground text-sm mb-6 leading-relaxed line-clamp-4">
                     {course.description}
                   </p>
 
                   {/* Meta Info */}
-                  <div className="space-y-2.5 mb-6 pb-6 border-b border-white/10">
+                  <div className="space-y-2.5 mb-6 pb-6 border-b border-white/10 flex-grow">
                     <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
                       <div className="p-1.5 rounded-lg bg-white/5 border border-white/10">
                         <Icons.Clock className="w-3.5 h-3.5 text-white/60" />
@@ -157,22 +157,33 @@ const Courses = () => {
                     )}
                   </div>
 
-                  {/* Play Store Link */}
-                  <div className="mb-4">
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
-                      <Icons.Smartphone className="w-3.5 h-3.5" />
-                      <span>Available on Play Store</span>
-                    </div>
-                    <a
-                      href={course.playStoreLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Button className="rounded-full w-full bg-primary text-black hover:bg-primary/90 font-semibold group/btn">
-                        Download App
-                        <Icons.Download className="w-4 h-4 ml-2 group-hover/btn:translate-y-0.5 transition-transform" />
+                  {/* Course Actions */}
+                  <div className="space-y-3 mt-auto">
+                    {/* View Course Button */}
+                    <Link to={`/courses/${course.slug}`}>
+                      <Button className="rounded-full w-full bg-white/5 text-white border border-white/10 hover:bg-primary hover:text-black hover:border-primary font-semibold transition-all duration-300 group/btn">
+                        View Course
+                        <Icons.ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
                       </Button>
-                    </a>
+                    </Link>
+
+                    {/* Play Store Link */}
+                    <div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                        <Icons.Smartphone className="w-3.5 h-3.5" />
+                        <span>Available on Play Store</span>
+                      </div>
+                      <a
+                        href={course.playStoreLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button className="rounded-full w-full bg-primary text-black hover:bg-primary/90 font-semibold group/btn">
+                          Download App
+                          <Icons.Download className="w-4 h-4 ml-2 group-hover/btn:translate-y-0.5 transition-transform" />
+                        </Button>
+                      </a>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -202,7 +213,7 @@ const Courses = () => {
               {liveCourses.map((course) => (
                 <div
                   key={course.id}
-                  className="group card-sleek p-6 relative overflow-hidden hover:border-white/20 transition-all duration-300"
+                  className="group card-sleek p-6 relative overflow-hidden hover:border-white/20 transition-all duration-300 flex flex-col min-h-[520px]"
                 >
                   {/* Badges */}
                   <div className="flex justify-between items-start mb-4 relative z-10">
@@ -223,7 +234,7 @@ const Courses = () => {
 
                   {/* Content */}
                   <h3 className="text-xl font-bold mb-3 text-white relative z-10">{course.title}</h3>
-                  <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+                  <p className="text-muted-foreground text-sm mb-6 leading-relaxed line-clamp-4">
                     {course.description}
                   </p>
 
@@ -246,7 +257,7 @@ const Courses = () => {
                   </div>
 
                   {/* Pricing */}
-                  <div className="mb-6">
+                  <div className="mb-6 flex-grow">
                     <p className="text-xs text-muted-foreground mb-2">Pricing</p>
                     <div className="text-sm font-bold text-white/90">
                       {formatPrice(course)}
@@ -254,7 +265,7 @@ const Courses = () => {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 mt-auto">
                     <Link to={`/courses/${course.slug}`}>
                       <Button className="rounded-full w-full bg-primary text-black hover:bg-primary/90 font-semibold group/btn">
                         View Details
@@ -304,32 +315,38 @@ const Courses = () => {
       <section className="relative py-16 md:py-20 bg-secondary/30">
         <FlowingLinesBackground variant="circuit" direction="ltr" />
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto bg-gradient-to-br from-primary to-orange-600 rounded-3xl p-8 md:p-12 text-primary-foreground text-center shadow-card-hover">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Start Your Cybersecurity Journey Today
-            </h2>
-            <p className="text-lg mb-8 opacity-90">
-              Join thousands of students who have transformed their careers with our expert-led courses
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link to="/contact">
-                <Button
-                  size="lg"
-                  className="rounded-full bg-primary-foreground text-primary hover:bg-primary-foreground/90 hover:shadow-lg hover:scale-105 transition-all duration-300 font-semibold border-2 border-transparent hover:border-white/20"
-                >
-                  Enroll Now
-                  <Icons.ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
-              <Link to="/course-selection">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="rounded-full border-2 border-primary-foreground bg-primary-foreground text-primary hover:bg-primary-foreground/90 hover:text-primary hover:shadow-lg hover:scale-105 transition-all duration-300 font-semibold"
-                >
-                  Choose Learning Format
-                </Button>
-              </Link>
+          <div className="max-w-4xl mx-auto bg-gradient-to-br from-primary via-accent to-primary rounded-3xl p-8 md:p-12 text-black text-center shadow-2xl relative overflow-hidden">
+            {/* Decorative circles */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-black/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-3xl" />
+
+            <div className="relative z-10">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Start Your Cybersecurity Journey Today
+              </h2>
+              <p className="text-lg mb-8 opacity-90">
+                Join thousands of students who have transformed their careers with our expert-led courses
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <Link to="/contact">
+                  <Button
+                    size="lg"
+                    className="rounded-full bg-black text-white hover:bg-black/90 shadow-xl font-semibold"
+                  >
+                    Enroll Now
+                    <Icons.ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+                <Link to="/course-selection">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="rounded-full border-2 border-black text-black bg-black/5 hover:bg-black hover:text-white font-semibold"
+                  >
+                    Choose Learning Format
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>

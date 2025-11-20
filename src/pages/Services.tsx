@@ -336,23 +336,23 @@ const Services = () => {
       <section className="relative py-16 md:py-20">
         <FlowingLinesBackground variant="wave" direction="rtl" />
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto bg-gradient-to-br from-primary via-accent to-primary rounded-3xl p-8 md:p-12 text-white text-center shadow-2xl relative overflow-hidden">
+          <div className="max-w-4xl mx-auto bg-gradient-to-br from-primary via-accent to-primary rounded-3xl p-8 md:p-12 text-black text-center shadow-2xl relative overflow-hidden">
             {/* Decorative circles */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-black/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-3xl" />
 
             <div className="relative z-10">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
                 Ready to Secure Your Application?
               </h2>
-              <p className="text-lg mb-8 opacity-95">
+              <p className="text-lg mb-8 opacity-90">
                 Get started with a free consultation and learn how we can help protect your business from cyber threats
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <Link to="#contact">
                   <Button
                     size="lg"
-                    className="rounded-full bg-white text-primary hover:bg-white/90 shadow-xl font-semibold"
+                    className="rounded-full bg-black text-white hover:bg-black/90 shadow-xl font-semibold"
                   >
                     Schedule Consultation
                   </Button>
@@ -361,7 +361,7 @@ const Services = () => {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="rounded-full border-2 border-white text-white bg-white/10 backdrop-blur-sm hover:bg-white hover:text-primary font-semibold"
+                    className="rounded-full border-2 border-black text-black bg-black/5 hover:bg-black hover:text-white font-semibold"
                   >
                     Contact Us
                   </Button>

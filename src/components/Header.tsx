@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/Logo.png";
@@ -52,14 +52,26 @@ const Header = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1">
             {navItems.map((item) => (
-              <Link
+              <NavLink
                 key={item.name}
                 to={item.path}
-                className="px-4 py-2 text-sm font-medium text-white hover:text-primary transition-colors relative group"
+                className={({ isActive }) =>
+                  `px-4 py-2 text-sm font-medium transition-colors relative group ${
+                    isActive
+                      ? 'text-primary'
+                      : 'text-white hover:text-primary'
+                  }`
+                }
               >
-                {item.name}
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-              </Link>
+                {({ isActive }) => (
+                  <>
+                    {item.name}
+                    <span className={`absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 ${
+                      isActive ? 'w-full' : 'w-0 group-hover:w-full'
+                    }`}></span>
+                  </>
+                )}
+              </NavLink>
             ))}
           </nav>
 
@@ -90,14 +102,20 @@ const Header = () => {
           <nav className="md:hidden py-4 border-t border-white/10">
             <div className="flex flex-col gap-1">
               {navItems.map((item) => (
-                <Link
+                <NavLink
                   key={item.name}
                   to={item.path}
-                  className="px-4 py-3 text-sm font-medium text-white hover:text-primary hover:bg-white/5 rounded-lg transition-all"
+                  className={({ isActive }) =>
+                    `px-4 py-3 text-sm font-medium rounded-lg transition-all ${
+                      isActive
+                        ? 'text-primary bg-white/10'
+                        : 'text-white hover:text-primary hover:bg-white/5'
+                    }`
+                  }
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
-                </Link>
+                </NavLink>
               ))}
               <Link
                 to="/contact"

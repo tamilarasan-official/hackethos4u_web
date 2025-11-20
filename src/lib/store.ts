@@ -76,6 +76,18 @@ export interface Review {
   isActive: boolean;
 }
 
+export interface Contact {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  message: string;
+  source: 'home' | 'services' | 'contact'; // which page the contact came from
+  serviceInterested?: string; // for service page contacts
+  status: 'new' | 'read' | 'replied' | 'converted'; // track status
+  date: string; // ISO date string
+}
+
 // Storage keys
 const STORAGE_KEYS = {
   BANNERS: 'orange-hub-banners',

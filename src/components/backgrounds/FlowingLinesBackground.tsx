@@ -41,12 +41,12 @@ const FlowingLinesBackground: React.FC<FlowingLinesBackgroundProps> = ({
 
   return (
     <div className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}>
-      <svg className="absolute inset-0 w-full h-full opacity-40" preserveAspectRatio="none" style={{ mixBlendMode: 'screen' }}>
+      <svg className="absolute inset-0 w-full h-full opacity-50" preserveAspectRatio="none" style={{ mixBlendMode: 'screen' }}>
         <defs>
           <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="rgb(255, 107, 53)" stopOpacity="0" />
-            <stop offset="50%" stopColor="rgb(255, 107, 53)" stopOpacity="1" />
-            <stop offset="100%" stopColor="rgb(255, 107, 53)" stopOpacity="0" />
+            <stop offset="0%" stopColor="rgb(255, 107, 53)" stopOpacity="0.2" />
+            <stop offset="50%" stopColor="rgb(255, 107, 53)" stopOpacity="0.7" />
+            <stop offset="100%" stopColor="rgb(255, 107, 53)" stopOpacity="0.2" />
           </linearGradient>
         </defs>
 

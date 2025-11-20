@@ -1,8 +1,12 @@
 import { Link } from "react-router-dom";
 import { Facebook, Twitter, Linkedin, Instagram, Youtube } from "lucide-react";
 import logo from "@/assets/Logo.png";
+import { useData } from "@/contexts/DataContext";
 
 const Footer = () => {
+  const { services } = useData();
+  const activeServices = services.filter(s => s.isActive);
+
   return (
     <footer className="bg-foreground text-background py-12">
       <div className="container mx-auto px-4">
@@ -72,26 +76,16 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold text-lg mb-4">Services</h4>
             <ul className="space-y-2 text-sm">
-              <li>
-                <Link to="/services/wpat-testing" className="opacity-80 hover:opacity-100 hover:text-primary transition-all">
-                  WPAT Testing
-                </Link>
-              </li>
-              <li>
-                <Link to="/services/mobile-security" className="opacity-80 hover:opacity-100 hover:text-primary transition-all">
-                  Mobile Security
-                </Link>
-              </li>
-              <li>
-                <Link to="/services/api-testing" className="opacity-80 hover:opacity-100 hover:text-primary transition-all">
-                  API Testing
-                </Link>
-              </li>
-              <li>
-                <Link to="/services/owasp-testing" className="opacity-80 hover:opacity-100 hover:text-primary transition-all">
-                  OWASP Testing
-                </Link>
-              </li>
+              {activeServices.map((service) => (
+                <li key={service.id}>
+                  <Link
+                    to={`/services/${service.slug}`}
+                    className="opacity-80 hover:opacity-100 hover:text-primary transition-all"
+                  >
+                    {service.title}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -99,10 +93,10 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold text-lg mb-4">Contact</h4>
             <ul className="space-y-2 text-sm opacity-80">
-              <li>Email: contact@hackethos4u.com</li>
-              <li>Phone: +91 98765 43210</li>
-              <li>Address: Tech Park, Cyber City</li>
-              <li>Bangalore, Karnataka 560001</li>
+              <li>Email: h4u.info@hackethos4u.com</li>
+              <li>Phone: +91 7095188315</li>
+              <li>Address: 9G8C+PRQ, Dilsukhnagar</li>
+              <li>Hyderabad, Telangana</li>
             </ul>
           </div>
         </div>

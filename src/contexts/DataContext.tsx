@@ -6,53 +6,64 @@ import {
   ClientLogo,
   Certificate,
   Review,
-  bannerStore,
-  serviceStore,
-  courseStore,
-  clientStore,
-  certificateStore,
-  reviewStore,
+  Contact,
 } from '@/lib/store';
+import {
+  coursesService,
+  servicesService,
+  certificatesService,
+  reviewsService,
+  bannersService,
+  clientsService,
+  contactsService,
+} from '@/lib/firestore';
+import { toast } from 'sonner';
 
 interface DataContextType {
+  // Loading states
+  loading: boolean;
+
   // Banners
   banners: Banner[];
-  updateBanners: (banners: Banner[]) => void;
-  addBanner: (banner: Banner) => void;
-  deleteBanner: (id: string) => void;
+  updateBanner: (id: string, data: Partial<Banner>) => Promise<void>;
+  addBanner: (banner: Omit<Banner, 'id'>) => Promise<void>;
+  deleteBanner: (id: string) => Promise<void>;
 
   // Services
   services: Service[];
-  updateServices: (services: Service[]) => void;
-  addService: (service: Service) => void;
-  deleteService: (id: string) => void;
+  updateService: (id: string, data: Partial<Service>) => Promise<void>;
+  addService: (service: Omit<Service, 'id'>) => Promise<void>;
+  deleteService: (id: string) => Promise<void>;
 
   // Courses
   courses: Course[];
-  updateCourses: (courses: Course[]) => void;
-  addCourse: (course: Course) => void;
-  deleteCourse: (id: string) => void;
+  updateCourse: (id: string, data: Partial<Course>) => Promise<void>;
+  addCourse: (course: Omit<Course, 'id'>) => Promise<void>;
+  deleteCourse: (id: string) => Promise<void>;
 
   // Clients
   clients: ClientLogo[];
-  updateClients: (clients: ClientLogo[]) => void;
-  addClient: (client: ClientLogo) => void;
-  deleteClient: (id: string) => void;
+  updateClient: (id: string, data: Partial<ClientLogo>) => Promise<void>;
+  addClient: (client: Omit<ClientLogo, 'id'>) => Promise<void>;
+  deleteClient: (id: string) => Promise<void>;
 
   // Certificates
   certificates: Certificate[];
-  updateCertificates: (certificates: Certificate[]) => void;
-  addCertificate: (certificate: Certificate) => void;
-  deleteCertificate: (id: string) => void;
+  updateCertificate: (id: string, data: Partial<Certificate>) => Promise<void>;
+  addCertificate: (certificate: Omit<Certificate, 'id'>) => Promise<void>;
+  deleteCertificate: (id: string) => Promise<void>;
 
   // Reviews
   reviews: Review[];
-  updateReviews: (reviews: Review[]) => void;
-  addReview: (review: Review) => void;
-  deleteReview: (id: string) => void;
+  updateReview: (id: string, data: Partial<Review>) => Promise<void>;
+  addReview: (review: Omit<Review, 'id'>) => Promise<void>;
+  deleteReview: (id: string) => Promise<void>;
 
-  // Utility
-  refreshAll: () => void;
+  // Contacts
+  contacts: Contact[];
+  updateContact: (id: string, data: Partial<Contact>) => Promise<void>;
+  addContact: (contact: Omit<Contact, 'id'>) => Promise<void>;
+  deleteContact: (id: string) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -64,149 +75,339 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [clients, setClients] = useState<ClientLogo[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Load initial data
+  // Set up real-time listeners for all collections
   useEffect(() => {
-    refreshAll();
+    const unsubscribers: Array<() => void> = [];
+
+    // Banners listener
+    const unsubBanners = bannersService.subscribe((data) => {
+      setBanners(data);
+    });
+    unsubscribers.push(unsubBanners);
+
+    // Services listener
+    const unsubServices = servicesService.subscribe((data) => {
+      setServices(data);
+    });
+    unsubscribers.push(unsubServices);
+
+    // Courses listener
+    const unsubCourses = coursesService.subscribe((data) => {
+      setCourses(data);
+    });
+    unsubscribers.push(unsubCourses);
+
+    // Clients listener
+    const unsubClients = clientsService.subscribe((data) => {
+      setClients(data);
+    });
+    unsubscribers.push(unsubClients);
+
+    // Certificates listener
+    const unsubCertificates = certificatesService.subscribe((data) => {
+      setCertificates(data);
+    });
+    unsubscribers.push(unsubCertificates);
+
+    // Reviews listener
+    const unsubReviews = reviewsService.subscribe((data) => {
+      setReviews(data);
+    });
+    unsubscribers.push(unsubReviews);
+
+    // Contacts listener
+    const unsubContacts = contactsService.subscribe((data) => {
+      setContacts(data);
+    });
+    unsubscribers.push(unsubContacts);
+
+    // Set loading to false after first data load
+    setLoading(false);
+
+    // Cleanup: unsubscribe from all listeners
+    return () => {
+      unsubscribers.forEach((unsub) => unsub());
+    };
   }, []);
 
-  const refreshAll = () => {
-    setBanners(bannerStore.get());
-    setServices(serviceStore.get());
-    setCourses(courseStore.get());
-    setClients(clientStore.get());
-    setCertificates(certificateStore.get());
-    setReviews(reviewStore.get());
-  };
-
   // Banner operations
-  const updateBanners = (newBanners: Banner[]) => {
-    bannerStore.save(newBanners);
-    setBanners(newBanners);
+  const addBanner = async (banner: Omit<Banner, 'id'>) => {
+    try {
+      await bannersService.create(banner);
+      toast.success('Banner added successfully!');
+    } catch (error) {
+      console.error('Error adding banner:', error);
+      toast.error('Failed to add banner');
+      throw error;
+    }
   };
 
-  const addBanner = (banner: Banner) => {
-    const newBanners = [...banners, banner];
-    updateBanners(newBanners);
+  const updateBanner = async (id: string, data: Partial<Banner>) => {
+    try {
+      await bannersService.update(id, data);
+      toast.success('Banner updated successfully!');
+    } catch (error) {
+      console.error('Error updating banner:', error);
+      toast.error('Failed to update banner');
+      throw error;
+    }
   };
 
-  const deleteBanner = (id: string) => {
-    const newBanners = banners.filter(b => b.id !== id);
-    updateBanners(newBanners);
+  const deleteBanner = async (id: string) => {
+    try {
+      await bannersService.delete(id);
+      toast.success('Banner deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting banner:', error);
+      toast.error('Failed to delete banner');
+      throw error;
+    }
   };
 
   // Service operations
-  const updateServices = (newServices: Service[]) => {
-    serviceStore.save(newServices);
-    setServices(newServices);
+  const addService = async (service: Omit<Service, 'id'>) => {
+    try {
+      await servicesService.create(service);
+      toast.success('Service added successfully!');
+    } catch (error) {
+      console.error('Error adding service:', error);
+      toast.error('Failed to add service');
+      throw error;
+    }
   };
 
-  const addService = (service: Service) => {
-    const newServices = [...services, service];
-    updateServices(newServices);
+  const updateService = async (id: string, data: Partial<Service>) => {
+    try {
+      await servicesService.update(id, data);
+      toast.success('Service updated successfully!');
+    } catch (error) {
+      console.error('Error updating service:', error);
+      toast.error('Failed to update service');
+      throw error;
+    }
   };
 
-  const deleteService = (id: string) => {
-    const newServices = services.filter(s => s.id !== id);
-    updateServices(newServices);
+  const deleteService = async (id: string) => {
+    try {
+      await servicesService.delete(id);
+      toast.success('Service deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting service:', error);
+      toast.error('Failed to delete service');
+      throw error;
+    }
   };
 
   // Course operations
-  const updateCourses = (newCourses: Course[]) => {
-    courseStore.save(newCourses);
-    setCourses(newCourses);
+  const addCourse = async (course: Omit<Course, 'id'>) => {
+    try {
+      await coursesService.create(course);
+      toast.success('Course added successfully!');
+    } catch (error) {
+      console.error('Error adding course:', error);
+      toast.error('Failed to add course');
+      throw error;
+    }
   };
 
-  const addCourse = (course: Course) => {
-    const newCourses = [...courses, course];
-    updateCourses(newCourses);
+  const updateCourse = async (id: string, data: Partial<Course>) => {
+    try {
+      await coursesService.update(id, data);
+      toast.success('Course updated successfully!');
+    } catch (error) {
+      console.error('Error updating course:', error);
+      toast.error('Failed to update course');
+      throw error;
+    }
   };
 
-  const deleteCourse = (id: string) => {
-    const newCourses = courses.filter(c => c.id !== id);
-    updateCourses(newCourses);
+  const deleteCourse = async (id: string) => {
+    try {
+      await coursesService.delete(id);
+      toast.success('Course deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting course:', error);
+      toast.error('Failed to delete course');
+      throw error;
+    }
   };
 
   // Client operations
-  const updateClients = (newClients: ClientLogo[]) => {
-    clientStore.save(newClients);
-    setClients(newClients);
+  const addClient = async (client: Omit<ClientLogo, 'id'>) => {
+    try {
+      await clientsService.create(client);
+      toast.success('Client added successfully!');
+    } catch (error) {
+      console.error('Error adding client:', error);
+      toast.error('Failed to add client');
+      throw error;
+    }
   };
 
-  const addClient = (client: ClientLogo) => {
-    const newClients = [...clients, client];
-    updateClients(newClients);
+  const updateClient = async (id: string, data: Partial<ClientLogo>) => {
+    try {
+      await clientsService.update(id, data);
+      toast.success('Client updated successfully!');
+    } catch (error) {
+      console.error('Error updating client:', error);
+      toast.error('Failed to update client');
+      throw error;
+    }
   };
 
-  const deleteClient = (id: string) => {
-    const newClients = clients.filter(c => c.id !== id);
-    updateClients(newClients);
+  const deleteClient = async (id: string) => {
+    try {
+      await clientsService.delete(id);
+      toast.success('Client deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting client:', error);
+      toast.error('Failed to delete client');
+      throw error;
+    }
   };
 
   // Certificate operations
-  const updateCertificates = (newCertificates: Certificate[]) => {
-    certificateStore.save(newCertificates);
-    setCertificates(newCertificates);
+  const addCertificate = async (certificate: Omit<Certificate, 'id'>) => {
+    try {
+      await certificatesService.create(certificate);
+      toast.success('Certificate added successfully!');
+    } catch (error) {
+      console.error('Error adding certificate:', error);
+      toast.error('Failed to add certificate');
+      throw error;
+    }
   };
 
-  const addCertificate = (certificate: Certificate) => {
-    const newCertificates = [...certificates, certificate];
-    updateCertificates(newCertificates);
+  const updateCertificate = async (id: string, data: Partial<Certificate>) => {
+    try {
+      await certificatesService.update(id, data);
+      toast.success('Certificate updated successfully!');
+    } catch (error) {
+      console.error('Error updating certificate:', error);
+      toast.error('Failed to update certificate');
+      throw error;
+    }
   };
 
-  const deleteCertificate = (id: string) => {
-    const newCertificates = certificates.filter(c => c.id !== id);
-    updateCertificates(newCertificates);
+  const deleteCertificate = async (id: string) => {
+    try {
+      await certificatesService.delete(id);
+      toast.success('Certificate deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting certificate:', error);
+      toast.error('Failed to delete certificate');
+      throw error;
+    }
   };
 
   // Review operations
-  const updateReviews = (newReviews: Review[]) => {
-    reviewStore.save(newReviews);
-    setReviews(newReviews);
+  const addReview = async (review: Omit<Review, 'id'>) => {
+    try {
+      await reviewsService.create(review);
+      toast.success('Review added successfully!');
+    } catch (error) {
+      console.error('Error adding review:', error);
+      toast.error('Failed to add review');
+      throw error;
+    }
   };
 
-  const addReview = (review: Review) => {
-    const newReviews = [...reviews, review];
-    updateReviews(newReviews);
+  const updateReview = async (id: string, data: Partial<Review>) => {
+    try {
+      await reviewsService.update(id, data);
+      toast.success('Review updated successfully!');
+    } catch (error) {
+      console.error('Error updating review:', error);
+      toast.error('Failed to update review');
+      throw error;
+    }
   };
 
-  const deleteReview = (id: string) => {
-    const newReviews = reviews.filter(r => r.id !== id);
-    updateReviews(newReviews);
+  const deleteReview = async (id: string) => {
+    try {
+      await reviewsService.delete(id);
+      toast.success('Review deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting review:', error);
+      toast.error('Failed to delete review');
+      throw error;
+    }
+  };
+
+  // Contact operations
+  const addContact = async (contact: Omit<Contact, 'id'>) => {
+    try {
+      await contactsService.create(contact);
+      toast.success('Contact form submitted successfully!');
+    } catch (error) {
+      console.error('Error adding contact:', error);
+      toast.error('Failed to submit contact form');
+      throw error;
+    }
+  };
+
+  const updateContact = async (id: string, data: Partial<Contact>) => {
+    try {
+      await contactsService.update(id, data);
+      toast.success('Contact updated successfully!');
+    } catch (error) {
+      console.error('Error updating contact:', error);
+      toast.error('Failed to update contact');
+      throw error;
+    }
+  };
+
+  const deleteContact = async (id: string) => {
+    try {
+      await contactsService.delete(id);
+      toast.success('Contact deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting contact:', error);
+      toast.error('Failed to delete contact');
+      throw error;
+    }
   };
 
   const value: DataContextType = {
+    loading,
+
     banners,
-    updateBanners,
+    updateBanner,
     addBanner,
     deleteBanner,
 
     services,
-    updateServices,
+    updateService,
     addService,
     deleteService,
 
     courses,
-    updateCourses,
+    updateCourse,
     addCourse,
     deleteCourse,
 
     clients,
-    updateClients,
+    updateClient,
     addClient,
     deleteClient,
 
     certificates,
-    updateCertificates,
+    updateCertificate,
     addCertificate,
     deleteCertificate,
 
     reviews,
-    updateReviews,
+    updateReview,
     addReview,
     deleteReview,
 
-    refreshAll,
+    contacts,
+    updateContact,
+    addContact,
+    deleteContact,
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

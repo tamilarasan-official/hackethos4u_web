@@ -1,12 +1,76 @@
+import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Mail, Phone, MapPin, Clock, Send, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 import { TechBackground, GridBackground, FlowingLinesBackground, ParticleBackground } from "@/components/backgrounds";
+import { useData } from "@/contexts/DataContext";
 
 const Contact = () => {
+  const { toast } = useToast();
+  const { addContact } = useData();
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    subject: "Course Inquiry",
+    message: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!formData.firstName || !formData.email || !formData.message) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await addContact({
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email,
+        phone: formData.phone,
+        message: `[${formData.subject}] ${formData.message}`,
+        source: 'contact-page',
+        status: 'new',
+        date: new Date().toISOString(),
+      });
+
+      toast({
+        title: "Message Sent!",
+        description: "We'll get back to you within 24 hours.",
+      });
+
+      // Reset form
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        subject: "Course Inquiry",
+        message: "",
+      });
+    } catch (error) {
+      console.error('Error submitting contact form:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
   return (
     <div className="min-h-screen bg-background grid-background">
       <Header />
@@ -46,36 +110,56 @@ const Contact = () => {
                 </div>
                 <h2 className="text-2xl font-bold">Send us a message</h2>
               </div>
-              <form className="space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-white">First Name</label>
-                    <Input placeholder="John" className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary" />
+                    <label className="text-sm font-medium text-white">First Name *</label>
+                    <Input
+                      value={formData.firstName}
+                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                      placeholder="John"
+                      className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary"
+                      required
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-white">Last Name</label>
-                    <Input placeholder="Doe" className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary" />
+                    <Input
+                      value={formData.lastName}
+                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                      placeholder="Doe"
+                      className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary"
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-white">Email</label>
+                  <label className="text-sm font-medium text-white">Email *</label>
                   <Input
                     type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="john.doe@example.com"
                     className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary"
+                    required
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-white">Phone</label>
                   <Input
                     type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="+91 XXXXX XXXXX"
                     className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary"
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-white">Subject</label>
-                  <select className="w-full px-4 py-2.5 rounded-lg border border-white/10 bg-black text-white focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors">
+                  <select
+                    value={formData.subject}
+                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-lg border border-white/10 bg-black text-white focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors"
+                  >
                     <option>Course Inquiry</option>
                     <option>Service Inquiry</option>
                     <option>Partnership</option>
@@ -83,15 +167,23 @@ const Contact = () => {
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-white">Message</label>
+                  <label className="text-sm font-medium text-white">Message *</label>
                   <Textarea
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     placeholder="Tell us how we can help you..."
                     className="rounded-lg min-h-[120px] bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary resize-none"
+                    required
                   />
                 </div>
-                <Button className="w-full rounded-full bg-primary text-black hover:bg-primary/90 font-semibold" size="lg">
+                <Button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full rounded-full bg-primary text-black hover:bg-primary/90 font-semibold"
+                  size="lg"
+                >
                   <Send className="w-4 h-4 mr-2" />
-                  Send Message
+                  {submitting ? 'Sending...' : 'Send Message'}
                 </Button>
               </form>
             </div>
@@ -108,8 +200,7 @@ const Contact = () => {
                     </div>
                     <div>
                       <h4 className="font-semibold mb-1.5 text-white text-sm">Email</h4>
-                      <p className="text-muted-foreground text-sm">contact@hackethos4u.com</p>
-                      <p className="text-muted-foreground text-sm">support@hackethos4u.com</p>
+                      <p className="text-muted-foreground text-sm">h4u.info@hackethos4u.com</p>
                     </div>
                   </div>
 
@@ -119,8 +210,7 @@ const Contact = () => {
                     </div>
                     <div>
                       <h4 className="font-semibold mb-1.5 text-white text-sm">Phone</h4>
-                      <p className="text-muted-foreground text-sm">+91 98765 43210</p>
-                      <p className="text-muted-foreground text-sm">+91 87654 32109</p>
+                      <p className="text-muted-foreground text-sm">+91 7095188315</p>
                     </div>
                   </div>
 
@@ -131,8 +221,8 @@ const Contact = () => {
                     <div>
                       <h4 className="font-semibold mb-1.5 text-white text-sm">Address</h4>
                       <p className="text-muted-foreground text-sm">
-                        Tech Park, Cyber City<br />
-                        Bangalore, Karnataka 560001<br />
+                        9G8C+PRQ, Dilsukhnagar<br />
+                        Hyderabad, Telangana<br />
                         India
                       </p>
                     </div>
@@ -225,7 +315,7 @@ const Contact = () => {
                   <MapPin className="w-12 h-12 text-primary" />
                 </div>
                 <h3 className="text-2xl font-bold mb-2 text-white">Visit Our Office</h3>
-                <p className="text-muted-foreground">Tech Park, Cyber City, Bangalore</p>
+                <p className="text-muted-foreground">9G8C+PRQ, Dilsukhnagar, Hyderabad</p>
               </div>
             </div>
           </div>
