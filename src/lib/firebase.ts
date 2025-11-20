@@ -3,15 +3,15 @@ import { getAuth } from "firebase/auth";
 import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 
-// Firebase configuration
+// Firebase configuration from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyCydoRu5x4VmdG6S7Wlu6iFjxMIpkPbm60",
-  authDomain: "hackthous4u-website.firebaseapp.com",
-  projectId: "hackthous4u-website",
-  storageBucket: "hackthous4u-website.firebasestorage.app",
-  messagingSenderId: "1077490164590",
-  appId: "1:1077490164590:web:b06b56ce6505cf7e94d77f",
-  measurementId: "G-4B1TVWCFQ9"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
