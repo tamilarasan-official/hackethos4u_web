@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,7 +9,11 @@ import { useData } from "@/contexts/DataContext";
 import { useAuth } from "@/contexts/AuthContext";
 import PasswordChangeDialog from "@/components/PasswordChangeDialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Star, Eye, EyeOff, LogOut, User, Mail, CheckCircle, MessageSquare, UserPlus, ThumbsUp, ThumbsDown } from "lucide-react";
+import {
+  Plus, Edit, Trash2, Star, Eye, EyeOff, LogOut, User,
+  BookOpen, Briefcase, MessageSquare, Image, Users, Mail,
+  CheckCircle, UserPlus, ThumbsUp, ThumbsDown, Menu, X, LayoutDashboard
+} from "lucide-react";
 import type { Course, Service, Review, Banner, ClientLogo, Contact } from "@/lib/store";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
@@ -18,32 +21,24 @@ const Admin = () => {
   const navigate = useNavigate();
   const { currentUser, logout } = useAuth();
   const {
-    courses,
-    addCourse,
-    updateCourse,
-    deleteCourse,
-    services,
-    addService,
-    updateService,
-    deleteService,
-    reviews,
-    addReview,
-    updateReview,
-    deleteReview,
-    banners,
-    addBanner,
-    updateBanner,
-    deleteBanner,
-    clients,
-    addClient,
-    updateClient,
-    deleteClient,
-    contacts,
-    updateContact,
-    deleteContact,
+    courses, addCourse, updateCourse, deleteCourse,
+    services, addService, updateService, deleteService,
+    reviews, addReview, updateReview, deleteReview,
+    banners, addBanner, updateBanner, deleteBanner,
+    clients, addClient, updateClient, deleteClient,
+    contacts, updateContact, deleteContact,
   } = useData();
 
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState<string>("courses");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Refs for scrolling to form sections
+  const courseFormRef = useRef<HTMLDivElement>(null);
+  const serviceFormRef = useRef<HTMLDivElement>(null);
+  const reviewFormRef = useRef<HTMLDivElement>(null);
+  const bannerFormRef = useRef<HTMLDivElement>(null);
+  const clientFormRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = async () => {
     try {
@@ -54,6 +49,11 @@ const Admin = () => {
     }
   };
 
+  // Scroll to form section
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
+    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   // Form states
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [editingService, setEditingService] = useState<Service | null>(null);
@@ -62,126 +62,96 @@ const Admin = () => {
 
   // Course Form
   const [courseForm, setCourseForm] = useState({
-    title: "",
-    description: "",
-    slug: "",
+    title: "", description: "", slug: "",
     category: "live" as "live" | "recording",
     sessionType: "both" as "one-to-one" | "group" | "both",
-    oneToOne: "",
-    groupMin: "",
-    groupMax: "",
-    duration: "",
-    level: "Intermediate" as "Beginner" | "Intermediate" | "Advanced",
-    icon: "Shield",
-    curriculum: "",
-    recordingsCount: "",
-    notes: "",
-    playStoreLink: "",
-    demoVideoUrl: "",
-    isActive: true,
-    demoAvailable: false,
+    oneToOne: "", groupMin: "", groupMax: "",
+    duration: "", level: "Intermediate" as "Beginner" | "Intermediate" | "Advanced",
+    icon: "Shield", curriculum: "", recordingsCount: "",
+    notes: "", playStoreLink: "", demoVideoUrl: "",
+    isActive: true, demoAvailable: false,
   });
 
   // Service Form
   const [serviceForm, setServiceForm] = useState({
-    title: "",
-    description: "",
-    slug: "",
-    icon: "Shield",
-    features: "",
-    details: "",
-    isActive: true,
+    title: "", description: "", slug: "", icon: "Shield",
+    features: "", details: "", isActive: true,
   });
 
   // Review Form
   const [reviewForm, setReviewForm] = useState({
-    name: "",
-    role: "",
-    rating: 5 as 1 | 2 | 3 | 4 | 5,
-    comment: "",
-    isActive: true,
+    name: "", role: "", rating: 5 as 1 | 2 | 3 | 4 | 5,
+    comment: "", date: new Date().toISOString().split('T')[0],
+    avatar: "", isActive: true,
   });
 
   // Banner Form
   const [bannerForm, setBannerForm] = useState({
-    title: "",
-    subtitle: "",
-    image: "",
-    countdownDate: "",
-    ctaText: "",
-    ctaLink: "",
-    isActive: true,
-    hasCountdown: false,
+    title: "", subtitle: "", image: "", ctaText: "",
+    ctaLink: "", countdownEndDate: "", isActive: true,
   });
 
-  // Client Logo Form
+  // Client Form
   const [clientForm, setClientForm] = useState({
-    name: "",
-    logo: "",
+    name: "", logo: "", website: "", isActive: true,
   });
 
-  const [editingClient, setEditingClient] = useState<ClientLogo | null>(null);
+  // Sidebar navigation items
+  const navigationItems = [
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { id: "courses", label: "Courses", icon: BookOpen },
+    { id: "services", label: "Services", icon: Briefcase },
+    { id: "reviews", label: "Reviews", icon: MessageSquare },
+    { id: "banners", label: "Banners", icon: Image },
+    { id: "clients", label: "Clients", icon: Users },
+    { id: "contacts", label: "Contacts", icon: Mail },
+  ];
 
-  // Convert to Review Dialog State
-  const [convertingContact, setConvertingContact] = useState<Contact | null>(null);
-  const [convertDialogOpen, setConvertDialogOpen] = useState(false);
-  const [convertReviewForm, setConvertReviewForm] = useState({
-    name: "",
-    role: "",
-    rating: 5 as 1 | 2 | 3 | 4 | 5,
-    comment: "",
-  });
-
-  // ============ COURSE CRUD ============
+  // Course Handlers
   const handleSaveCourse = async () => {
-    if (!courseForm.title || !courseForm.slug) {
-      toast({ title: "Error", description: "Title and slug are required", variant: "destructive" });
-      return;
-    }
-
-    const courseData: any = {
-      title: courseForm.title,
-      description: courseForm.description,
-      slug: courseForm.slug,
-      category: courseForm.category,
-      duration: courseForm.duration,
-      level: courseForm.level,
-      gradient: "from-primary via-accent to-primary",
-      icon: courseForm.icon,
-      curriculum: courseForm.curriculum ? courseForm.curriculum.split("\n").filter(Boolean) : [],
-      isActive: courseForm.isActive,
-      demoAvailable: courseForm.demoAvailable,
-    };
-
-    // Add pricing for live courses
-    if (courseForm.category === "live") {
-      if (courseForm.sessionType) courseData.sessionType = courseForm.sessionType;
-      const pricing: any = {};
-      if (courseForm.oneToOne) pricing.oneToOne = parseInt(courseForm.oneToOne);
-      if (courseForm.groupMin) pricing.groupMin = parseInt(courseForm.groupMin);
-      if (courseForm.groupMax) pricing.groupMax = parseInt(courseForm.groupMax);
-      if (Object.keys(pricing).length > 0) courseData.pricing = pricing;
-    }
-
-    // Add recording course fields
-    if (courseForm.category === "recording") {
-      if (courseForm.recordingsCount) courseData.recordingsCount = parseInt(courseForm.recordingsCount);
-      if (courseForm.playStoreLink) courseData.playStoreLink = courseForm.playStoreLink;
-    }
-
-    // Add optional fields only if they have values
-    if (courseForm.notes) courseData.notes = courseForm.notes;
-    if (courseForm.demoVideoUrl) courseData.demoVideoUrl = courseForm.demoVideoUrl;
-
     try {
+      const courseData: any = {
+        title: courseForm.title,
+        slug: courseForm.slug,
+        description: courseForm.description,
+        category: courseForm.category,
+        level: courseForm.level,
+        duration: courseForm.duration,
+        icon: courseForm.icon,
+        curriculum: courseForm.curriculum.split('\n').filter(Boolean),
+        notes: courseForm.notes.split('\n').filter(Boolean),
+        isActive: courseForm.isActive,
+        demoAvailable: courseForm.demoAvailable,
+        demoVideoUrl: courseForm.demoVideoUrl || undefined,
+      };
+
+      if (courseForm.category === 'live') {
+        courseData.sessionType = courseForm.sessionType;
+        courseData.pricing = {
+          oneToOne: courseForm.oneToOne ? parseInt(courseForm.oneToOne) : undefined,
+          groupMin: courseForm.groupMin ? parseInt(courseForm.groupMin) : undefined,
+          groupMax: courseForm.groupMax ? parseInt(courseForm.groupMax) : undefined,
+        };
+      } else {
+        courseData.recordingsCount = courseForm.recordingsCount ? parseInt(courseForm.recordingsCount) : undefined;
+        courseData.playStoreLink = courseForm.playStoreLink || undefined;
+      }
+
       if (editingCourse) {
         await updateCourse(editingCourse.id, courseData);
+        setEditingCourse(null);
       } else {
         await addCourse(courseData);
       }
-      resetCourseForm();
+
+      setCourseForm({
+        title: "", description: "", slug: "", category: "live", sessionType: "both",
+        oneToOne: "", groupMin: "", groupMax: "", duration: "", level: "Intermediate",
+        icon: "Shield", curriculum: "", recordingsCount: "", notes: "", playStoreLink: "",
+        demoVideoUrl: "", isActive: true, demoAvailable: false,
+      });
     } catch (error) {
-      console.error('Error saving course:', error);
+      console.error("Error saving course:", error);
     }
   };
 
@@ -199,9 +169,9 @@ const Admin = () => {
       duration: course.duration,
       level: course.level,
       icon: course.icon,
-      curriculum: course.curriculum?.join("\n") || "",
+      curriculum: Array.isArray(course.curriculum) ? course.curriculum.join('\n') : (course.curriculum || ""),
       recordingsCount: course.recordingsCount?.toString() || "",
-      notes: course.notes || "",
+      notes: Array.isArray(course.notes) ? course.notes.join('\n') : (course.notes || ""),
       playStoreLink: course.playStoreLink || "",
       demoVideoUrl: course.demoVideoUrl || "",
       isActive: course.isActive,
@@ -210,66 +180,37 @@ const Admin = () => {
   };
 
   const handleDeleteCourse = async (id: string) => {
-    if (confirm("Are you sure you want to delete this course?")) {
-      try {
-        await deleteCourse(id);
-      } catch (error) {
-        console.error('Error deleting course:', error);
-      }
+    if (confirm('Are you sure you want to delete this course?')) {
+      await deleteCourse(id);
     }
   };
 
-  const resetCourseForm = () => {
-    setEditingCourse(null);
-    setCourseForm({
-      title: "",
-      description: "",
-      slug: "",
-      category: "live",
-      sessionType: "both",
-      oneToOne: "",
-      groupMin: "",
-      groupMax: "",
-      duration: "",
-      level: "Intermediate",
-      icon: "Shield",
-      curriculum: "",
-      recordingsCount: "",
-      notes: "",
-      playStoreLink: "",
-      demoVideoUrl: "",
-      isActive: true,
-      demoAvailable: false,
-    });
-  };
-
-  // ============ SERVICE CRUD ============
+  // Service Handlers
   const handleSaveService = async () => {
-    if (!serviceForm.title || !serviceForm.slug) {
-      toast({ title: "Error", description: "Title and slug are required", variant: "destructive" });
-      return;
-    }
-
-    const serviceData = {
-      title: serviceForm.title,
-      description: serviceForm.description,
-      slug: serviceForm.slug,
-      icon: serviceForm.icon,
-      gradient: "from-primary via-accent to-primary",
-      features: serviceForm.features.split("\n").filter(Boolean),
-      details: serviceForm.details || undefined,
-      isActive: serviceForm.isActive,
-    };
-
     try {
+      const serviceData: any = {
+        title: serviceForm.title,
+        slug: serviceForm.slug,
+        description: serviceForm.description,
+        icon: serviceForm.icon,
+        features: serviceForm.features.split('\n').filter(Boolean),
+        details: serviceForm.details.split('\n').filter(Boolean),
+        isActive: serviceForm.isActive,
+      };
+
       if (editingService) {
         await updateService(editingService.id, serviceData);
+        setEditingService(null);
       } else {
         await addService(serviceData);
       }
-      resetServiceForm();
+
+      setServiceForm({
+        title: "", description: "", slug: "", icon: "Shield",
+        features: "", details: "", isActive: true,
+      });
     } catch (error) {
-      console.error('Error saving service:', error);
+      console.error("Error saving service:", error);
     }
   };
 
@@ -280,60 +221,45 @@ const Admin = () => {
       description: service.description,
       slug: service.slug,
       icon: service.icon,
-      features: service.features.join("\n"),
-      details: service.details || "",
+      features: Array.isArray(service.features) ? service.features.join('\n') : (service.features || ""),
+      details: Array.isArray(service.details) ? service.details.join('\n') : (service.details || ""),
       isActive: service.isActive,
     });
   };
 
   const handleDeleteService = async (id: string) => {
-    if (confirm("Are you sure you want to delete this service?")) {
-      try {
-        await deleteService(id);
-      } catch (error) {
-        console.error('Error deleting service:', error);
-      }
+    if (confirm('Are you sure you want to delete this service?')) {
+      await deleteService(id);
     }
   };
 
-  const resetServiceForm = () => {
-    setEditingService(null);
-    setServiceForm({
-      title: "",
-      description: "",
-      slug: "",
-      icon: "Shield",
-      features: "",
-      details: "",
-      isActive: true,
-    });
-  };
-
-  // ============ REVIEW CRUD ============
+  // Review Handlers
   const handleSaveReview = async () => {
-    if (!reviewForm.name || !reviewForm.comment) {
-      toast({ title: "Error", description: "Name and comment are required", variant: "destructive" });
-      return;
-    }
-
-    const reviewData = {
-      name: reviewForm.name,
-      role: reviewForm.role,
-      rating: reviewForm.rating,
-      comment: reviewForm.comment,
-      date: editingReview?.date || new Date().toISOString(),
-      isActive: reviewForm.isActive,
-    };
-
     try {
+      const reviewData: any = {
+        name: reviewForm.name,
+        role: reviewForm.role,
+        rating: reviewForm.rating,
+        comment: reviewForm.comment,
+        date: reviewForm.date,
+        avatar: reviewForm.avatar,
+        isActive: reviewForm.isActive,
+      };
+
       if (editingReview) {
         await updateReview(editingReview.id, reviewData);
+        setEditingReview(null);
       } else {
         await addReview(reviewData);
       }
-      resetReviewForm();
+
+      setReviewForm({
+        name: "", role: "", rating: 5, comment: "",
+        date: new Date().toISOString().split('T')[0],
+        avatar: "", isActive: true,
+      });
     } catch (error) {
-      console.error('Error saving review:', error);
+      console.error("Error saving review:", error);
     }
   };
 
@@ -344,80 +270,49 @@ const Admin = () => {
       role: review.role,
       rating: review.rating,
       comment: review.comment,
+      date: review.date,
+      avatar: review.avatar || "",
       isActive: review.isActive,
     });
   };
 
   const handleDeleteReview = async (id: string) => {
-    if (confirm("Are you sure you want to delete this review?")) {
-      try {
-        await deleteReview(id);
-      } catch (error) {
-        console.error('Error deleting review:', error);
-      }
+    if (confirm('Are you sure you want to delete this review?')) {
+      await deleteReview(id);
     }
   };
 
-  const resetReviewForm = () => {
-    setEditingReview(null);
-    setReviewForm({
-      name: "",
-      role: "",
-      rating: 5,
-      comment: "",
-      isActive: true,
-    });
-  };
-
-  const handleApproveReview = async (id: string) => {
-    try {
-      await updateReview(id, { isActive: true });
-    } catch (error) {
-      console.error('Error approving review:', error);
-    }
-  };
-
-  const handleRejectReview = async (id: string) => {
-    if (confirm("Are you sure you want to reject this review? It will be marked as inactive.")) {
-      try {
-        await updateReview(id, { isActive: false });
-      } catch (error) {
-        console.error('Error rejecting review:', error);
-      }
-    }
-  };
-
-  // ============ BANNER CRUD ============
+  // Banner Handlers
   const handleSaveBanner = async () => {
-    if (!bannerForm.title) {
-      toast({ title: "Error", description: "Title is required", variant: "destructive" });
-      return;
-    }
-
-    const bannerData: any = {
-      title: bannerForm.title,
-      subtitle: bannerForm.subtitle,
-      image: bannerForm.image,
-      isActive: bannerForm.isActive,
-      order: editingBanner?.order || banners.length + 1,
-    };
-
-    // Add optional fields only if they have values (NO undefined)
-    if (bannerForm.hasCountdown && bannerForm.countdownDate) {
-      bannerData.countdown = { endDate: bannerForm.countdownDate };
-    }
-    if (bannerForm.ctaText) bannerData.ctaText = bannerForm.ctaText;
-    if (bannerForm.ctaLink) bannerData.ctaLink = bannerForm.ctaLink;
-
     try {
+      const bannerData: any = {
+        title: bannerForm.title,
+        subtitle: bannerForm.subtitle,
+        image: bannerForm.image,
+        ctaText: bannerForm.ctaText,
+        ctaLink: bannerForm.ctaLink,
+        isActive: bannerForm.isActive,
+      };
+
+      if (bannerForm.countdownEndDate) {
+        bannerData.countdown = {
+          endDate: new Date(bannerForm.countdownEndDate).toISOString(),
+        };
+      }
+
       if (editingBanner) {
         await updateBanner(editingBanner.id, bannerData);
+        setEditingBanner(null);
       } else {
         await addBanner(bannerData);
       }
-      resetBannerForm();
+
+      setBannerForm({
+        title: "", subtitle: "", image: "", ctaText: "",
+        ctaLink: "", countdownEndDate: "", isActive: true,
+      });
     } catch (error) {
-      console.error('Error saving banner:', error);
+      console.error("Error saving banner:", error);
     }
   };
 
@@ -427,223 +322,124 @@ const Admin = () => {
       title: banner.title,
       subtitle: banner.subtitle,
       image: banner.image,
-      countdownDate: banner.countdown?.endDate || "",
       ctaText: banner.ctaText || "",
       ctaLink: banner.ctaLink || "",
+      countdownEndDate: banner.countdown?.endDate ? new Date(banner.countdown.endDate).toISOString().split('T')[0] : "",
       isActive: banner.isActive,
-      hasCountdown: !!banner.countdown?.endDate,
     });
   };
 
   const handleDeleteBanner = async (id: string) => {
-    if (confirm("Are you sure you want to delete this banner?")) {
-      try {
-        await deleteBanner(id);
-      } catch (error) {
-        console.error('Error deleting banner:', error);
-      }
+    if (confirm('Are you sure you want to delete this banner?')) {
+      await deleteBanner(id);
     }
   };
 
-  const resetBannerForm = () => {
-    setEditingBanner(null);
-    setBannerForm({
-      title: "",
-      subtitle: "",
-      image: "",
-      countdownDate: "",
-      ctaText: "",
-      ctaLink: "",
-      isActive: true,
-      hasCountdown: false,
-    });
-  };
-
-  // ============ FILE UPLOAD HELPER ============
-  const handleFileUpload = (file: File, callback: (base64: string) => void) => {
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast({ title: "Error", description: "Please select an image file", variant: "destructive" });
-      return;
-    }
-
-    if (file.size > 2 * 1024 * 1024) { // 2MB limit
-      toast({ title: "Error", description: "Image size must be less than 2MB", variant: "destructive" });
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      callback(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  // ============ CLIENT CRUD ============
+  // Client Handlers
   const handleSaveClient = async () => {
-    if (!clientForm.name || !clientForm.logo) {
-      toast({ title: "Error", description: "Name and logo are required", variant: "destructive" });
-      return;
-    }
-
-    const clientData = {
-      name: clientForm.name,
-      logo: clientForm.logo,
-    };
-
     try {
-      if (editingClient) {
-        await updateClient(editingClient.id, clientData);
-      } else {
-        await addClient(clientData);
-      }
-      resetClientForm();
-    } catch (error) {
-      console.error('Error saving client:', error);
-    }
-  };
+      const clientData: any = {
+        name: clientForm.name,
+        logo: clientForm.logo,
+        website: clientForm.website,
+        isActive: clientForm.isActive,
+      };
 
-  const handleEditClient = (client: ClientLogo) => {
-    setEditingClient(client);
-    setClientForm({
-      name: client.name,
-      logo: client.logo,
-    });
+      await addClient(clientData);
+      setClientForm({ name: "", logo: "", website: "", isActive: true });
+    } catch (error) {
+      console.error("Error saving client:", error);
+    }
   };
 
   const handleDeleteClient = async (id: string) => {
-    if (confirm("Are you sure you want to delete this client?")) {
-      try {
-        await deleteClient(id);
-      } catch (error) {
-        console.error('Error deleting client:', error);
-      }
+    if (confirm('Are you sure you want to delete this client?')) {
+      await deleteClient(id);
     }
   };
 
-  const resetClientForm = () => {
-    setEditingClient(null);
-    setClientForm({
-      name: "",
-      logo: "",
-    });
-  };
-
-  // ============ CONTACT CRUD ============
-  const handleMarkAsRead = async (id: string) => {
-    try {
-      await updateContact(id, { status: 'read' });
-    } catch (error) {
-      console.error('Error marking contact as read:', error);
-    }
-  };
-
-  const handleMarkAsReplied = async (id: string) => {
-    try {
-      await updateContact(id, { status: 'replied' });
-    } catch (error) {
-      console.error('Error marking contact as replied:', error);
-    }
+  // Contact Handlers
+  const handleUpdateContactStatus = async (id: string, status: Contact['status']) => {
+    await updateContact(id, { status });
   };
 
   const handleDeleteContact = async (id: string) => {
-    if (confirm("Are you sure you want to delete this contact?")) {
-      try {
-        await deleteContact(id);
-      } catch (error) {
-        console.error('Error deleting contact:', error);
-      }
+    if (confirm('Are you sure you want to delete this contact?')) {
+      await deleteContact(id);
     }
   };
 
-  const handleOpenConvertDialog = (contact: Contact) => {
-    setConvertingContact(contact);
-    setConvertReviewForm({
-      name: contact.name,
-      role: "",
-      rating: 5,
-      comment: contact.message,
-    });
-    setConvertDialogOpen(true);
-  };
-
-  const handleConvertToReview = async () => {
-    if (!convertingContact || !convertReviewForm.name || !convertReviewForm.comment) {
-      toast({ title: "Error", description: "Name and comment are required", variant: "destructive" });
-      return;
-    }
-
+  const handleConvertToReview = async (contact: Contact, rating: number) => {
     try {
-      // Create the review
       await addReview({
-        name: convertReviewForm.name,
-        role: convertReviewForm.role,
-        rating: convertReviewForm.rating,
-        comment: convertReviewForm.comment,
-        date: new Date().toISOString(),
+        name: contact.name,
+        role: "Customer",
+        rating: rating as 1 | 2 | 3 | 4 | 5,
+        comment: contact.message,
+        date: contact.date,
+        avatar: "",
         isActive: true,
       });
-
-      // Mark contact as converted
-      await updateContact(convertingContact.id, { status: 'converted' });
-
-      // Close dialog and reset
-      setConvertDialogOpen(false);
-      setConvertingContact(null);
-      setConvertReviewForm({
-        name: "",
-        role: "",
-        rating: 5,
-        comment: "",
-      });
-
+      await updateContact(contact.id, { status: 'converted' });
       toast({ title: "Success", description: "Contact converted to review successfully!" });
     } catch (error) {
-      console.error('Error converting contact to review:', error);
-      toast({ title: "Error", description: "Failed to convert contact to review", variant: "destructive" });
-    }
-  };
-
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case 'new': return 'default';
-      case 'read': return 'secondary';
-      case 'replied': return 'outline';
-      case 'converted': return 'default';
-      default: return 'secondary';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'new': return 'text-blue-500';
-      case 'read': return 'text-yellow-500';
-      case 'replied': return 'text-green-500';
-      case 'converted': return 'text-purple-500';
-      default: return 'text-gray-500';
+      console.error("Error converting to review:", error);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Admin Header Bar */}
-      <div className="fixed top-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-b border-white/10 z-40">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <User className="w-5 h-5 text-primary" />
-              <span className="text-sm text-muted-foreground">
-                Logged in as: <span className="text-white font-medium">{currentUser?.email}</span>
-              </span>
+    <div className="min-h-screen bg-background flex">
+      {/* Sidebar */}
+      <aside className={`fixed lg:sticky top-0 left-0 h-screen bg-card border-r border-white/10 z-50 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} w-64`}>
+        <div className="flex flex-col h-full">
+          {/* Logo */}
+          <div className="p-6 border-b border-white/10">
+            <h2 className="text-xl font-bold text-white">Admin Panel</h2>
+            <p className="text-xs text-muted-foreground mt-1">Content Management</p>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 p-4 overflow-y-auto">
+            <div className="space-y-1">
+              {navigationItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveTab(item.id);
+                      setSidebarOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                      activeTab === item.id
+                        ? 'bg-primary text-black font-semibold'
+                        : 'text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
             </div>
-            <div className="flex items-center gap-3">
+          </nav>
+
+          {/* User Section */}
+          <div className="p-4 border-t border-white/10">
+            <div className="flex items-center gap-3 mb-3 p-2">
+              <User className="w-8 h-8 text-primary" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">Logged in as</p>
+                <p className="text-sm text-white font-medium truncate">{currentUser?.email}</p>
+              </div>
+            </div>
+            <div className="space-y-2">
               <PasswordChangeDialog />
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleLogout}
-                className="border-white/10 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20"
+                className="w-full border-white/10 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
@@ -651,856 +447,1020 @@ const Admin = () => {
             </div>
           </div>
         </div>
-      </div>
+      </aside>
 
-      <div className="pt-20">
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <div className="max-w-7xl mx-auto">
-            <h1 className="text-4xl font-bold mb-8">Content Management System</h1>
+      {/* Overlay for mobile */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-            <Tabs defaultValue="courses" className="w-full">
-              <TabsList className="grid w-full grid-cols-6 mb-8">
-                <TabsTrigger value="courses">Courses</TabsTrigger>
-                <TabsTrigger value="services">Services</TabsTrigger>
-                <TabsTrigger value="reviews">Reviews</TabsTrigger>
-                <TabsTrigger value="banners">Banners</TabsTrigger>
-                <TabsTrigger value="clients">Clients</TabsTrigger>
-                <TabsTrigger value="contacts">Contacts</TabsTrigger>
-              </TabsList>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-h-screen">
+        {/* Top Bar */}
+        <header className="sticky top-0 bg-card/95 backdrop-blur-sm border-b border-white/10 z-30 px-4 sm:px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="lg:hidden"
+              >
+                {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </Button>
+              <h1 className="text-xl sm:text-2xl font-bold text-white">
+                {navigationItems.find(item => item.id === activeTab)?.label || 'Dashboard'}
+              </h1>
+            </div>
+          </div>
+        </header>
 
-              {/* ============ COURSES TAB ============ */}
-              <TabsContent value="courses" className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold">Manage Courses</h2>
-                  <Button onClick={() => resetCourseForm()} className="rounded-full">
+        {/* Content Area */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+          {/* Dashboard Tab */}
+          {activeTab === 'dashboard' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <Card className="p-6 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-blue-500/20">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-muted-foreground text-sm">Total Courses</p>
+                    <h3 className="text-3xl font-bold text-white mt-1">{courses.length}</h3>
+                  </div>
+                  <BookOpen className="w-12 h-12 text-blue-500" />
+                </div>
+              </Card>
+
+              <Card className="p-6 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/20">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-muted-foreground text-sm">Total Services</p>
+                    <h3 className="text-3xl font-bold text-white mt-1">{services.length}</h3>
+                  </div>
+                  <Briefcase className="w-12 h-12 text-purple-500" />
+                </div>
+              </Card>
+
+              <Card className="p-6 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/20">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-muted-foreground text-sm">Total Reviews</p>
+                    <h3 className="text-3xl font-bold text-white mt-1">{reviews.length}</h3>
+                  </div>
+                  <MessageSquare className="w-12 h-12 text-green-500" />
+                </div>
+              </Card>
+
+              <Card className="p-6 bg-gradient-to-br from-orange-500/10 to-red-500/10 border-orange-500/20">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-muted-foreground text-sm">Total Banners</p>
+                    <h3 className="text-3xl font-bold text-white mt-1">{banners.length}</h3>
+                  </div>
+                  <Image className="w-12 h-12 text-orange-500" />
+                </div>
+              </Card>
+
+              <Card className="p-6 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border-cyan-500/20">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-muted-foreground text-sm">Total Clients</p>
+                    <h3 className="text-3xl font-bold text-white mt-1">{clients.length}</h3>
+                  </div>
+                  <Users className="w-12 h-12 text-cyan-500" />
+                </div>
+              </Card>
+
+              <Card className="p-6 bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border-yellow-500/20">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-muted-foreground text-sm">New Contacts</p>
+                    <h3 className="text-3xl font-bold text-white mt-1">
+                      {contacts.filter(c => c.status === 'new').length}
+                    </h3>
+                  </div>
+                  <Mail className="w-12 h-12 text-yellow-500" />
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* Courses Tab */}
+          {activeTab === 'courses' && (
+            <div className="space-y-6">
+              {/* Course List */}
+              <Card className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-white">Manage Courses</h2>
+                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-black hover:text-black" onClick={() => scrollToSection(courseFormRef)}>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Course
                   </Button>
                 </div>
 
-                {/* Course List */}
-                <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-4">
                   {courses.map((course) => (
-                    <Card key={course.id} className="p-6">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-xl font-bold">{course.title}</h3>
-                            <Badge variant={course.isActive ? "default" : "secondary"}>
-                              {course.isActive ? <Eye className="w-3 h-3 mr-1" /> : <EyeOff className="w-3 h-3 mr-1" />}
-                              {course.isActive ? "Active" : "Inactive"}
-                            </Badge>
-                            <Badge>{course.category}</Badge>
-                            <Badge variant="outline">{course.level}</Badge>
-                          </div>
-                          <p className="text-muted-foreground mb-4">{course.description}</p>
-                          <div className="flex gap-4 text-sm text-muted-foreground">
-                            <span>Duration: {course.duration}</span>
-                            {course.pricing?.oneToOne && <span>1-on-1: ₹{course.pricing.oneToOne.toLocaleString()}</span>}
-                            {course.pricing?.groupMin && <span>Group: ₹{course.pricing.groupMin.toLocaleString()} - ₹{course.pricing.groupMax?.toLocaleString()}</span>}
-                            {course.recordingsCount && <span>Recordings: {course.recordingsCount}</span>}
-                            {course.playStoreLink && <span>📱 Play Store Available</span>}
+                    <Card key={course.id} className="p-4 sm:p-6 bg-white/5 border-white/10">
+                      <div className="space-y-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <h3 className="text-base sm:text-lg font-semibold text-white flex-1">{course.title}</h3>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditCourse(course)}
+                              className="border-white/10 hover:bg-white/5 text-white hover:text-white px-3 py-2"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeleteCourse(course.id)}
+                              className="border-red-500/20 hover:bg-red-500/10 text-red-500 px-3 py-2"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
                         </div>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="rounded-full" onClick={() => handleEditCourse(course)}>
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button variant="outline" size="sm" className="rounded-full text-destructive" onClick={() => handleDeleteCourse(course.id)}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant={course.isActive ? "default" : "secondary"} className="text-xs">
+                            {course.isActive ? (
+                              <><Eye className="w-3 h-3 mr-1" /> Active</>
+                            ) : (
+                              <><EyeOff className="w-3 h-3 mr-1" /> Inactive</>
+                            )}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">{course.category}</Badge>
+                          <Badge variant="outline" className="text-xs">{course.level}</Badge>
+                        </div>
+
+                        <p className="text-sm text-muted-foreground line-clamp-3">{course.description}</p>
+
+                        <div className="flex flex-col gap-2 text-xs text-muted-foreground">
+                          <span className="font-medium">Duration: {course.duration}</span>
+                          {course.pricing && (
+                            <div className="space-y-1">
+                              <span className="block">1-on-1: ₹{course.pricing.oneToOne?.toLocaleString()}</span>
+                              <span className="block">Group: ₹{course.pricing.groupMin?.toLocaleString()} - ₹{course.pricing.groupMax?.toLocaleString()}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </Card>
                   ))}
                 </div>
+              </Card>
 
-                {/* Course Form */}
-                <Card className="p-6 mt-6">
-                  <h3 className="text-xl font-bold mb-4">{editingCourse ? "Edit Course" : "Add New Course"}</h3>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Course Title *</label>
-                        <Input value={courseForm.title} onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })} placeholder="Ethical Hacking" className="bg-white/5 border-white/10 text-white" />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Slug *</label>
-                        <Input value={courseForm.slug} onChange={(e) => setCourseForm({ ...courseForm, slug: e.target.value })} placeholder="ethical-hacking" className="bg-white/5 border-white/10 text-white" />
-                      </div>
+              {/* Course Form */}
+              <Card className="p-4 sm:p-6" ref={courseFormRef}>
+                <h3 className="text-lg font-bold text-white mb-6">
+                  {editingCourse ? 'Edit Course' : 'Add New Course'}
+                </h3>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-white mb-2 block">Course Title *</label>
+                      <Input
+                        value={courseForm.title}
+                        onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })}
+                        placeholder="Ethical Hacking"
+                        className="bg-white/5 border-white/10 text-white h-12 text-base"
+                      />
                     </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Description</label>
-                      <Textarea value={courseForm.description} onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })} rows={3} className="bg-white/5 border-white/10 text-white" />
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Category</label>
-                        <select className="w-full px-4 py-2 rounded-lg border bg-white/5 border-white/10 text-white" value={courseForm.category} onChange={(e) => setCourseForm({ ...courseForm, category: e.target.value as "live" | "recording" })}>
-                          <option value="live" className="bg-gray-900 text-white">Live</option>
-                          <option value="recording" className="bg-gray-900 text-white">Recording</option>
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Level</label>
-                        <select className="w-full px-4 py-2 rounded-lg border bg-white/5 border-white/10 text-white" value={courseForm.level} onChange={(e) => setCourseForm({ ...courseForm, level: e.target.value as "Beginner" | "Intermediate" | "Advanced" })}>
-                          <option value="Beginner" className="bg-gray-900 text-white">Beginner</option>
-                          <option value="Intermediate" className="bg-gray-900 text-white">Intermediate</option>
-                          <option value="Advanced" className="bg-gray-900 text-white">Advanced</option>
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Duration</label>
-                        <Input value={courseForm.duration} onChange={(e) => setCourseForm({ ...courseForm, duration: e.target.value })} placeholder="6 months" className="bg-white/5 border-white/10 text-white" />
-                      </div>
-                    </div>
-
-                    {courseForm.category === "live" && (
-                      <>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium">Session Type</label>
-                          <select className="w-full px-4 py-2 rounded-lg border bg-white/5 border-white/10 text-white" value={courseForm.sessionType} onChange={(e) => setCourseForm({ ...courseForm, sessionType: e.target.value as "one-to-one" | "group" | "both" })}>
-                            <option value="one-to-one" className="bg-gray-900 text-white">One-to-One</option>
-                            <option value="group" className="bg-gray-900 text-white">Group</option>
-                            <option value="both" className="bg-gray-900 text-white">Both</option>
-                          </select>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium">One-to-One Price</label>
-                            <Input type="number" value={courseForm.oneToOne} onChange={(e) => setCourseForm({ ...courseForm, oneToOne: e.target.value })} placeholder="40000" className="bg-white/5 border-white/10 text-white" />
-                          </div>
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium">Group Min Price</label>
-                            <Input type="number" value={courseForm.groupMin} onChange={(e) => setCourseForm({ ...courseForm, groupMin: e.target.value })} placeholder="15000" className="bg-white/5 border-white/10 text-white" />
-                          </div>
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium">Group Max Price</label>
-                            <Input type="number" value={courseForm.groupMax} onChange={(e) => setCourseForm({ ...courseForm, groupMax: e.target.value })} placeholder="20000" className="bg-white/5 border-white/10 text-white" />
-                          </div>
-                        </div>
-                      </>
-                    )}
-
-                    {courseForm.category === "recording" && (
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium">Recordings Count</label>
-                          <Input type="number" value={courseForm.recordingsCount} onChange={(e) => setCourseForm({ ...courseForm, recordingsCount: e.target.value })} placeholder="150" className="bg-white/5 border-white/10 text-white" />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium">Play Store Link</label>
-                          <Input value={courseForm.playStoreLink} onChange={(e) => setCourseForm({ ...courseForm, playStoreLink: e.target.value })} placeholder="https://play.google.com/..." className="bg-white/5 border-white/10 text-white" />
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Curriculum (one per line)</label>
-                      <Textarea value={courseForm.curriculum} onChange={(e) => setCourseForm({ ...courseForm, curriculum: e.target.value })} rows={5} placeholder="Introduction to Hacking&#10;Network Security&#10;Web Security" className="bg-white/5 border-white/10 text-white" />
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Notes</label>
-                      <Textarea value={courseForm.notes} onChange={(e) => setCourseForm({ ...courseForm, notes: e.target.value })} rows={3} className="bg-white/5 border-white/10 text-white" />
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Demo Video URL (YouTube)</label>
-                      <Input value={courseForm.demoVideoUrl} onChange={(e) => setCourseForm({ ...courseForm, demoVideoUrl: e.target.value })} placeholder="https://www.youtube.com/watch?v=..." className="bg-white/5 border-white/10 text-white" />
-                      <p className="text-xs text-muted-foreground">Enter a YouTube video URL to display as a demo video on the course page</p>
-                    </div>
-
-                    <div className="flex items-center gap-6">
-                      <label className="flex items-center gap-2">
-                        <input type="checkbox" checked={courseForm.isActive} onChange={(e) => setCourseForm({ ...courseForm, isActive: e.target.checked })} />
-                        <span className="text-sm font-medium">Active</span>
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <input type="checkbox" checked={courseForm.demoAvailable} onChange={(e) => setCourseForm({ ...courseForm, demoAvailable: e.target.checked })} />
-                        <span className="text-sm font-medium">Demo Available</span>
-                      </label>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button onClick={handleSaveCourse} className="rounded-full">
-                        {editingCourse ? "Update Course" : "Save Course"}
-                      </Button>
-                      {editingCourse && (
-                        <Button onClick={resetCourseForm} variant="outline" className="rounded-full">
-                          Cancel
-                        </Button>
-                      )}
+                    <div>
+                      <label className="text-sm font-medium text-white mb-2 block">Slug *</label>
+                      <Input
+                        value={courseForm.slug}
+                        onChange={(e) => setCourseForm({ ...courseForm, slug: e.target.value })}
+                        placeholder="ethical-hacking"
+                        className="bg-white/5 border-white/10 text-white h-12 text-base"
+                      />
                     </div>
                   </div>
-                </Card>
-              </TabsContent>
 
-              {/* ============ SERVICES TAB ============ */}
-              <TabsContent value="services" className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold">Manage Services</h2>
-                  <Button onClick={() => resetServiceForm()} className="rounded-full">
+                  <div>
+                    <label className="text-sm font-medium text-white mb-2 block">Description</label>
+                    <Textarea
+                      value={courseForm.description}
+                      onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
+                      className="bg-white/5 border-white/10 text-white"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-white mb-2 block">Category</label>
+                      <select
+                        value={courseForm.category}
+                        onChange={(e) => setCourseForm({ ...courseForm, category: e.target.value as "live" | "recording" })}
+                        className="w-full px-4 py-3 rounded-lg border bg-white/5 border-white/10 text-white text-base h-12"
+                      >
+                        <option value="live" className="bg-gray-900 text-white">Live</option>
+                        <option value="recording" className="bg-gray-900 text-white">Recording</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-white mb-2 block">Level</label>
+                      <select
+                        value={courseForm.level}
+                        onChange={(e) => setCourseForm({ ...courseForm, level: e.target.value as any })}
+                        className="w-full px-4 py-3 rounded-lg border bg-white/5 border-white/10 text-white text-base h-12"
+                      >
+                        <option value="Beginner" className="bg-gray-900 text-white">Beginner</option>
+                        <option value="Intermediate" className="bg-gray-900 text-white">Intermediate</option>
+                        <option value="Advanced" className="bg-gray-900 text-white">Advanced</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-white mb-2 block">Duration</label>
+                      <Input
+                        value={courseForm.duration}
+                        onChange={(e) => setCourseForm({ ...courseForm, duration: e.target.value })}
+                        placeholder="6 months"
+                        className="bg-white/5 border-white/10 text-white h-12 text-base"
+                      />
+                    </div>
+                  </div>
+
+                  {courseForm.category === 'live' && (
+                    <>
+                      <div>
+                        <label className="text-sm font-medium text-white mb-2 block">Session Type</label>
+                        <select
+                          value={courseForm.sessionType}
+                          onChange={(e) => setCourseForm({ ...courseForm, sessionType: e.target.value as any })}
+                          className="w-full px-4 py-3 rounded-lg border bg-white/5 border-white/10 text-white text-base h-12"
+                        >
+                          <option value="one-to-one" className="bg-gray-900 text-white">One-to-One</option>
+                          <option value="group" className="bg-gray-900 text-white">Group</option>
+                          <option value="both" className="bg-gray-900 text-white">Both</option>
+                        </select>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="text-sm font-medium text-white mb-2 block">One-to-One Price</label>
+                          <Input
+                            type="number"
+                            value={courseForm.oneToOne}
+                            onChange={(e) => setCourseForm({ ...courseForm, oneToOne: e.target.value })}
+                            placeholder="40000"
+                            className="bg-white/5 border-white/10 text-white h-12 text-base"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-white mb-2 block">Group Min Price</label>
+                          <Input
+                            type="number"
+                            value={courseForm.groupMin}
+                            onChange={(e) => setCourseForm({ ...courseForm, groupMin: e.target.value })}
+                            placeholder="15000"
+                            className="bg-white/5 border-white/10 text-white h-12 text-base"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-white mb-2 block">Group Max Price</label>
+                          <Input
+                            type="number"
+                            value={courseForm.groupMax}
+                            onChange={(e) => setCourseForm({ ...courseForm, groupMax: e.target.value })}
+                            placeholder="20000"
+                            className="bg-white/5 border-white/10 text-white h-12 text-base"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {courseForm.category === 'recording' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-white mb-2 block">Recordings Count</label>
+                        <Input
+                          type="number"
+                          value={courseForm.recordingsCount}
+                          onChange={(e) => setCourseForm({ ...courseForm, recordingsCount: e.target.value })}
+                          placeholder="150"
+                          className="bg-white/5 border-white/10 text-white h-12 text-base"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-white mb-2 block">Play Store Link</label>
+                        <Input
+                          value={courseForm.playStoreLink}
+                          onChange={(e) => setCourseForm({ ...courseForm, playStoreLink: e.target.value })}
+                          placeholder="https://play.google.com/store/..."
+                          className="bg-white/5 border-white/10 text-white h-12 text-base"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="text-sm font-medium text-white mb-2 block">Curriculum (one per line)</label>
+                    <Textarea
+                      value={courseForm.curriculum}
+                      onChange={(e) => setCourseForm({ ...courseForm, curriculum: e.target.value })}
+                      placeholder="Introduction to Hacking&#10;Network Security&#10;Web Security"
+                      className="bg-white/5 border-white/10 text-white"
+                      rows={4}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-white mb-2 block">Notes</label>
+                    <Textarea
+                      value={courseForm.notes}
+                      onChange={(e) => setCourseForm({ ...courseForm, notes: e.target.value })}
+                      className="bg-white/5 border-white/10 text-white"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-white mb-2 block">Demo Video URL (YouTube)</label>
+                    <Input
+                      value={courseForm.demoVideoUrl}
+                      onChange={(e) => setCourseForm({ ...courseForm, demoVideoUrl: e.target.value })}
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      className="bg-white/5 border-white/10 text-white"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Enter a YouTube video URL to display as a demo video on the course page
+                    </p>
+                  </div>
+
+                  <div className="flex gap-6">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={courseForm.isActive}
+                        onChange={(e) => setCourseForm({ ...courseForm, isActive: e.target.checked })}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm text-white">Active</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={courseForm.demoAvailable}
+                        onChange={(e) => setCourseForm({ ...courseForm, demoAvailable: e.target.checked })}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm text-white">Demo Available</span>
+                    </label>
+                  </div>
+
+                  <Button onClick={handleSaveCourse} className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-black">
+                    {editingCourse ? 'Update Course' : 'Save Course'}
+                  </Button>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* Services Tab */}
+          {activeTab === 'services' && (
+            <div className="space-y-6">
+              {/* Service List */}
+              <Card className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-white">Manage Services</h2>
+                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-black hover:text-black" onClick={() => scrollToSection(serviceFormRef)}>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Service
                   </Button>
                 </div>
 
-                {/* Service List */}
-                <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-4">
                   {services.map((service) => (
-                    <Card key={service.id} className="p-6">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-xl font-bold">{service.title}</h3>
-                            <Badge variant={service.isActive ? "default" : "secondary"}>
-                              {service.isActive ? <Eye className="w-3 h-3 mr-1" /> : <EyeOff className="w-3 h-3 mr-1" />}
-                              {service.isActive ? "Active" : "Inactive"}
-                            </Badge>
+                    <Card key={service.id} className="p-4 sm:p-6 bg-white/5 border-white/10">
+                      <div className="space-y-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <h3 className="text-base sm:text-lg font-semibold text-white flex-1">{service.title}</h3>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditService(service)}
+                              className="border-white/10 hover:bg-white/5 text-white hover:text-white px-3 py-2"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeleteService(service.id)}
+                              className="border-red-500/20 hover:bg-red-500/10 text-red-500 px-3 py-2"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
-                          <p className="text-muted-foreground mb-3">{service.description}</p>
-                          <div className="flex flex-wrap gap-2">
-                            {service.features.map((feature, idx) => (
-                              <Badge key={idx} variant="outline">{feature}</Badge>
+                        </div>
+
+                        <Badge variant={service.isActive ? "default" : "secondary"} className="text-xs w-fit">
+                          {service.isActive ? (
+                            <><Eye className="w-3 h-3 mr-1" /> Active</>
+                          ) : (
+                            <><EyeOff className="w-3 h-3 mr-1" /> Inactive</>
+                          )}
+                        </Badge>
+
+                        <p className="text-sm text-muted-foreground line-clamp-3">{service.description}</p>
+                        {service.features && service.features.length > 0 && (
+                          <p className="text-xs text-muted-foreground font-medium">{service.features.length} features</p>
+                        )}
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </Card>
+
+              {/* Service Form */}
+              <Card className="p-4 sm:p-6" ref={serviceFormRef}>
+                <h3 className="text-lg font-bold text-white mb-6">
+                  {editingService ? 'Edit Service' : 'Add New Service'}
+                </h3>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-white mb-2 block">Service Title *</label>
+                      <Input
+                        value={serviceForm.title}
+                        onChange={(e) => setServiceForm({ ...serviceForm, title: e.target.value })}
+                        placeholder="WPAT Testing"
+                        className="bg-white/5 border-white/10 text-white h-12 text-base"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-white mb-2 block">Slug *</label>
+                      <Input
+                        value={serviceForm.slug}
+                        onChange={(e) => setServiceForm({ ...serviceForm, slug: e.target.value })}
+                        placeholder="wpat-testing"
+                        className="bg-white/5 border-white/10 text-white h-12 text-base"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-white mb-2 block">Description</label>
+                    <Textarea
+                      value={serviceForm.description}
+                      onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })}
+                      className="bg-white/5 border-white/10 text-white"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-white mb-2 block">Icon Name</label>
+                    <Input
+                      value={serviceForm.icon}
+                      onChange={(e) => setServiceForm({ ...serviceForm, icon: e.target.value })}
+                      placeholder="Shield"
+                      className="bg-white/5 border-white/10 text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-white mb-2 block">Features (one per line)</label>
+                    <Textarea
+                      value={serviceForm.features}
+                      onChange={(e) => setServiceForm({ ...serviceForm, features: e.target.value })}
+                      placeholder="Comprehensive security testing&#10;Detailed reports&#10;Expert consultation"
+                      className="bg-white/5 border-white/10 text-white"
+                      rows={4}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-white mb-2 block">Details (one per line)</label>
+                    <Textarea
+                      value={serviceForm.details}
+                      onChange={(e) => setServiceForm({ ...serviceForm, details: e.target.value })}
+                      className="bg-white/5 border-white/10 text-white"
+                      rows={4}
+                    />
+                  </div>
+
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={serviceForm.isActive}
+                      onChange={(e) => setServiceForm({ ...serviceForm, isActive: e.target.checked })}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm text-white">Active</span>
+                  </label>
+
+                  <Button onClick={handleSaveService} className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-black">
+                    {editingService ? 'Update Service' : 'Save Service'}
+                  </Button>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* Reviews Tab */}
+          {activeTab === 'reviews' && (
+            <div className="space-y-6">
+              {/* Review List */}
+              <Card className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-white">Manage Reviews</h2>
+                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-black hover:text-black" onClick={() => scrollToSection(reviewFormRef)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Review
+                  </Button>
+                </div>
+
+                <div className="space-y-4">
+                  {reviews.map((review) => (
+                    <Card key={review.id} className="p-4 sm:p-6 bg-white/5 border-white/10">
+                      <div className="space-y-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1">
+                            <h3 className="text-base sm:text-lg font-semibold text-white mb-1">{review.name}</h3>
+                            <p className="text-sm text-muted-foreground">{review.role}</p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditReview(review)}
+                              className="border-white/10 hover:bg-white/5 text-white hover:text-white px-3 py-2"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeleteReview(review.id)}
+                              className="border-red-500/20 hover:bg-red-500/10 text-red-500 px-3 py-2"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <div className="flex gap-1">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-4 h-4 ${i < review.rating ? 'fill-yellow-500 text-yellow-500' : 'text-gray-500'}`}
+                              />
                             ))}
                           </div>
+                          <Badge variant={review.isActive ? "default" : "secondary"} className="text-xs">
+                            {review.isActive ? (
+                              <><Eye className="w-3 h-3 mr-1" /> Active</>
+                            ) : (
+                              <><EyeOff className="w-3 h-3 mr-1" /> Inactive</>
+                            )}
+                          </Badge>
                         </div>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="rounded-full" onClick={() => handleEditService(service)}>
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button variant="outline" size="sm" className="rounded-full text-destructive" onClick={() => handleDeleteService(service.id)}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
+
+                        <p className="text-sm text-muted-foreground line-clamp-3">{review.comment}</p>
                       </div>
                     </Card>
                   ))}
                 </div>
+              </Card>
 
-                {/* Service Form */}
-                <Card className="p-6 mt-6">
-                  <h3 className="text-xl font-bold mb-4">{editingService ? "Edit Service" : "Add New Service"}</h3>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Service Title *</label>
-                        <Input value={serviceForm.title} onChange={(e) => setServiceForm({ ...serviceForm, title: e.target.value })} placeholder="WPAT Testing" className="bg-white/5 border-white/10 text-white" />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Slug *</label>
-                        <Input value={serviceForm.slug} onChange={(e) => setServiceForm({ ...serviceForm, slug: e.target.value })} placeholder="wpat-testing" className="bg-white/5 border-white/10 text-white" />
-                      </div>
+              {/* Review Form */}
+              <Card className="p-4 sm:p-6" ref={reviewFormRef}>
+                <h3 className="text-lg font-bold text-white mb-6">
+                  {editingReview ? 'Edit Review' : 'Add New Review'}
+                </h3>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-white mb-2 block">Name *</label>
+                      <Input
+                        value={reviewForm.name}
+                        onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
+                        placeholder="John Doe"
+                        className="bg-white/5 border-white/10 text-white h-12 text-base"
+                      />
                     </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Description</label>
-                      <Textarea value={serviceForm.description} onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })} rows={3} className="bg-white/5 border-white/10 text-white" />
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Features (one per line)</label>
-                      <Textarea value={serviceForm.features} onChange={(e) => setServiceForm({ ...serviceForm, features: e.target.value })} rows={4} placeholder="Web Application Testing&#10;Mobile App Testing&#10;OWASP Top 10" className="bg-white/5 border-white/10 text-white" />
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Details</label>
-                      <Textarea value={serviceForm.details} onChange={(e) => setServiceForm({ ...serviceForm, details: e.target.value })} rows={3} className="bg-white/5 border-white/10 text-white" />
-                    </div>
-
-                    <label className="flex items-center gap-2">
-                      <input type="checkbox" checked={serviceForm.isActive} onChange={(e) => setServiceForm({ ...serviceForm, isActive: e.target.checked })} />
-                      <span className="text-sm font-medium">Active</span>
-                    </label>
-
-                    <div className="flex gap-2">
-                      <Button onClick={handleSaveService} className="rounded-full">
-                        {editingService ? "Update Service" : "Save Service"}
-                      </Button>
-                      {editingService && (
-                        <Button onClick={resetServiceForm} variant="outline" className="rounded-full">
-                          Cancel
-                        </Button>
-                      )}
+                    <div>
+                      <label className="text-sm font-medium text-white mb-2 block">Role *</label>
+                      <Input
+                        value={reviewForm.role}
+                        onChange={(e) => setReviewForm({ ...reviewForm, role: e.target.value })}
+                        placeholder="Security Engineer"
+                        className="bg-white/5 border-white/10 text-white h-12 text-base"
+                      />
                     </div>
                   </div>
-                </Card>
-              </TabsContent>
 
-              {/* ============ REVIEWS TAB ============ */}
-              <TabsContent value="reviews" className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold">Manage Reviews</h2>
-                  <div className="flex gap-2 items-center">
-                    <Badge variant="outline">Total: {reviews.length}</Badge>
-                    <Badge>Active: {reviews.filter(r => r.isActive).length}</Badge>
-                    <Badge variant="secondary">Pending: {reviews.filter(r => !r.isActive).length}</Badge>
-                    <Button onClick={() => resetReviewForm()} className="rounded-full">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Review
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Review List */}
-                <div className="grid grid-cols-1 gap-4">
-                  {[...reviews]
-                    .sort((a, b) => {
-                      // Show pending reviews first
-                      if (!a.isActive && b.isActive) return -1;
-                      if (a.isActive && !b.isActive) return 1;
-                      return new Date(b.date).getTime() - new Date(a.date).getTime();
-                    })
-                    .map((review) => (
-                    <Card key={review.id} className="p-6">
-                      <div className="flex justify-between items-start gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-lg font-bold">{review.name}</h3>
-                            <Badge variant={review.isActive ? "default" : "secondary"}>
-                              {review.isActive ? <Eye className="w-3 h-3 mr-1" /> : <EyeOff className="w-3 h-3 mr-1" />}
-                              {review.isActive ? "Active" : "Pending Approval"}
-                            </Badge>
-                            <div className="flex gap-0.5">
-                              {[...Array(review.rating)].map((_, i) => (
-                                <Star key={i} className="w-4 h-4 fill-primary text-primary" />
-                              ))}
-                            </div>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-2">{review.role || "No role specified"}</p>
-                          <p className="text-muted-foreground italic">"{review.comment}"</p>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          {!review.isActive && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-500 border-green-500/20"
-                              onClick={() => handleApproveReview(review.id)}
-                            >
-                              <ThumbsUp className="w-4 h-4 mr-2" />
-                              Approve
-                            </Button>
-                          )}
-                          {!review.isActive && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-500 border-red-500/20"
-                              onClick={() => handleRejectReview(review.id)}
-                            >
-                              <ThumbsDown className="w-4 h-4 mr-2" />
-                              Reject
-                            </Button>
-                          )}
-                          <Button variant="outline" size="sm" className="rounded-full" onClick={() => handleEditReview(review)}>
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button variant="outline" size="sm" className="rounded-full text-destructive" onClick={() => handleDeleteReview(review.id)}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-
-                {/* Review Form */}
-                <Card className="p-6 mt-6">
-                  <h3 className="text-xl font-bold mb-4">{editingReview ? "Edit Review" : "Add New Review"}</h3>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Name *</label>
-                        <Input value={reviewForm.name} onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })} placeholder="John Doe" className="bg-white/5 border-white/10 text-white" />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Role</label>
-                        <Input value={reviewForm.role} onChange={(e) => setReviewForm({ ...reviewForm, role: e.target.value })} placeholder="Security Analyst" className="bg-white/5 border-white/10 text-white" />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Rating</label>
-                      <select className="w-full px-4 py-2 rounded-lg border bg-white/5 border-white/10 text-white" value={reviewForm.rating} onChange={(e) => setReviewForm({ ...reviewForm, rating: parseInt(e.target.value) as 1 | 2 | 3 | 4 | 5 })}>
-                        <option value={5} className="bg-gray-900 text-white">5 Stars</option>
-                        <option value={4} className="bg-gray-900 text-white">4 Stars</option>
-                        <option value={3} className="bg-gray-900 text-white">3 Stars</option>
-                        <option value={2} className="bg-gray-900 text-white">2 Stars</option>
-                        <option value={1} className="bg-gray-900 text-white">1 Star</option>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-white mb-2 block">Rating *</label>
+                      <select
+                        value={reviewForm.rating}
+                        onChange={(e) => setReviewForm({ ...reviewForm, rating: parseInt(e.target.value) as any })}
+                        className="w-full px-4 py-3 rounded-lg border bg-white/5 border-white/10 text-white text-base h-12"
+                      >
+                        <option value={5} className="bg-gray-900 text-white">5 Stars - Excellent</option>
+                        <option value={4} className="bg-gray-900 text-white">4 Stars - Very Good</option>
+                        <option value={3} className="bg-gray-900 text-white">3 Stars - Good</option>
+                        <option value={2} className="bg-gray-900 text-white">2 Stars - Fair</option>
+                        <option value={1} className="bg-gray-900 text-white">1 Star - Poor</option>
                       </select>
                     </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Comment *</label>
-                      <Textarea value={reviewForm.comment} onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })} rows={4} placeholder="Share your experience..." className="bg-white/5 border-white/10 text-white" />
-                    </div>
-
-                    <label className="flex items-center gap-2">
-                      <input type="checkbox" checked={reviewForm.isActive} onChange={(e) => setReviewForm({ ...reviewForm, isActive: e.target.checked })} />
-                      <span className="text-sm font-medium">Active</span>
-                    </label>
-
-                    <div className="flex gap-2">
-                      <Button onClick={handleSaveReview} className="rounded-full">
-                        {editingReview ? "Update Review" : "Save Review"}
-                      </Button>
-                      {editingReview && (
-                        <Button onClick={resetReviewForm} variant="outline" className="rounded-full">
-                          Cancel
-                        </Button>
-                      )}
+                    <div>
+                      <label className="text-sm font-medium text-white mb-2 block">Date</label>
+                      <Input
+                        type="date"
+                        value={reviewForm.date}
+                        onChange={(e) => setReviewForm({ ...reviewForm, date: e.target.value })}
+                        className="bg-white/5 border-white/10 text-white h-12 text-base"
+                      />
                     </div>
                   </div>
-                </Card>
-              </TabsContent>
 
-              {/* ============ BANNERS TAB ============ */}
-              <TabsContent value="banners" className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold">Manage Banners</h2>
-                  <Button onClick={() => resetBannerForm()} className="rounded-full">
+                  <div>
+                    <label className="text-sm font-medium text-white mb-2 block">Comment *</label>
+                    <Textarea
+                      value={reviewForm.comment}
+                      onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                      className="bg-white/5 border-white/10 text-white"
+                      rows={4}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-white mb-2 block">Avatar URL</label>
+                    <Input
+                      value={reviewForm.avatar}
+                      onChange={(e) => setReviewForm({ ...reviewForm, avatar: e.target.value })}
+                      placeholder="https://..."
+                      className="bg-white/5 border-white/10 text-white"
+                    />
+                  </div>
+
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={reviewForm.isActive}
+                      onChange={(e) => setReviewForm({ ...reviewForm, isActive: e.target.checked })}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm text-white">Active</span>
+                  </label>
+
+                  <Button onClick={handleSaveReview} className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-black">
+                    {editingReview ? 'Update Review' : 'Save Review'}
+                  </Button>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* Banners Tab */}
+          {activeTab === 'banners' && (
+            <div className="space-y-6">
+              {/* Banner List */}
+              <Card className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-white">Manage Banners</h2>
+                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-black hover:text-black" onClick={() => scrollToSection(bannerFormRef)}>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Banner
                   </Button>
                 </div>
 
-                {/* Banner List */}
-                <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-4">
                   {banners.map((banner) => (
-                    <Card key={banner.id} className="p-6">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-xl font-bold">{banner.title}</h3>
-                            <Badge variant={banner.isActive ? "default" : "secondary"}>
-                              {banner.isActive ? <Eye className="w-3 h-3 mr-1" /> : <EyeOff className="w-3 h-3 mr-1" />}
-                              {banner.isActive ? "Active" : "Inactive"}
-                            </Badge>
+                    <Card key={banner.id} className="p-4 sm:p-6 bg-white/5 border-white/10">
+                      <div className="space-y-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <h3 className="text-base sm:text-lg font-semibold text-white flex-1">{banner.title}</h3>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditBanner(banner)}
+                              className="border-white/10 hover:bg-white/5 text-white hover:text-white px-3 py-2"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeleteBanner(banner.id)}
+                              className="border-red-500/20 hover:bg-red-500/10 text-red-500 px-3 py-2"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
-                          <p className="text-muted-foreground mb-2">{banner.subtitle}</p>
-                          {banner.ctaText && <Badge variant="outline">{banner.ctaText} → {banner.ctaLink}</Badge>}
                         </div>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="rounded-full" onClick={() => handleEditBanner(banner)}>
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button variant="outline" size="sm" className="rounded-full text-destructive" onClick={() => handleDeleteBanner(banner.id)}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
+
+                        <Badge variant={banner.isActive ? "default" : "secondary"} className="text-xs w-fit">
+                          {banner.isActive ? (
+                            <><Eye className="w-3 h-3 mr-1" /> Active</>
+                          ) : (
+                            <><EyeOff className="w-3 h-3 mr-1" /> Inactive</>
+                          )}
+                        </Badge>
+
+                        <p className="text-sm text-muted-foreground line-clamp-2">{banner.subtitle}</p>
+                        {banner.countdown && (
+                          <p className="text-xs text-muted-foreground font-medium">
+                            Countdown ends: {new Date(banner.countdown.endDate).toLocaleDateString()}
+                          </p>
+                        )}
                       </div>
                     </Card>
                   ))}
                 </div>
+              </Card>
 
-                {/* Banner Form */}
-                <Card className="p-6 mt-6">
-                  <h3 className="text-xl font-bold mb-4">{editingBanner ? "Edit Banner" : "Add New Banner"}</h3>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Title *</label>
-                        <Input value={bannerForm.title} onChange={(e) => setBannerForm({ ...bannerForm, title: e.target.value })} placeholder="Ethical Hacking Masterclass" className="bg-white/5 border-white/10 text-white" />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Subtitle</label>
-                        <Input value={bannerForm.subtitle} onChange={(e) => setBannerForm({ ...bannerForm, subtitle: e.target.value })} placeholder="6-Month Training Program" className="bg-white/5 border-white/10 text-white" />
-                      </div>
+              {/* Banner Form */}
+              <Card className="p-4 sm:p-6" ref={bannerFormRef}>
+                <h3 className="text-lg font-bold text-white mb-6">
+                  {editingBanner ? 'Edit Banner' : 'Add New Banner'}
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-white mb-2 block">Title *</label>
+                    <Input
+                      value={bannerForm.title}
+                      onChange={(e) => setBannerForm({ ...bannerForm, title: e.target.value })}
+                      placeholder="Banner Title"
+                      className="bg-white/5 border-white/10 text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-white mb-2 block">Subtitle</label>
+                    <Input
+                      value={bannerForm.subtitle}
+                      onChange={(e) => setBannerForm({ ...bannerForm, subtitle: e.target.value })}
+                      placeholder="Banner Subtitle"
+                      className="bg-white/5 border-white/10 text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-white mb-2 block">Image URL *</label>
+                    <Input
+                      value={bannerForm.image}
+                      onChange={(e) => setBannerForm({ ...bannerForm, image: e.target.value })}
+                      placeholder="https://..."
+                      className="bg-white/5 border-white/10 text-white"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-white mb-2 block">CTA Text</label>
+                      <Input
+                        value={bannerForm.ctaText}
+                        onChange={(e) => setBannerForm({ ...bannerForm, ctaText: e.target.value })}
+                        placeholder="Learn More"
+                        className="bg-white/5 border-white/10 text-white h-12 text-base"
+                      />
                     </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Banner Image</label>
-                      <div className="space-y-2">
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              handleFileUpload(file, (base64) => {
-                                setBannerForm({ ...bannerForm, image: base64 });
-                              });
-                            }
-                          }}
-                          className="cursor-pointer bg-white/5 border-white/10 text-white"
-                        />
-                        <Input
-                          value={bannerForm.image}
-                          onChange={(e) => setBannerForm({ ...bannerForm, image: e.target.value })}
-                          placeholder="Or enter image URL"
-                          className="bg-white/5 border-white/10 text-white"
-                        />
-                        {bannerForm.image && (
-                          <div className="mt-2 p-2 border rounded-lg">
-                            <img
-                              src={bannerForm.image}
-                              alt="Preview"
-                              className="max-h-32 object-contain mx-auto"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).style.display = 'none';
-                              }}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">CTA Text</label>
-                        <Input value={bannerForm.ctaText} onChange={(e) => setBannerForm({ ...bannerForm, ctaText: e.target.value })} placeholder="Enroll Now" className="bg-white/5 border-white/10 text-white" />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">CTA Link</label>
-                        <Input value={bannerForm.ctaLink} onChange={(e) => setBannerForm({ ...bannerForm, ctaLink: e.target.value })} placeholder="/courses/ethical-hacking" className="bg-white/5 border-white/10 text-white" />
-                      </div>
-                    </div>
-
-                    <div className="space-y-4 p-4 border rounded-lg bg-secondary/20">
-                      <label className="flex items-center gap-2">
-                        <input type="checkbox" checked={bannerForm.hasCountdown} onChange={(e) => setBannerForm({ ...bannerForm, hasCountdown: e.target.checked })} className="rounded" />
-                        <span className="text-sm font-medium">Enable Countdown Timer</span>
-                      </label>
-
-                      {bannerForm.hasCountdown && (
-                        <div className="space-y-2 pl-6">
-                          <label className="text-sm font-medium">Countdown End Date & Time</label>
-                          <Input
-                            type="datetime-local"
-                            value={bannerForm.countdownDate ? new Date(bannerForm.countdownDate).toISOString().slice(0, 16) : ""}
-                            onChange={(e) => {
-                              const isoDate = e.target.value ? new Date(e.target.value).toISOString() : "";
-                              setBannerForm({ ...bannerForm, countdownDate: isoDate });
-                            }}
-                            className="rounded-lg bg-white/5 border-white/10 text-white"
-                          />
-                          <p className="text-xs text-muted-foreground">Select when the countdown should end</p>
-                        </div>
-                      )}
-                    </div>
-
-                    <label className="flex items-center gap-2">
-                      <input type="checkbox" checked={bannerForm.isActive} onChange={(e) => setBannerForm({ ...bannerForm, isActive: e.target.checked })} />
-                      <span className="text-sm font-medium">Active</span>
-                    </label>
-
-                    <div className="flex gap-2">
-                      <Button onClick={handleSaveBanner} className="rounded-full">
-                        {editingBanner ? "Update Banner" : "Save Banner"}
-                      </Button>
-                      {editingBanner && (
-                        <Button onClick={resetBannerForm} variant="outline" className="rounded-full">
-                          Cancel
-                        </Button>
-                      )}
+                    <div>
+                      <label className="text-sm font-medium text-white mb-2 block">CTA Link</label>
+                      <Input
+                        value={bannerForm.ctaLink}
+                        onChange={(e) => setBannerForm({ ...bannerForm, ctaLink: e.target.value })}
+                        placeholder="/courses"
+                        className="bg-white/5 border-white/10 text-white h-12 text-base"
+                      />
                     </div>
                   </div>
-                </Card>
-              </TabsContent>
 
-              {/* ============ CLIENTS TAB ============ */}
-              <TabsContent value="clients" className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold">Manage Client Logos</h2>
-                  <Button onClick={() => resetClientForm()} className="rounded-full">
+                  <div>
+                    <label className="text-sm font-medium text-white mb-2 block">Countdown End Date</label>
+                    <Input
+                      type="date"
+                      value={bannerForm.countdownEndDate}
+                      onChange={(e) => setBannerForm({ ...bannerForm, countdownEndDate: e.target.value })}
+                      className="bg-white/5 border-white/10 text-white"
+                    />
+                  </div>
+
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={bannerForm.isActive}
+                      onChange={(e) => setBannerForm({ ...bannerForm, isActive: e.target.checked })}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm text-white">Active</span>
+                  </label>
+
+                  <Button onClick={handleSaveBanner} className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-black">
+                    {editingBanner ? 'Update Banner' : 'Save Banner'}
+                  </Button>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* Clients Tab */}
+          {activeTab === 'clients' && (
+            <div className="space-y-6">
+              {/* Client List */}
+              <Card className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-white">Manage Clients</h2>
+                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-black hover:text-black" onClick={() => scrollToSection(clientFormRef)}>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Client
                   </Button>
                 </div>
 
-                {/* Client List */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {clients.map((client) => (
-                    <Card key={client.id} className="p-4 text-center">
-                      <div className="aspect-square bg-secondary/30 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
-                        {client.logo ? (
-                          <img
-                            src={client.logo}
-                            alt={client.name}
-                            className="w-full h-full object-contain p-2"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          <span className="text-muted-foreground text-xs">{client.name}</span>
-                        )}
-                      </div>
-                      <p className="text-sm font-medium truncate mb-2">{client.name}</p>
-                      <div className="flex gap-2 justify-center">
-                        <Button variant="outline" size="sm" className="rounded-full flex-1" onClick={() => handleEditClient(client)}>
-                          <Edit className="w-3 h-3" />
-                        </Button>
-                        <Button variant="outline" size="sm" className="rounded-full text-destructive" onClick={() => handleDeleteClient(client.id)}>
-                          <Trash2 className="w-3 h-3" />
+                    <Card key={client.id} className="p-4 bg-white/5 border-white/10">
+                      <div className="flex flex-col items-center text-center">
+                        <div className="w-full aspect-video bg-white/10 rounded-lg mb-3 flex items-center justify-center">
+                          {client.logo ? (
+                            <img src={client.logo} alt={client.name} className="max-w-full max-h-full object-contain" />
+                          ) : (
+                            <Users className="w-12 h-12 text-muted-foreground" />
+                          )}
+                        </div>
+                        <h3 className="text-sm font-semibold text-white mb-2">{client.name}</h3>
+                        <Badge variant={client.isActive ? "default" : "secondary"} className="mb-3">
+                          {client.isActive ? 'Active' : 'Inactive'}
+                        </Badge>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteClient(client.id)}
+                          className="w-full border-red-500/20 hover:bg-red-500/10 text-red-500"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete
                         </Button>
                       </div>
                     </Card>
                   ))}
                 </div>
+              </Card>
 
-                {/* Client Form */}
-                <Card className="p-6 mt-6">
-                  <h3 className="text-xl font-bold mb-4">{editingClient ? "Edit Client" : "Add New Client"}</h3>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Client Name *</label>
-                      <Input
-                        value={clientForm.name}
-                        onChange={(e) => setClientForm({ ...clientForm, name: e.target.value })}
-                        placeholder="Company Name"
-                        className="bg-white/5 border-white/10 text-white"
-                      />
-                    </div>
+              {/* Client Form */}
+              <Card className="p-4 sm:p-6" ref={clientFormRef}>
+                <h3 className="text-lg font-bold text-white mb-6">Add New Client</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-white mb-2 block">Client Name *</label>
+                    <Input
+                      value={clientForm.name}
+                      onChange={(e) => setClientForm({ ...clientForm, name: e.target.value })}
+                      placeholder="Company Name"
+                      className="bg-white/5 border-white/10 text-white"
+                    />
+                  </div>
 
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Client Logo *</label>
-                      <div className="space-y-2">
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              handleFileUpload(file, (base64) => {
-                                setClientForm({ ...clientForm, logo: base64 });
-                              });
-                            }
-                          }}
-                          className="cursor-pointer bg-white/5 border-white/10 text-white"
-                        />
-                        <Input
-                          value={clientForm.logo}
-                          onChange={(e) => setClientForm({ ...clientForm, logo: e.target.value })}
-                          placeholder="Or enter logo URL"
-                          className="bg-white/5 border-white/10 text-white"
-                        />
-                        {clientForm.logo && (
-                          <div className="mt-2 p-4 border rounded-lg bg-secondary/10">
-                            <img
-                              src={clientForm.logo}
-                              alt="Preview"
-                              className="max-h-24 object-contain mx-auto"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).style.display = 'none';
-                              }}
-                            />
+                  <div>
+                    <label className="text-sm font-medium text-white mb-2 block">Logo URL *</label>
+                    <Input
+                      value={clientForm.logo}
+                      onChange={(e) => setClientForm({ ...clientForm, logo: e.target.value })}
+                      placeholder="https://..."
+                      className="bg-white/5 border-white/10 text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-white mb-2 block">Website</label>
+                    <Input
+                      value={clientForm.website}
+                      onChange={(e) => setClientForm({ ...clientForm, website: e.target.value })}
+                      placeholder="https://..."
+                      className="bg-white/5 border-white/10 text-white"
+                    />
+                  </div>
+
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={clientForm.isActive}
+                      onChange={(e) => setClientForm({ ...clientForm, isActive: e.target.checked })}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm text-white">Active</span>
+                  </label>
+
+                  <Button onClick={handleSaveClient} className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-black">
+                    Save Client
+                  </Button>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* Contacts Tab */}
+          {activeTab === 'contacts' && (
+            <Card className="p-4 sm:p-6">
+              <h2 className="text-xl font-bold text-white mb-6">Manage Contacts</h2>
+              <div className="space-y-4">
+                {contacts.map((contact) => (
+                  <Card key={contact.id} className="p-4 bg-white/5 border-white/10">
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="text-lg font-semibold text-white">{contact.name}</h3>
+                            <Badge variant={
+                              contact.status === 'new' ? 'default' :
+                              contact.status === 'contacted' ? 'secondary' :
+                              contact.status === 'resolved' ? 'outline' : 'default'
+                            }>
+                              {contact.status}
+                            </Badge>
                           </div>
-                        )}
+                          <p className="text-sm text-muted-foreground mb-1">{contact.email}</p>
+                          {contact.phone && <p className="text-sm text-muted-foreground mb-2">{contact.phone}</p>}
+                          <p className="text-sm text-white mb-2">{contact.message}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(contact.date).toLocaleDateString()} • Source: {contact.source}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleUpdateContactStatus(contact.id, 'contacted')}
+                          className="border-white/10 hover:bg-white/5 text-white hover:text-white"
+                        >
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          Mark Contacted
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleUpdateContactStatus(contact.id, 'resolved')}
+                          className="border-white/10 hover:bg-white/5 text-white hover:text-white"
+                        >
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          Mark Resolved
+                        </Button>
+
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button size="sm" variant="outline" className="border-white/10 hover:bg-white/5 text-white hover:text-white">
+                              <UserPlus className="w-3 h-3 mr-1" />
+                              Convert to Review
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="bg-card border-white/10 sm:max-w-md">
+                            <DialogHeader>
+                              <DialogTitle className="text-white text-base sm:text-lg">Convert to Review</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4 pt-4">
+                              <p className="text-sm text-muted-foreground">
+                                Convert this contact message into a customer review. Select a rating:
+                              </p>
+                              <div className="grid grid-cols-5 gap-2">
+                                {[5, 4, 3, 2, 1].map((rating) => (
+                                  <Button
+                                    key={rating}
+                                    size="sm"
+                                    onClick={() => handleConvertToReview(contact, rating)}
+                                    className="bg-primary hover:bg-primary/90 text-black flex flex-col items-center justify-center h-16 sm:h-auto sm:flex-row px-2 text-xs sm:text-sm"
+                                  >
+                                    <span className="text-lg sm:text-base">{rating}</span>
+                                    <span className="text-base sm:text-lg">⭐</span>
+                                  </Button>
+                                ))}
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteContact(contact.id)}
+                          className="border-red-500/20 hover:bg-red-500/10 text-red-500"
+                        >
+                          <Trash2 className="w-3 h-3 mr-1" />
+                          Delete
+                        </Button>
                       </div>
                     </div>
-
-                    <div className="flex gap-2">
-                      <Button onClick={handleSaveClient} className="rounded-full">
-                        {editingClient ? "Update Client" : "Save Client"}
-                      </Button>
-                      {editingClient && (
-                        <Button onClick={resetClientForm} variant="outline" className="rounded-full">
-                          Cancel
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              </TabsContent>
-
-              {/* ============ CONTACTS TAB ============ */}
-              <TabsContent value="contacts" className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold">Manage Contact Submissions</h2>
-                  <div className="flex gap-2">
-                    <Badge variant="outline">Total: {contacts.length}</Badge>
-                    <Badge>New: {contacts.filter(c => c.status === 'new').length}</Badge>
-                  </div>
-                </div>
-
-                {/* Contact List */}
-                <div className="grid grid-cols-1 gap-4">
-                  {contacts.length === 0 ? (
-                    <Card className="p-8 text-center">
-                      <Mail className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                      <p className="text-muted-foreground">No contact submissions yet</p>
-                    </Card>
-                  ) : (
-                    [...contacts]
-                      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                      .map((contact) => (
-                        <Card key={contact.id} className="p-6">
-                          <div className="flex justify-between items-start gap-4">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-3">
-                                <h3 className="text-lg font-bold">{contact.name}</h3>
-                                <Badge variant={getStatusBadgeVariant(contact.status)} className={getStatusColor(contact.status)}>
-                                  {contact.status.toUpperCase()}
-                                </Badge>
-                                <Badge variant="outline">{contact.source}</Badge>
-                                <span className="text-sm text-muted-foreground">
-                                  {new Date(contact.date).toLocaleDateString()} {new Date(contact.date).toLocaleTimeString()}
-                                </span>
-                              </div>
-
-                              <div className="space-y-2 mb-4">
-                                <div className="flex items-center gap-2 text-sm">
-                                  <Mail className="w-4 h-4 text-muted-foreground" />
-                                  <a href={`mailto:${contact.email}`} className="text-primary hover:underline">{contact.email}</a>
-                                </div>
-                                {contact.phone && (
-                                  <div className="flex items-center gap-2 text-sm">
-                                    <span className="text-muted-foreground">📞</span>
-                                    <span>{contact.phone}</span>
-                                  </div>
-                                )}
-                                {contact.serviceInterested && (
-                                  <div className="flex items-center gap-2 text-sm">
-                                    <span className="text-muted-foreground">🎯</span>
-                                    <span>Interested in: <strong>{contact.serviceInterested}</strong></span>
-                                  </div>
-                                )}
-                              </div>
-
-                              <div className="bg-secondary/20 p-4 rounded-lg">
-                                <p className="text-sm text-muted-foreground mb-1">Message:</p>
-                                <p className="text-sm">{contact.message}</p>
-                              </div>
-                            </div>
-
-                            <div className="flex flex-col gap-2">
-                              {contact.status !== 'converted' && (
-                                <>
-                                  {contact.status === 'new' && (
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="rounded-full"
-                                      onClick={() => handleMarkAsRead(contact.id)}
-                                    >
-                                      <CheckCircle className="w-4 h-4 mr-2" />
-                                      Mark as Read
-                                    </Button>
-                                  )}
-                                  {(contact.status === 'read' || contact.status === 'new') && (
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="rounded-full"
-                                      onClick={() => handleMarkAsReplied(contact.id)}
-                                    >
-                                      <MessageSquare className="w-4 h-4 mr-2" />
-                                      Mark as Replied
-                                    </Button>
-                                  )}
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="rounded-full bg-primary/10 hover:bg-primary/20"
-                                    onClick={() => handleOpenConvertDialog(contact)}
-                                  >
-                                    <UserPlus className="w-4 h-4 mr-2" />
-                                    Convert to Review
-                                  </Button>
-                                </>
-                              )}
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="rounded-full text-destructive"
-                                onClick={() => handleDeleteContact(contact.id)}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        </Card>
-                      ))
-                  )}
-                </div>
-              </TabsContent>
-            </Tabs>
-
-            {/* Convert to Review Dialog */}
-            <Dialog open={convertDialogOpen} onOpenChange={setConvertDialogOpen}>
-              <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                  <DialogTitle>Convert Contact to Review</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Name *</label>
-                    <Input
-                      value={convertReviewForm.name}
-                      onChange={(e) => setConvertReviewForm({ ...convertReviewForm, name: e.target.value })}
-                      placeholder="Customer name"
-                      className="bg-white/5 border-white/10 text-white"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Role/Title</label>
-                    <Input
-                      value={convertReviewForm.role}
-                      onChange={(e) => setConvertReviewForm({ ...convertReviewForm, role: e.target.value })}
-                      placeholder="e.g., Security Analyst, Pentester"
-                      className="bg-white/5 border-white/10 text-white"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Rating</label>
-                    <select
-                      className="w-full px-4 py-2 rounded-lg border bg-white/5 border-white/10 text-white"
-                      value={convertReviewForm.rating}
-                      onChange={(e) => setConvertReviewForm({ ...convertReviewForm, rating: parseInt(e.target.value) as 1 | 2 | 3 | 4 | 5 })}
-                    >
-                      <option value={5} className="bg-gray-900 text-white">5 Stars - Excellent</option>
-                      <option value={4} className="bg-gray-900 text-white">4 Stars - Very Good</option>
-                      <option value={3} className="bg-gray-900 text-white">3 Stars - Good</option>
-                      <option value={2} className="bg-gray-900 text-white">2 Stars - Fair</option>
-                      <option value={1} className="bg-gray-900 text-white">1 Star - Poor</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Review Comment *</label>
-                    <Textarea
-                      value={convertReviewForm.comment}
-                      onChange={(e) => setConvertReviewForm({ ...convertReviewForm, comment: e.target.value })}
-                      rows={5}
-                      placeholder="Review text..."
-                      className="bg-white/5 border-white/10 text-white"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      This is pre-filled with the contact message. You can edit it to make it more suitable as a review.
-                    </p>
-                  </div>
-
-                  <div className="flex gap-2 pt-4">
-                    <Button onClick={handleConvertToReview} className="rounded-full flex-1">
-                      <UserPlus className="w-4 h-4 mr-2" />
-                      Create Review
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        setConvertDialogOpen(false);
-                        setConvertingContact(null);
-                      }}
-                      variant="outline"
-                      className="rounded-full"
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </div>
-      </section>
+                  </Card>
+                ))}
+              </div>
+            </Card>
+          )}
+        </main>
       </div>
     </div>
   );

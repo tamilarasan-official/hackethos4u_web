@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { FlowingLinesBackground } from "@/components/backgrounds";
 import { useData } from "@/contexts/DataContext";
+import { useRef } from "react";
 
 const ServicesSection = () => {
   const { services } = useData();
   const activeServices = services.filter(s => s.isActive);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Get icon component from icon name
   const getIconComponent = (iconName: string) => {
@@ -44,7 +46,7 @@ const ServicesSection = () => {
 
         {/* Auto-scrolling container or grid */}
         {shouldAutoScroll ? (
-          <div className="relative">
+          <div className="relative overflow-hidden py-2">
             <div className="flex gap-6 animate-scroll">
             {duplicatedServices.map((service, index) => {
               return (
@@ -53,7 +55,7 @@ const ServicesSection = () => {
                   className="group relative flex-shrink-0 w-[360px]"
                 >
                   {/* Card with gradient border effect */}
-                  <div className="card-sleek p-8 h-full flex flex-col relative overflow-hidden">
+                  <div className="card-sleek p-8 h-full flex flex-col relative overflow-visible">
                     {/* Top gradient accent bar */}
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
 
@@ -96,7 +98,7 @@ const ServicesSection = () => {
                 key={service.id}
                 className="group relative"
               >
-                <div className="card-sleek p-8 h-full flex flex-col relative overflow-hidden">
+                <div className="card-sleek p-8 h-full flex flex-col relative overflow-visible">
                   {/* Top gradient accent bar */}
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
 

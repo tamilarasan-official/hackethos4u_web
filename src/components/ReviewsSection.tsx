@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Star, MessageSquarePlus } from "lucide-react";
 import { FlowingLinesBackground } from "@/components/backgrounds";
 import { useData } from "@/contexts/DataContext";
@@ -11,6 +11,7 @@ import { toast } from "sonner";
 const ReviewsSection = () => {
   const { reviews, addReview } = useData();
   const activeReviews = reviews.filter(r => r.isActive);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Review submission modal state
   const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -112,12 +113,12 @@ const ReviewsSection = () => {
 
         {/* Auto-scrolling container or grid */}
         {shouldAutoScroll ? (
-          <div className="relative">
+          <div className="relative overflow-hidden py-2">
             <div className="flex gap-6 animate-scroll">
             {duplicatedReviews.map((review, index) => (
               <div
                 key={`${review.id}-${index}`}
-                className="card-sleek p-6 flex-shrink-0 w-[380px] flex flex-col min-h-[280px]"
+                className="card-sleek p-6 flex-shrink-0 w-[380px] flex flex-col min-h-[280px] overflow-visible"
               >
                 {/* Stars */}
                 <div className="flex gap-1 mb-4">

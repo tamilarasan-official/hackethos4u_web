@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { Clock, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -8,6 +8,7 @@ import { useData } from "@/contexts/DataContext";
 const CoursesSection = () => {
   const { courses } = useData();
   const [activeTab, setActiveTab] = useState("All");
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Get active courses
   const activeCourses = useMemo(() => courses.filter(c => c.isActive), [courses]);
@@ -72,28 +73,28 @@ const CoursesSection = () => {
 
         {/* Course Cards - Grid or Auto-scroll */}
         {shouldAutoScroll ? (
-          <div className="relative">
+          <div className="relative overflow-hidden py-2">
             <div className="flex gap-6 animate-scroll">
               {displayCourses.map((course, index) => (
                 <div
                   key={`${course.id}-${index}`}
                   className="group relative flex-shrink-0 w-[360px]"
                 >
-                  <div className="card-sleek p-8 h-full flex flex-col relative overflow-hidden">
+                  <div className="card-sleek p-8 h-full flex flex-col relative overflow-visible">
                     {/* Top gradient accent bar */}
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
 
                     {/* Content */}
-                    <div className="relative z-10">
+                    <div className="relative z-10 flex-1 flex flex-col">
                       <h3 className="text-xl font-bold mb-3 text-white">
                         {course.title}
                       </h3>
-                      <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+                      <p className="text-muted-foreground text-sm mb-6 leading-relaxed flex-grow">
                         {course.description}
                       </p>
 
                       {/* Meta Info */}
-                      <div className="flex items-center gap-6 mb-8 pb-6 border-b border-white/10">
+                      <div className="flex items-center gap-6 mb-6 pb-6 border-b border-white/10">
                         <div className="flex items-center gap-2 text-sm">
                           <div className="p-1.5 rounded-lg bg-primary/10 border border-primary/20">
                             <Clock className="w-3.5 h-3.5 text-primary" />
@@ -124,21 +125,21 @@ const CoursesSection = () => {
                 key={course.id}
                 className="group relative"
               >
-                <div className="card-sleek p-8 h-full flex flex-col relative overflow-hidden">
+                <div className="card-sleek p-8 h-full flex flex-col relative overflow-visible">
                   {/* Top gradient accent bar */}
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
 
                   {/* Content */}
-                  <div className="relative z-10">
+                  <div className="relative z-10 flex-1 flex flex-col">
                     <h3 className="text-xl font-bold mb-3 text-white">
                       {course.title}
                     </h3>
-                    <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+                    <p className="text-muted-foreground text-sm mb-6 leading-relaxed flex-grow">
                       {course.description}
                     </p>
 
                     {/* Meta Info */}
-                    <div className="flex items-center gap-6 mb-8 pb-6 border-b border-white/10">
+                    <div className="flex items-center gap-6 mb-6 pb-6 border-b border-white/10">
                       <div className="flex items-center gap-2 text-sm">
                         <div className="p-1.5 rounded-lg bg-primary/10 border border-primary/20">
                           <Clock className="w-3.5 h-3.5 text-primary" />
