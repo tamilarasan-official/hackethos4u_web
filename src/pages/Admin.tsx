@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { useData } from "@/contexts/DataContext";
 import { useAuth } from "@/contexts/AuthContext";
 import PasswordChangeDialog from "@/components/PasswordChangeDialog";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import { useToast } from "@/hooks/use-toast";
 import {
   Plus, Edit, Trash2, Star, Eye, EyeOff, LogOut, User,
@@ -33,6 +34,19 @@ const Admin = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<string>("courses");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Confirm Dialog State
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    title: string;
+    description: string;
+    onConfirm: () => void;
+  }>({
+    open: false,
+    title: '',
+    description: '',
+    onConfirm: () => {},
+  });
 
   // Refs for scrolling to form sections
   const courseFormRef = useRef<HTMLDivElement>(null);
@@ -181,9 +195,12 @@ const Admin = () => {
   };
 
   const handleDeleteCourse = async (id: string) => {
-    if (confirm('Are you sure you want to delete this course?')) {
-      await deleteCourse(id);
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Delete Course',
+      description: 'Are you sure you want to delete this course? This action cannot be undone.',
+      onConfirm: () => deleteCourse(id),
+    });
   };
 
   // Service Handlers
@@ -229,9 +246,12 @@ const Admin = () => {
   };
 
   const handleDeleteService = async (id: string) => {
-    if (confirm('Are you sure you want to delete this service?')) {
-      await deleteService(id);
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Delete Service',
+      description: 'Are you sure you want to delete this service? This action cannot be undone.',
+      onConfirm: () => deleteService(id),
+    });
   };
 
   // Review Handlers
@@ -278,9 +298,12 @@ const Admin = () => {
   };
 
   const handleDeleteReview = async (id: string) => {
-    if (confirm('Are you sure you want to delete this review?')) {
-      await deleteReview(id);
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Delete Review',
+      description: 'Are you sure you want to delete this review? This action cannot be undone.',
+      onConfirm: () => deleteReview(id),
+    });
   };
 
   // Banner Handlers
@@ -331,9 +354,12 @@ const Admin = () => {
   };
 
   const handleDeleteBanner = async (id: string) => {
-    if (confirm('Are you sure you want to delete this banner?')) {
-      await deleteBanner(id);
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Delete Banner',
+      description: 'Are you sure you want to delete this banner? This action cannot be undone.',
+      onConfirm: () => deleteBanner(id),
+    });
   };
 
   // Client Handlers
@@ -354,9 +380,12 @@ const Admin = () => {
   };
 
   const handleDeleteClient = async (id: string) => {
-    if (confirm('Are you sure you want to delete this client?')) {
-      await deleteClient(id);
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Delete Client',
+      description: 'Are you sure you want to delete this client? This action cannot be undone.',
+      onConfirm: () => deleteClient(id),
+    });
   };
 
   // Contact Handlers
@@ -365,9 +394,12 @@ const Admin = () => {
   };
 
   const handleDeleteContact = async (id: string) => {
-    if (confirm('Are you sure you want to delete this contact?')) {
-      await deleteContact(id);
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Delete Contact',
+      description: 'Are you sure you want to delete this contact? This action cannot be undone.',
+      onConfirm: () => deleteContact(id),
+    });
   };
 
   const handleConvertToReview = async (contact: Contact, rating: number) => {
@@ -1384,8 +1416,9 @@ const Admin = () => {
                             <h3 className="text-lg font-semibold text-white">{contact.name}</h3>
                             <Badge variant={
                               contact.status === 'new' ? 'default' :
-                              contact.status === 'contacted' ? 'secondary' :
-                              contact.status === 'resolved' ? 'outline' : 'default'
+                              contact.status === 'read' ? 'secondary' :
+                              contact.status === 'replied' ? 'outline' :
+                              contact.status === 'converted' ? 'default' : 'default'
                             }>
                               {contact.status}
                             </Badge>
@@ -1403,20 +1436,22 @@ const Admin = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleUpdateContactStatus(contact.id, 'contacted')}
+                          onClick={() => handleUpdateContactStatus(contact.id, 'read')}
                           className="border-white/10 hover:bg-white/5 text-white hover:text-white"
+                          disabled={contact.status !== 'new'}
                         >
                           <CheckCircle className="w-3 h-3 mr-1" />
-                          Mark Contacted
+                          Mark as Read
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleUpdateContactStatus(contact.id, 'resolved')}
+                          onClick={() => handleUpdateContactStatus(contact.id, 'replied')}
                           className="border-white/10 hover:bg-white/5 text-white hover:text-white"
+                          disabled={contact.status === 'new'}
                         >
                           <CheckCircle className="w-3 h-3 mr-1" />
-                          Mark Resolved
+                          Mark as Replied
                         </Button>
 
                         <Dialog>
@@ -1469,6 +1504,18 @@ const Admin = () => {
           )}
         </main>
       </div>
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        onConfirm={confirmDialog.onConfirm}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
     </>
   );

@@ -10,6 +10,7 @@ interface TimeRemaining {
   hours: number;
   minutes: number;
   seconds: number;
+  expired?: boolean;
 }
 
 const HeroSlider = () => {
@@ -48,6 +49,16 @@ const HeroSlider = () => {
               hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
               minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
               seconds: Math.floor((distance % (1000 * 60)) / 1000),
+              expired: false,
+            };
+          } else {
+            // Countdown has expired - show expired message
+            newTimeRemaining[banner.id] = {
+              days: 0,
+              hours: 0,
+              minutes: 0,
+              seconds: 0,
+              expired: true,
             };
           }
         }
@@ -165,36 +176,54 @@ const HeroSlider = () => {
                     {/* Countdown Timer */}
                     {banner.countdown && timeRemaining[banner.id] && (
                       <div className="bg-white/20 backdrop-blur-xl border-2 border-white/30 rounded-2xl px-5 py-3 inline-flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mb-6 shadow-2xl">
-                        <span className="text-sm md:text-base font-bold flex items-center gap-2 tracking-wide" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
-                          <span className="text-lg">⏰</span>
-                          Offer Ends In:
-                        </span>
-                        <div className="flex gap-2 md:gap-3">
-                          <div className="text-center">
-                            <div className="text-xl md:text-3xl font-extrabold bg-white/20 backdrop-blur-md rounded-xl px-2.5 py-1.5 min-w-[50px] md:min-w-[60px] border border-white/20 shadow-lg tracking-tight" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
-                              {timeRemaining[banner.id].days}
+                        {timeRemaining[banner.id].expired ? (
+                          // Expired State
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">🎯</span>
+                            <div>
+                              <div className="text-lg md:text-xl font-extrabold tracking-wide" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
+                                Offer Ended
+                              </div>
+                              <div className="text-xs md:text-sm opacity-90 font-medium">
+                                Contact us for current offers
+                              </div>
                             </div>
-                            <div className="text-xs mt-1 opacity-90 font-semibold tracking-wider uppercase">Days</div>
                           </div>
-                          <div className="text-center">
-                            <div className="text-xl md:text-3xl font-extrabold bg-white/20 backdrop-blur-md rounded-xl px-2.5 py-1.5 min-w-[50px] md:min-w-[60px] border border-white/20 shadow-lg tracking-tight" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
-                              {String(timeRemaining[banner.id].hours).padStart(2, '0')}
+                        ) : (
+                          // Active Countdown
+                          <>
+                            <span className="text-sm md:text-base font-bold flex items-center gap-2 tracking-wide" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
+                              <span className="text-lg">⏰</span>
+                              Offer Ends In:
+                            </span>
+                            <div className="flex gap-2 md:gap-3">
+                              <div className="text-center">
+                                <div className="text-xl md:text-3xl font-extrabold bg-white/20 backdrop-blur-md rounded-xl px-2.5 py-1.5 min-w-[50px] md:min-w-[60px] border border-white/20 shadow-lg tracking-tight" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
+                                  {timeRemaining[banner.id].days}
+                                </div>
+                                <div className="text-xs mt-1 opacity-90 font-semibold tracking-wider uppercase">Days</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-xl md:text-3xl font-extrabold bg-white/20 backdrop-blur-md rounded-xl px-2.5 py-1.5 min-w-[50px] md:min-w-[60px] border border-white/20 shadow-lg tracking-tight" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
+                                  {String(timeRemaining[banner.id].hours).padStart(2, '0')}
+                                </div>
+                                <div className="text-xs mt-1 opacity-90 font-semibold tracking-wider uppercase">Hours</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-xl md:text-3xl font-extrabold bg-white/20 backdrop-blur-md rounded-xl px-2.5 py-1.5 min-w-[50px] md:min-w-[60px] border border-white/20 shadow-lg tracking-tight" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
+                                  {String(timeRemaining[banner.id].minutes).padStart(2, '0')}
+                                </div>
+                                <div className="text-xs mt-1 opacity-90 font-semibold tracking-wider uppercase">Mins</div>
+                              </div>
+                              <div className="text-center hidden sm:block">
+                                <div className="text-xl md:text-3xl font-extrabold bg-white/20 backdrop-blur-md rounded-xl px-2.5 py-1.5 min-w-[50px] md:min-w-[60px] border border-white/20 shadow-lg tracking-tight" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
+                                  {String(timeRemaining[banner.id].seconds).padStart(2, '0')}
+                                </div>
+                                <div className="text-xs mt-1 opacity-90 font-semibold tracking-wider uppercase">Secs</div>
+                              </div>
                             </div>
-                            <div className="text-xs mt-1 opacity-90 font-semibold tracking-wider uppercase">Hours</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-xl md:text-3xl font-extrabold bg-white/20 backdrop-blur-md rounded-xl px-2.5 py-1.5 min-w-[50px] md:min-w-[60px] border border-white/20 shadow-lg tracking-tight" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
-                              {String(timeRemaining[banner.id].minutes).padStart(2, '0')}
-                            </div>
-                            <div className="text-xs mt-1 opacity-90 font-semibold tracking-wider uppercase">Mins</div>
-                          </div>
-                          <div className="text-center hidden sm:block">
-                            <div className="text-xl md:text-3xl font-extrabold bg-white/20 backdrop-blur-md rounded-xl px-2.5 py-1.5 min-w-[50px] md:min-w-[60px] border border-white/20 shadow-lg tracking-tight" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
-                              {String(timeRemaining[banner.id].seconds).padStart(2, '0')}
-                            </div>
-                            <div className="text-xs mt-1 opacity-90 font-semibold tracking-wider uppercase">Secs</div>
-                          </div>
-                        </div>
+                          </>
+                        )}
                       </div>
                     )}
 

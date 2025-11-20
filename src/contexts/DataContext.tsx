@@ -81,51 +81,64 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Set up real-time listeners for all collections
   useEffect(() => {
     const unsubscribers: Array<() => void> = [];
+    let loadedCollections = 0;
+    const totalCollections = 7;
+
+    const checkAllLoaded = () => {
+      loadedCollections++;
+      if (loadedCollections === totalCollections) {
+        setLoading(false);
+      }
+    };
 
     // Banners listener
     const unsubBanners = bannersService.subscribe((data) => {
       setBanners(data);
+      checkAllLoaded();
     });
     unsubscribers.push(unsubBanners);
 
     // Services listener
     const unsubServices = servicesService.subscribe((data) => {
       setServices(data);
+      checkAllLoaded();
     });
     unsubscribers.push(unsubServices);
 
     // Courses listener
     const unsubCourses = coursesService.subscribe((data) => {
       setCourses(data);
+      checkAllLoaded();
     });
     unsubscribers.push(unsubCourses);
 
     // Clients listener
     const unsubClients = clientsService.subscribe((data) => {
       setClients(data);
+      checkAllLoaded();
     });
     unsubscribers.push(unsubClients);
 
     // Certificates listener
     const unsubCertificates = certificatesService.subscribe((data) => {
       setCertificates(data);
+      checkAllLoaded();
     });
     unsubscribers.push(unsubCertificates);
 
     // Reviews listener
     const unsubReviews = reviewsService.subscribe((data) => {
       setReviews(data);
+      checkAllLoaded();
     });
     unsubscribers.push(unsubReviews);
 
     // Contacts listener
     const unsubContacts = contactsService.subscribe((data) => {
       setContacts(data);
+      checkAllLoaded();
     });
     unsubscribers.push(unsubContacts);
-
-    // Set loading to false after first data load
-    setLoading(false);
 
     // Cleanup: unsubscribe from all listeners
     return () => {

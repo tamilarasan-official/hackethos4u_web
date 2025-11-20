@@ -113,6 +113,29 @@ const Courses = () => {
         </div>
       </section>
 
+      {/* Empty State */}
+      {recordingCourses.length === 0 && liveCourses.length === 0 && (
+        <section className="relative py-32">
+          <div className="container mx-auto px-4">
+            <div className="max-w-2xl mx-auto text-center">
+              <div className="mb-6 inline-flex p-6 rounded-full bg-primary/10 border border-primary/20">
+                <Icons.BookOpen className="w-16 h-16 text-primary" />
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">No Courses Available Yet</h2>
+              <p className="text-muted-foreground text-lg mb-8">
+                We're currently preparing exciting new courses for you. Check back soon or contact us for updates!
+              </p>
+              <Link to="/contact">
+                <Button size="lg" className="rounded-full bg-primary text-black hover:bg-primary/90 font-semibold">
+                  Contact Us for Updates
+                  <Icons.ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Recording Sessions */}
       {recordingCourses.length > 0 && (
         <section className="relative py-16 md:py-20">
