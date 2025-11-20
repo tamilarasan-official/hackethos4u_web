@@ -7,12 +7,18 @@ import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { useData } from "@/contexts/DataContext";
 import { TechBackground, GridBackground, FlowingLinesBackground, ParticleBackground } from "@/components/backgrounds";
+import SEO, { organizationSchema, createBreadcrumbSchema } from "@/components/SEO";
 
 const Courses = () => {
   const { courses } = useData();
 
   const recordingCourses = courses.filter((c) => c.isActive && c.category === 'recording');
   const liveCourses = courses.filter((c) => c.isActive && c.category === 'live');
+
+  const breadcrumbs = createBreadcrumbSchema([
+    { name: "Home", url: "https://hackethos4u.com/" },
+    { name: "Courses", url: "https://hackethos4u.com/courses" }
+  ]);
 
   const getIconComponent = (iconName: string) => {
     const Icon = Icons[iconName as keyof typeof Icons] as React.ComponentType<{ className?: string }>;
@@ -40,6 +46,13 @@ const Courses = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Cybersecurity Courses - Ethical Hacking, VAPT, Bug Bounty Training"
+        description="Master cybersecurity with expert-led courses: Ethical Hacking, VAPT Professional Training, Bug Bounty Hunting, and AR/VR Security. Recording sessions and live interactive classes available. Learn from industry professionals in Hyderabad."
+        keywords="ethical hacking course, VAPT training, bug bounty course, cybersecurity certification, penetration testing course, security training India, online cybersecurity courses, ethical hacking certification, VAPT course Hyderabad, AR VR security"
+        canonical="https://hackethos4u.com/courses"
+        structuredData={[organizationSchema, breadcrumbs]}
+      />
       <Header />
 
       <div className="pt-16 md:pt-20">

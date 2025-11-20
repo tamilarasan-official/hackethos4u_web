@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useData } from "@/contexts/DataContext";
 import { FlowingLinesBackground } from "@/components/backgrounds";
+import SEO, { organizationSchema, createCourseSchema, createBreadcrumbSchema } from "@/components/SEO";
 
 const CoursePage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -56,8 +57,22 @@ const CoursePage = () => {
     return (match && match[2].length === 11) ? match[2] : null;
   };
 
+  const courseSchema = createCourseSchema(course);
+  const breadcrumbs = createBreadcrumbSchema([
+    { name: "Home", url: "https://hackethos4u.com/" },
+    { name: "Courses", url: "https://hackethos4u.com/courses" },
+    { name: course.title, url: `https://hackethos4u.com/courses/${course.slug}` }
+  ]);
+
   return (
     <div className="min-h-screen bg-background grid-background">
+      <SEO
+        title={`${course.title} ${course.category === 'recording' ? '- Pre-Recorded' : '- Live Training'} Course`}
+        description={`${course.description} ${course.category === 'recording' ? 'Download our comprehensive pre-recorded course' : 'Join live interactive training sessions'}. ${course.duration} duration. Expert-led cybersecurity training in India.`}
+        keywords={`${course.title}, ${course.slug}, ${course.category} course, cybersecurity training, ${course.level || 'professional'} level, ${course.curriculum?.slice(0, 5).join(', ')}`}
+        canonical={`https://hackethos4u.com/courses/${course.slug}`}
+        structuredData={[organizationSchema, courseSchema, breadcrumbs]}
+      />
       <Header />
 
       <div className="pt-16 md:pt-20">

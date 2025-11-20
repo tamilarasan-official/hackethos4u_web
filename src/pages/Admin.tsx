@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import type { Course, Service, Review, Banner, ClientLogo, Contact } from "@/lib/store";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import SEO from "@/components/SEO";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -388,8 +389,14 @@ const Admin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* Sidebar */}
+    <>
+      <SEO
+        title="Admin Panel - Hackethos4U"
+        description="Admin panel for managing Hackethos4U website content"
+        noindex={true}
+      />
+      <div className="min-h-screen bg-background flex">
+        {/* Sidebar */}
       <aside className={`fixed lg:sticky top-0 left-0 h-screen bg-card border-r border-white/10 z-50 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} w-64`}>
         <div className="flex flex-col h-full">
           {/* Logo */}
@@ -1463,6 +1470,7 @@ const Admin = () => {
         </main>
       </div>
     </div>
+    </>
   );
 };
 

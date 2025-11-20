@@ -10,11 +10,17 @@ import { useData } from "@/contexts/DataContext";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { TechBackground, GridBackground, FlowingLinesBackground, ParticleBackground } from "@/components/backgrounds";
+import SEO, { organizationSchema, createBreadcrumbSchema } from "@/components/SEO";
 
 const Services = () => {
   const { services, clients } = useData();
   const { toast } = useToast();
   const activeServices = services.filter((s) => s.isActive);
+
+  const breadcrumbs = createBreadcrumbSchema([
+    { name: "Home", url: "https://hackethos4u.com/" },
+    { name: "Services", url: "https://hackethos4u.com/services" }
+  ]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -63,6 +69,13 @@ const Services = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Professional Cybersecurity & VAPT Services"
+        description="Expert penetration testing services: WPAT (Web Application), Mobile Security Testing, API Security Assessment, and OWASP Top 10 Vulnerability Testing. Secure your business with professional security audits in India."
+        keywords="VAPT services, penetration testing India, web application security testing, mobile app security, API security testing, OWASP testing, security audit, vulnerability assessment, cybersecurity services Hyderabad"
+        canonical="https://hackethos4u.com/services"
+        structuredData={[organizationSchema, breadcrumbs]}
+      />
       <Header />
 
       <div className="pt-16 md:pt-20">

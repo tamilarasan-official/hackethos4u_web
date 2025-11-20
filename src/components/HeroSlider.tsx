@@ -143,6 +143,7 @@ const HeroSlider = () => {
                   <img
                     src={banner.image}
                     alt={banner.title}
+                    loading={index === 0 ? "eager" : "lazy"}
                     className="w-full h-full object-cover"
                   />
                   {/* Moderate gradient overlay - darker on left for text readability */}

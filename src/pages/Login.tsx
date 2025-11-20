@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, Loader2 } from 'lucide-react';
+import SEO from '@/components/SEO';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -33,8 +34,14 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black p-4">
-      {/* Animated background effects */}
+    <>
+      <SEO
+        title="Login - Hackethos4U"
+        description="Admin login page for Hackethos4U"
+        noindex={true}
+      />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black p-4">
+        {/* Animated background effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-primary/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
@@ -113,6 +120,7 @@ const Login = () => {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 };
 

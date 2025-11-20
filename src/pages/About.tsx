@@ -3,10 +3,18 @@ import Footer from "@/components/Footer";
 import { Shield, Award, Users, TrendingUp, Target, Heart, Lightbulb, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TechBackground, GridBackground, FlowingLinesBackground, ParticleBackground } from "@/components/backgrounds";
+import SEO, { organizationSchema } from "@/components/SEO";
 
 const About = () => {
   return (
     <div className="min-h-screen bg-background grid-background">
+      <SEO
+        title="About Hackethos4U - Leading Cybersecurity Training & VAPT Services"
+        description="Hackethos4U is a premier cybersecurity training institute and VAPT service provider in Hyderabad, India. Since 2018, we've been empowering security professionals with expert-led ethical hacking courses and professional penetration testing services."
+        keywords="about hackethos4u, cybersecurity training institute, VAPT company India, ethical hacking institute Hyderabad, security training experts, penetration testing company, cybersecurity education"
+        canonical="https://hackethos4u.com/about"
+        structuredData={organizationSchema}
+      />
       <Header />
 
       <div className="pt-16 md:pt-20">

@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { TechBackground, GridBackground, FlowingLinesBackground, ParticleBackground } from "@/components/backgrounds";
 import { useData } from "@/contexts/DataContext";
+import SEO, { organizationSchema } from "@/components/SEO";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -73,6 +74,13 @@ const Contact = () => {
   };
   return (
     <div className="min-h-screen bg-background grid-background">
+      <SEO
+        title="Contact Us - Get Expert Cybersecurity Solutions"
+        description="Contact Hackethos4U for professional VAPT services, cybersecurity training inquiries, or security consulting. Located in Hyderabad, India. Call +91-7095188315 or email h4u.info@hackethos4u.com"
+        keywords="contact hackethos4u, cybersecurity contact, VAPT inquiry, security training contact, penetration testing quote, Hyderabad cybersecurity, security consultation"
+        canonical="https://hackethos4u.com/contact"
+        structuredData={organizationSchema}
+      />
       <Header />
 
       <div className="pt-16 md:pt-20">

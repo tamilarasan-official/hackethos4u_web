@@ -1,8 +1,15 @@
+# Hackethos4U - Cybersecurity Training & VAPT Services
+# https://hackethos4u.com
+
 User-agent: Googlebot
 Allow: /
+Disallow: /admin
+Disallow: /login
 
 User-agent: Bingbot
 Allow: /
+Disallow: /admin
+Disallow: /login
 
 User-agent: Twitterbot
 Allow: /
@@ -12,3 +19,8 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /login
+
+# Sitemap Location
+Sitemap: https://hackethos4u.com/sitemap.xml

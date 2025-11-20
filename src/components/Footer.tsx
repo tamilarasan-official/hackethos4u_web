@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
-import { Facebook, Twitter, Linkedin, Instagram, Youtube } from "lucide-react";
+import { Facebook, Linkedin, Instagram, Youtube, AtSign } from "lucide-react";
 import logo from "@/assets/Logo.png";
 import { useData } from "@/contexts/DataContext";
 
 const Footer = () => {
   const { services } = useData();
-  const activeServices = services.filter(s => s.isActive);
+  const activeServices = services.filter(s => s.isActive).slice(0, 4);
 
   return (
     <footer className="bg-foreground text-background py-12">
@@ -27,19 +27,19 @@ const Footer = () => {
               Professional cybersecurity training and VAPT services to secure your digital future.
             </p>
             <div className="flex gap-3">
-              <a href="#" className="hover:text-primary transition-colors">
+              <a href="https://www.facebook.com/people/Hackethos4u/61566999715807/?is_tour_dismissed" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Facebook" title="Facebook" className="hover:text-primary transition-colors">
                 <Facebook size={20} />
               </a>
-              <a href="#" className="hover:text-primary transition-colors">
-                <Twitter size={20} />
+              <a href="https://www.threads.com/@hackethos4u?xmt=AQGztzjvD4gzEPiw7J1dg2pUTcE4qFp3Re5hLUq5U" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Threads" title="Threads" className="hover:text-primary transition-colors">
+                <AtSign size={20} />
               </a>
-              <a href="#" className="hover:text-primary transition-colors">
+              <a href="https://www.linkedin.com/in/maniteja7v/" target="_blank" rel="noopener noreferrer" aria-label="Connect with us on LinkedIn" title="LinkedIn" className="hover:text-primary transition-colors">
                 <Linkedin size={20} />
               </a>
-              <a href="#" className="hover:text-primary transition-colors">
+              <a href="https://www.instagram.com/hackethos4u/" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Instagram" title="Instagram" className="hover:text-primary transition-colors">
                 <Instagram size={20} />
               </a>
-              <a href="#" className="hover:text-primary transition-colors">
+              <a href="https://www.youtube.com/@hackethos4u" target="_blank" rel="noopener noreferrer" aria-label="Subscribe to our YouTube channel" title="YouTube" className="hover:text-primary transition-colors">
                 <Youtube size={20} />
               </a>
             </div>

@@ -6,6 +6,7 @@ import { ArrowRight, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FlowingLinesBackground } from "@/components/backgrounds";
 import { useData } from "@/contexts/DataContext";
+import SEO, { organizationSchema, createServiceSchema, createBreadcrumbSchema } from "@/components/SEO";
 
 const ServiceDetail = () => {
   const { slug } = useParams();
@@ -33,8 +34,22 @@ const ServiceDetail = () => {
   // Get icon component from service.icon string
   const IconComponent = service.icon ? (Icons[service.icon as keyof typeof Icons] as React.ComponentType<{ className?: string }>) : Icons.Shield;
 
+  const serviceSchema = createServiceSchema(service);
+  const breadcrumbs = createBreadcrumbSchema([
+    { name: "Home", url: "https://hackethos4u.com/" },
+    { name: "Services", url: "https://hackethos4u.com/services" },
+    { name: service.title, url: `https://hackethos4u.com/services/${service.slug}` }
+  ]);
+
   return (
     <div className="min-h-screen bg-background grid-background">
+      <SEO
+        title={`${service.title} - Professional Security Testing`}
+        description={`${service.details || service.description} Professional ${service.title.toLowerCase()} services in India. Get expert vulnerability assessment and penetration testing for your business.`}
+        keywords={`${service.title}, ${service.slug}, cybersecurity testing, security assessment, penetration testing, VAPT services, ${service.features?.slice(0, 3).join(', ')}`}
+        canonical={`https://hackethos4u.com/services/${service.slug}`}
+        structuredData={[organizationSchema, serviceSchema, breadcrumbs]}
+      />
       <Header />
 
       <div className="pt-16 md:pt-20">
