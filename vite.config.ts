@@ -15,4 +15,19 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunks - separate large dependencies
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-tabs', '@radix-ui/react-dropdown-menu'],
+          'form-vendor': ['react-hook-form', '@hookform/resolvers'],
+          'query-vendor': ['@tanstack/react-query'],
+          'firebase-vendor': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000, // Increase limit to 1000kb to reduce warnings
+  },
 }));
