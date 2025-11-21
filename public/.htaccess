@@ -1,0 +1,118 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Redirect old website URLs to new React routes (case-insensitive)
+  RewriteCond %{REQUEST_URI} ^/Contact$ [NC]
+  RewriteRule ^.*$ /contact [R=301,L]
+
+  RewriteCond %{REQUEST_URI} ^/About$ [NC]
+  RewriteRule ^.*$ /about [R=301,L]
+
+  RewriteCond %{REQUEST_URI} ^/Our[\ ]Team$ [NC]
+  RewriteRule ^.*$ /about [R=301,L]
+
+  RewriteCond %{REQUEST_URI} ^/ETHICAL[\ ]HACKING$ [NC]
+  RewriteRule ^.*$ /courses/ethical-hacking-live [R=301,L]
+
+  RewriteCond %{REQUEST_URI} ^/Signup[\ ]terminal$ [NC]
+  RewriteRule ^.*$ /course-selection [R=301,L]
+
+  # Redirect any old PHP or HTML pages to home
+  RewriteCond %{REQUEST_URI} \.(php|html|htm)$ [NC]
+  RewriteRule ^.*$ / [R=301,L]
+
+  # Don't rewrite files or directories
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+
+  # Rewrite everything else to index.html to allow React Router to handle routing
+  RewriteRule . /index.html [L]
+</IfModule>
+
+# Compression for better performance
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html
+  AddOutputFilterByType DEFLATE text/css
+  AddOutputFilterByType DEFLATE text/javascript
+  AddOutputFilterByType DEFLATE application/javascript
+  AddOutputFilterByType DEFLATE application/x-javascript
+  AddOutputFilterByType DEFLATE application/json
+  AddOutputFilterByType DEFLATE application/xml
+  AddOutputFilterByType DEFLATE text/xml
+  AddOutputFilterByType DEFLATE text/plain
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# Brotli compression (if available)
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/xml text/css text/javascript
+  AddOutputFilterByType BROTLI_COMPRESS application/x-javascript application/javascript application/json application/xml
+</IfModule>
+
+# Browser caching with aggressive settings
+<IfModule mod_expires.c>
+  ExpiresActive On
+
+  # Images - 1 year
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/x-icon "access plus 1 year"
+
+  # CSS and JavaScript - 1 year (with versioning/hashing)
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType text/javascript "access plus 1 year"
+
+  # Fonts - 1 year
+  ExpiresByType font/ttf "access plus 1 year"
+  ExpiresByType font/woff "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType application/font-woff "access plus 1 year"
+
+  # HTML - No cache (always fresh)
+  ExpiresByType text/html "access plus 0 seconds"
+
+  # Data - 1 week
+  ExpiresByType application/json "access plus 1 week"
+  ExpiresByType application/xml "access plus 1 week"
+</IfModule>
+
+# Security headers
+<IfModule mod_headers.c>
+  # Security
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set X-XSS-Protection "1; mode=block"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+
+  # Performance - Cache control
+  <FilesMatch "\.(ico|jpg|jpeg|png|gif|webp|svg)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  <FilesMatch "\.(css|js)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  <FilesMatch "\.(woff|woff2|ttf|eot)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  <FilesMatch "\.(html|htm)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+</IfModule>
+
+# ETags for better caching
+FileETag MTime Size
+
+# Disable ETags for static files (use Cache-Control instead)
+<FilesMatch "\.(ico|jpg|jpeg|png|gif|css|js)$">
+  FileETag None
+</FilesMatch>

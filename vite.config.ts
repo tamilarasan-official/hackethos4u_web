@@ -16,6 +16,11 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    target: 'es2015', // Modern browsers only for smaller bundle
+    minify: 'esbuild', // Fast and effective minification
+    esbuild: {
+      drop: ['console', 'debugger'], // Remove console.logs and debuggers
+    },
     rollupOptions: {
       output: {
         manualChunks: {
@@ -29,5 +34,7 @@ export default defineConfig(({ mode }) => ({
       },
     },
     chunkSizeWarningLimit: 1000, // Increase limit to 1000kb to reduce warnings
+    cssCodeSplit: true, // Split CSS into separate chunks
+    sourcemap: false, // Disable sourcemaps in production for smaller size
   },
 }));
