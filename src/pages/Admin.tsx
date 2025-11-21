@@ -58,7 +58,7 @@ const Admin = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/login');
+      navigate('/admin-access');
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -427,17 +427,16 @@ const Admin = () => {
         description="Admin panel for managing Hackethos4U website content"
         noindex={true}
       />
-      <div className="min-h-screen bg-background flex">
-        {/* Sidebar */}
-      <aside className={`fixed lg:sticky top-0 left-0 h-screen bg-card border-r border-white/10 z-50 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} w-64`}>
-        <div className="flex flex-col h-full">
+      <div className="min-h-screen bg-background lg:flex">
+        {/* Sidebar - Fixed on all screen sizes */}
+      <aside className={`fixed top-0 left-0 h-screen bg-card border-r border-white/10 z-50 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} w-64 flex flex-col`}>
           {/* Logo */}
-          <div className="p-6 border-b border-white/10">
+          <div className="p-6 border-b border-white/10 flex-shrink-0">
             <h2 className="text-xl font-bold text-white">Admin Panel</h2>
             <p className="text-xs text-muted-foreground mt-1">Content Management</p>
           </div>
 
-          {/* Navigation */}
+          {/* Navigation - Scrollable */}
           <nav className="flex-1 p-4 overflow-y-auto">
             <div className="space-y-1">
               {navigationItems.map((item) => {
@@ -463,29 +462,33 @@ const Admin = () => {
             </div>
           </nav>
 
-          {/* User Section */}
-          <div className="p-4 border-t border-white/10">
-            <div className="flex items-center gap-3 mb-3 p-2">
-              <User className="w-8 h-8 text-primary" />
+          {/* User Section - Fixed at Bottom */}
+          <div className="border-t border-white/10 bg-card/50 backdrop-blur-sm flex-shrink-0">
+            {/* User Info */}
+            <div className="px-4 py-3 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <User className="w-5 h-5 text-primary" />
+              </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-muted-foreground">Logged in as</p>
-                <p className="text-sm text-white font-medium truncate">{currentUser?.email}</p>
+                <p className="text-xs text-muted-foreground font-medium">Admin</p>
+                <p className="text-xs text-white truncate">{currentUser?.email}</p>
               </div>
             </div>
-            <div className="space-y-2">
+
+            {/* Action Buttons */}
+            <div className="px-4 pb-4 space-y-2">
               <PasswordChangeDialog />
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleLogout}
-                className="w-full border-white/10 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20"
+                className="w-full border-white/10 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 transition-all"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
               </Button>
             </div>
           </div>
-        </div>
       </aside>
 
       {/* Overlay for mobile */}
@@ -497,7 +500,7 @@ const Admin = () => {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
         {/* Top Bar */}
         <header className="sticky top-0 bg-card/95 backdrop-blur-sm border-b border-white/10 z-30 px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">

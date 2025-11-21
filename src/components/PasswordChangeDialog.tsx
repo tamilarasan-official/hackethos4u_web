@@ -71,7 +71,7 @@ const PasswordChangeDialog = () => {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="border-white/10 hover:bg-white/5 hover:text-white text-white">
+        <Button variant="outline" size="sm" className="w-full border-white/10 hover:bg-primary/10 hover:text-primary hover:border-primary/20 transition-all">
           <Key className="w-4 h-4 mr-2" />
           Change Password
         </Button>

@@ -4,12 +4,12 @@
 User-agent: Googlebot
 Allow: /
 Disallow: /admin
-Disallow: /login
+Disallow: /admin-access
 
 User-agent: Bingbot
 Allow: /
 Disallow: /admin
-Disallow: /login
+Disallow: /admin-access
 
 User-agent: Twitterbot
 Allow: /
@@ -20,7 +20,7 @@ Allow: /
 User-agent: *
 Allow: /
 Disallow: /admin
-Disallow: /login
+Disallow: /admin-access
 
 # Sitemap Location
 Sitemap: https://hackethos4u.com/sitemap.xml
