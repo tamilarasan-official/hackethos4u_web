@@ -354,7 +354,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const addContact = async (contact: Omit<Contact, 'id'>) => {
     try {
       await contactsService.create(contact);
-      toast.success('Contact form submitted successfully!');
+      // Toast notification handled by calling component for custom messages
     } catch (error) {
       console.error('Error adding contact:', error);
       toast.error('Failed to submit contact form');

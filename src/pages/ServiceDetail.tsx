@@ -71,7 +71,7 @@ const ServiceDetail = () => {
               {service.details || service.description}
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link to="/contact">
+              <Link to="/services#contact">
                 <Button size="lg" className="rounded-full">
                   Get a Quote
                   <ArrowRight className="w-4 h-4 ml-2" />
@@ -131,14 +131,39 @@ const ServiceDetail = () => {
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl font-bold mb-8">Trusted By</h2>
             <div className="flex flex-wrap justify-center items-center gap-8 mb-12">
-              {clients && clients.length > 0 ? clients.slice(0, 4).map((client, index: number) => (
-                <div
-                  key={index}
-                  className="bg-card rounded-2xl px-8 py-4 shadow-card font-semibold text-muted-foreground"
-                >
-                  {client.name}
-                </div>
-              )) : (
+              {clients && clients.length > 0 ? clients.slice(0, 4).map((client, index: number) => {
+                const CardContent = (
+                  <>
+                    <img
+                      src={client.logo}
+                      alt={client.name}
+                      className="max-h-12 w-auto opacity-70 hover:opacity-100 transition-opacity"
+                    />
+                    <span className="text-sm text-muted-foreground font-medium text-center">
+                      {client.name}
+                    </span>
+                  </>
+                );
+
+                return client.website ? (
+                  <a
+                    key={index}
+                    href={client.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex flex-col items-center justify-center p-6 bg-card rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 hover:scale-105 gap-3 cursor-pointer"
+                  >
+                    {CardContent}
+                  </a>
+                ) : (
+                  <div
+                    key={index}
+                    className="flex flex-col items-center justify-center p-6 bg-card rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 hover:scale-105 gap-3"
+                  >
+                    {CardContent}
+                  </div>
+                );
+              }) : (
                 <p className="text-muted-foreground">Trusted by leading organizations worldwide</p>
               )}
             </div>
@@ -149,7 +174,7 @@ const ServiceDetail = () => {
               <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
                 Get in touch with our security experts to discuss your requirements and receive a customized quote.
               </p>
-              <Link to="/contact">
+              <Link to="/services#contact">
                 <Button size="lg" className="rounded-full">
                   Request a Quote
                   <ArrowRight className="w-4 h-4 ml-2" />

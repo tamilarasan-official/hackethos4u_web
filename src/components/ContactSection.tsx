@@ -135,7 +135,7 @@ const ContactSection = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-1.5 text-white text-sm">Email</h4>
-                    <p className="text-muted-foreground text-sm">h4u.info@hackethos4u.com</p>
+                    <p className="text-muted-foreground text-sm">maniteja.thagaram@hackethos4u.com</p>
                   </div>
                 </div>
 
@@ -145,7 +145,7 @@ const ContactSection = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-1.5 text-white text-sm">Phone</h4>
-                    <p className="text-muted-foreground text-sm">+91 7095188315</p>
+                    <p className="text-muted-foreground text-sm">+91 8008593735</p>
                   </div>
                 </div>
 

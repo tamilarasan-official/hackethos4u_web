@@ -5,22 +5,34 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useData } from "@/contexts/DataContext";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { TechBackground, GridBackground, FlowingLinesBackground, ParticleBackground } from "@/components/backgrounds";
 import SEO, { organizationSchema, createBreadcrumbSchema } from "@/components/SEO";
 
 const Services = () => {
-  const { services, clients } = useData();
-  const { toast } = useToast();
+  const { services, clients, addContact } = useData();
   const activeServices = services.filter((s) => s.isActive);
+  const location = useLocation();
 
   const breadcrumbs = createBreadcrumbSchema([
     { name: "Home", url: "https://hackethos4u.com/" },
     { name: "Services", url: "https://hackethos4u.com/services" }
   ]);
+
+  // Auto-scroll to contact form if hash is present
+  useEffect(() => {
+    if (location.hash === '#contact') {
+      setTimeout(() => {
+        const element = document.getElementById('contact');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, [location]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -45,12 +57,26 @@ const Services = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      toast({
-        title: "Quote Request Sent!",
+    try {
+      // Find the service name from slug
+      const selectedService = activeServices.find(s => s.slug === formData.service);
+      const serviceTitle = selectedService ? selectedService.title : formData.service;
+
+      await addContact({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.company, // Using company field temporarily for additional info
+        message: `Company: ${formData.company}\n\nService Interested: ${serviceTitle}\n\nMessage:\n${formData.message}`,
+        source: 'services',
+        serviceInterested: serviceTitle,
+        status: 'new',
+        date: new Date().toISOString(),
+      });
+
+      toast.success("Quote Request Sent!", {
         description: "We'll get back to you within 24 hours.",
       });
+
       setFormData({
         name: "",
         email: "",
@@ -58,8 +84,12 @@ const Services = () => {
         service: "",
         message: "",
       });
+    } catch (error) {
+      console.error('Error submitting quote request:', error);
+      toast.error("Failed to submit. Please try again.");
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   };
 
   const getIconComponent = (iconName: string) => {
@@ -185,18 +215,39 @@ const Services = () => {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto items-center">
-              {clients.map((client) => (
-                <div
-                  key={client.id}
-                  className="flex items-center justify-center p-6 bg-card rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 hover:scale-105"
-                >
-                  <img
-                    src={client.logo}
-                    alt={client.name}
-                    className="max-h-12 w-auto opacity-70 hover:opacity-100 transition-opacity"
-                  />
-                </div>
-              ))}
+              {clients.map((client) => {
+                const CardContent = (
+                  <>
+                    <img
+                      src={client.logo}
+                      alt={client.name}
+                      className="max-h-12 w-auto opacity-70 hover:opacity-100 transition-opacity"
+                    />
+                    <span className="text-sm text-muted-foreground font-medium text-center">
+                      {client.name}
+                    </span>
+                  </>
+                );
+
+                return client.website ? (
+                  <a
+                    key={client.id}
+                    href={client.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex flex-col items-center justify-center p-6 bg-card rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 hover:scale-105 gap-3 cursor-pointer"
+                  >
+                    {CardContent}
+                  </a>
+                ) : (
+                  <div
+                    key={client.id}
+                    className="flex flex-col items-center justify-center p-6 bg-card rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 hover:scale-105 gap-3"
+                  >
+                    {CardContent}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>

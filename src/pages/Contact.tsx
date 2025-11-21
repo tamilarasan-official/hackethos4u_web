@@ -76,7 +76,7 @@ const Contact = () => {
     <div className="min-h-screen bg-background grid-background">
       <SEO
         title="Contact Us - Get Expert Cybersecurity Solutions"
-        description="Contact Hackethos4U for professional VAPT services, cybersecurity training inquiries, or security consulting. Located in Hyderabad, India. Call +91-7095188315 or email h4u.info@hackethos4u.com"
+        description="Contact Hackethos4U for professional VAPT services, cybersecurity training inquiries, or security consulting. Located in Hyderabad, India. Call +91-8008593735 or email maniteja.thagaram@hackethos4u.com"
         keywords="contact hackethos4u, cybersecurity contact, VAPT inquiry, security training contact, penetration testing quote, Hyderabad cybersecurity, security consultation"
         canonical="https://hackethos4u.com/contact"
         structuredData={organizationSchema}
@@ -208,7 +208,7 @@ const Contact = () => {
                     </div>
                     <div>
                       <h4 className="font-semibold mb-1.5 text-white text-sm">Email</h4>
-                      <p className="text-muted-foreground text-sm">h4u.info@hackethos4u.com</p>
+                      <p className="text-muted-foreground text-sm">maniteja.thagaram@hackethos4u.com</p>
                     </div>
                   </div>
 
@@ -218,7 +218,7 @@ const Contact = () => {
                     </div>
                     <div>
                       <h4 className="font-semibold mb-1.5 text-white text-sm">Phone</h4>
-                      <p className="text-muted-foreground text-sm">+91 7095188315</p>
+                      <p className="text-muted-foreground text-sm">+91 8008593735</p>
                     </div>
                   </div>
 

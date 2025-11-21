@@ -80,8 +80,8 @@ export const organizationSchema = {
   "url": "https://hackethos4u.com",
   "logo": "https://hackethos4u.com/logo.png",
   "description": "Professional cybersecurity training and VAPT (Vulnerability Assessment and Penetration Testing) services. We offer ethical hacking courses, bug bounty training, OWASP testing, mobile security, and API security services.",
-  "email": "h4u.info@hackethos4u.com",
-  "telephone": "+91-7095188315",
+  "email": "maniteja.thagaram@hackethos4u.com",
+  "telephone": "+91-8008593735",
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "9G8C+PRQ, Dilsukhnagar",
@@ -100,8 +100,8 @@ export const organizationSchema = {
   "contactPoint": {
     "@type": "ContactPoint",
     "contactType": "Customer Service",
-    "telephone": "+91-7095188315",
-    "email": "h4u.info@hackethos4u.com",
+    "telephone": "+91-8008593735",
+    "email": "maniteja.thagaram@hackethos4u.com",
     "areaServed": "IN",
     "availableLanguage": ["English", "Hindi", "Telugu"]
   }

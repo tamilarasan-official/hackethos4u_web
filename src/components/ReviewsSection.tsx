@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { Star, MessageSquarePlus } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Star, MessageSquarePlus, ChevronLeft, ChevronRight } from "lucide-react";
 import { FlowingLinesBackground } from "@/components/backgrounds";
 import { useData } from "@/contexts/DataContext";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,8 @@ const ReviewsSection = () => {
   const { reviews, addReview } = useData();
   const activeReviews = reviews.filter(r => r.isActive);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAutoScrolling, setIsAutoScrolling] = useState(true);
 
   // Review submission modal state
   const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -75,6 +77,53 @@ const ReviewsSection = () => {
     }
   };
 
+  // Auto-scroll effect for mobile
+  useEffect(() => {
+    if (!scrollContainerRef.current || activeReviews.length <= 1) return;
+
+    const container = scrollContainerRef.current;
+    let autoScrollInterval: NodeJS.Timeout;
+
+    if (isAutoScrolling) {
+      autoScrollInterval = setInterval(() => {
+        const nextIndex = (currentIndex + 1) % activeReviews.length;
+        setCurrentIndex(nextIndex);
+
+        const cardWidth = container.scrollWidth / activeReviews.length;
+        container.scrollTo({
+          left: cardWidth * nextIndex,
+          behavior: 'smooth'
+        });
+      }, 3000);
+    }
+
+    return () => clearInterval(autoScrollInterval);
+  }, [currentIndex, activeReviews.length, isAutoScrolling]);
+
+  // Stop auto-scroll when user manually scrolls
+  const handleScroll = () => {
+    setIsAutoScrolling(false);
+    if (!scrollContainerRef.current) return;
+
+    const container = scrollContainerRef.current;
+    const cardWidth = container.scrollWidth / activeReviews.length;
+    const newIndex = Math.round(container.scrollLeft / cardWidth);
+    setCurrentIndex(newIndex);
+  };
+
+  const scrollToIndex = (index: number) => {
+    if (!scrollContainerRef.current) return;
+    setIsAutoScrolling(false);
+
+    const container = scrollContainerRef.current;
+    const cardWidth = container.scrollWidth / activeReviews.length;
+    container.scrollTo({
+      left: cardWidth * index,
+      behavior: 'smooth'
+    });
+    setCurrentIndex(index);
+  };
+
   // Duplicate reviews for infinite scroll effect if more than 3
   const duplicatedReviews = activeReviews.length > 3 ? [...activeReviews, ...activeReviews] : activeReviews;
 
@@ -85,7 +134,7 @@ const ReviewsSection = () => {
   const shouldAutoScroll = activeReviews.length > 3;
 
   return (
-    <section id="reviews" className={`relative py-20 md:py-28 ${shouldAutoScroll ? 'overflow-hidden' : ''}`}>
+    <section id="reviews" className="relative py-20 md:py-28 overflow-hidden">
       <FlowingLinesBackground variant="wave" direction="rtl" />
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-16">
@@ -111,16 +160,24 @@ const ReviewsSection = () => {
           </div>
         </div>
 
-        {/* Auto-scrolling container or grid */}
-        {shouldAutoScroll ? (
-          <div className="relative overflow-hidden py-2">
-            <div className="flex gap-6 animate-scroll">
-            {duplicatedReviews.map((review, index) => (
+        {/* Mobile: Horizontal scroll */}
+        <div className="md:hidden">
+          <div
+            ref={scrollContainerRef}
+            onScroll={handleScroll}
+            onTouchStart={() => setIsAutoScrolling(false)}
+            className="flex gap-6 overflow-x-auto py-4 snap-x snap-mandatory scrollbar-hide px-4 -mx-4"
+            style={{
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch'
+            }}
+          >
+            {activeReviews.map((review, index) => (
               <div
                 key={`${review.id}-${index}`}
-                className="card-sleek p-6 flex-shrink-0 w-[380px] flex flex-col min-h-[280px] overflow-visible"
+                className="card-sleek p-6 flex-shrink-0 w-[85vw] sm:w-[380px] flex flex-col min-h-[280px] overflow-visible snap-center"
               >
-                {/* Stars */}
                 <div className="flex gap-1 mb-4">
                   {[...Array(review.rating)].map((_, i) => (
                     <Star
@@ -129,13 +186,9 @@ const ReviewsSection = () => {
                     />
                   ))}
                 </div>
-
-                {/* Comment */}
                 <p className="text-sm text-muted-foreground mb-6 flex-grow line-clamp-6">
                   "{review.comment}"
                 </p>
-
-                {/* Author Info */}
                 <div className="border-t border-border pt-4 mt-auto">
                   <div className="flex items-center justify-between">
                     <div>
@@ -151,48 +204,110 @@ const ReviewsSection = () => {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Pagination Dots for Mobile */}
+          {activeReviews.length > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-8 relative z-10">
+              {activeReviews.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => scrollToIndex(index)}
+                  className={`transition-all duration-300 rounded-full ${
+                    index === currentIndex
+                      ? 'bg-primary w-8 h-2'
+                      : 'bg-white/30 w-2 h-2 hover:bg-white/50'
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
             </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-            {activeReviews.map((review) => (
-              <div
-                key={review.id}
-                className="card-sleek p-6 flex flex-col min-h-[280px]"
-              >
-                {/* Stars */}
-                <div className="flex gap-1 mb-4">
-                  {[...Array(review.rating)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="w-5 h-5 fill-primary text-primary"
-                    />
-                  ))}
-                </div>
+          )}
 
-                {/* Comment */}
-                <p className="text-sm text-muted-foreground mb-6 flex-grow line-clamp-6">
-                  "{review.comment}"
-                </p>
+          {/* Swipe Hint - Only show initially */}
+          {activeReviews.length > 1 && isAutoScrolling && (
+            <div className="flex items-center justify-center gap-2 mt-4 text-muted-foreground text-sm animate-pulse relative z-10">
+              <ChevronLeft className="w-4 h-4" />
+              <span>Swipe to explore</span>
+              <ChevronRight className="w-4 h-4" />
+            </div>
+          )}
+        </div>
 
-                {/* Author Info */}
-                <div className="border-t border-border pt-4 mt-auto">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-semibold text-sm">{review.name}</h4>
-                      <p className="text-xs text-muted-foreground">
-                        {review.role}
-                      </p>
+        {/* Desktop: Auto-scroll or Grid */}
+        <div className="hidden md:block">
+          {shouldAutoScroll ? (
+            <div className="relative overflow-hidden py-2">
+              <div className="flex gap-6 animate-scroll">
+                {duplicatedReviews.map((review, index) => (
+                  <div
+                    key={`${review.id}-${index}`}
+                    className="card-sleek p-6 flex-shrink-0 w-[380px] flex flex-col min-h-[280px] overflow-visible"
+                  >
+                    <div className="flex gap-1 mb-4">
+                      {[...Array(review.rating)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className="w-5 h-5 fill-primary text-primary"
+                        />
+                      ))}
                     </div>
-                    <span className="text-xs text-muted-foreground">
-                      {formatDate(review.date)}
-                    </span>
+                    <p className="text-sm text-muted-foreground mb-6 flex-grow line-clamp-6">
+                      "{review.comment}"
+                    </p>
+                    <div className="border-t border-border pt-4 mt-auto">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-semibold text-sm">{review.name}</h4>
+                          <p className="text-xs text-muted-foreground">
+                            {review.role}
+                          </p>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {formatDate(review.date)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+              {activeReviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="card-sleek p-6 flex flex-col min-h-[280px]"
+                >
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(review.rating)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className="w-5 h-5 fill-primary text-primary"
+                      />
+                    ))}
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-6 flex-grow line-clamp-6">
+                    "{review.comment}"
+                  </p>
+                  <div className="border-t border-border pt-4 mt-auto">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-semibold text-sm">{review.name}</h4>
+                        <p className="text-xs text-muted-foreground">
+                          {review.role}
+                        </p>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(review.date)}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Submit Review Modal */}
         <Dialog open={showSubmitModal} onOpenChange={setShowSubmitModal}>

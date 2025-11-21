@@ -93,8 +93,8 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold text-lg mb-4">Contact</h4>
             <ul className="space-y-2 text-sm opacity-80">
-              <li>Email: h4u.info@hackethos4u.com</li>
-              <li>Phone: +91 7095188315</li>
+              <li>Email: maniteja.thagaram@hackethos4u.com</li>
+              <li>Phone: +91 8008593735</li>
               <li>Address: 9G8C+PRQ, Dilsukhnagar</li>
               <li>Hyderabad, Telangana</li>
             </ul>

@@ -27,7 +27,7 @@ const HeroSlider = () => {
 
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % activeBanners.length);
-    }, 5000);
+    }, 8000); // 8 seconds delay between slides
 
     return () => clearInterval(timer);
   }, [activeBanners.length]);
