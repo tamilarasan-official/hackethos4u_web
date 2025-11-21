@@ -1490,7 +1490,7 @@ const Admin = () => {
                           size="sm"
                           variant="outline"
                           onClick={() => handleDeleteContact(contact.id)}
-                          className="border-red-500/20 hover:bg-red-500/10 text-red-500"
+                          className="border-red-500/20 hover:bg-red-500/10 text-red-500 hover:text-red-500"
                         >
                           <Trash2 className="w-3 h-3 mr-1" />
                           Delete
