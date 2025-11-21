@@ -262,7 +262,7 @@ const Admin = () => {
         role: reviewForm.role,
         rating: reviewForm.rating,
         comment: reviewForm.comment,
-        date: reviewForm.date,
+        date: reviewForm.date ? new Date(reviewForm.date).toISOString() : new Date().toISOString(), // Convert yyyy-MM-dd to ISO
         avatar: reviewForm.avatar,
         isActive: reviewForm.isActive,
       };
@@ -291,7 +291,7 @@ const Admin = () => {
       role: review.role,
       rating: review.rating,
       comment: review.comment,
-      date: review.date,
+      date: review.date ? review.date.split('T')[0] : new Date().toISOString().split('T')[0], // Convert ISO to yyyy-MM-dd
       avatar: review.avatar || "",
       isActive: review.isActive,
     });
