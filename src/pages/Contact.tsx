@@ -125,7 +125,7 @@ const Contact = () => {
                     <Input
                       value={formData.firstName}
                       onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                      placeholder="John"
+                      placeholder="Enter your first name"
                       className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary"
                       required
                     />
@@ -135,7 +135,7 @@ const Contact = () => {
                     <Input
                       value={formData.lastName}
                       onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                      placeholder="Doe"
+                      placeholder="Enter your last name"
                       className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary"
                     />
                   </div>
@@ -146,7 +146,7 @@ const Contact = () => {
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="john.doe@example.com"
+                    placeholder="Enter your email"
                     className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary"
                     required
                   />
@@ -206,9 +206,9 @@ const Contact = () => {
                     <div className="bg-primary/10 text-primary rounded-lg p-2.5 border border-primary/20 flex-shrink-0">
                       <Mail className="w-4 h-4" />
                     </div>
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <h4 className="font-semibold mb-1.5 text-white text-sm">Email</h4>
-                      <p className="text-muted-foreground text-sm">maniteja.thagaram@hackethos4u.com</p>
+                      <p className="text-muted-foreground text-sm break-words">maniteja.thagaram@hackethos4u.com</p>
                     </div>
                   </div>
 
@@ -239,7 +239,7 @@ const Contact = () => {
               </div>
 
               {/* Office Hours */}
-              <div className="bg-gradient-to-br from-primary to-accent text-black rounded-xl p-6 shadow-lg">
+              <div data-light-bg="true" className="bg-gradient-to-br from-primary to-accent text-black rounded-xl p-6 shadow-lg">
                 <div className="flex items-center gap-2.5 mb-5">
                   <Clock className="w-5 h-5" />
                   <h3 className="text-xl font-bold">Office Hours</h3>
@@ -311,20 +311,26 @@ const Contact = () => {
         </div>
       </section>
 
-      {/* Map Placeholder */}
+      {/* Google Maps */}
       <section className="relative py-16">
         <FlowingLinesBackground variant="wave" direction="rtl" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-6xl mx-auto">
-            <div className="card-sleek h-[400px] flex items-center justify-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
-              <div className="text-center relative z-10">
-                <div className="inline-flex p-4 rounded-xl bg-primary/10 border border-primary/20 mb-4">
-                  <MapPin className="w-12 h-12 text-primary" />
-                </div>
-                <h3 className="text-2xl font-bold mb-2 text-white">Visit Our Office</h3>
-                <p className="text-muted-foreground">9G8C+PRQ, Dilsukhnagar, Hyderabad</p>
-              </div>
+            <div className="mb-6 text-center">
+              <h3 className="text-2xl md:text-3xl font-bold mb-2 text-white">Visit Our Office</h3>
+              <p className="text-muted-foreground">9G8C+PRQ, Dilsukhnagar, Hyderabad, Telangana</p>
+            </div>
+            <div className="card-sleek overflow-hidden">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3807.823!2d78.5215!3d17.3665!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTfCsDIxJzU5LjQiTiA3OMKwMzEnMTcuNCJF!5e0!3m2!1sen!2sin!4v1635000000000!5m2!1sen!2sin"
+                width="100%"
+                height="400"
+                style={{ border: 0 }}
+                allowFullScreen={true}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="w-full h-[400px]"
+              ></iframe>
             </div>
           </div>
         </div>

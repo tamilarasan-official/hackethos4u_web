@@ -192,6 +192,8 @@ const Admin = () => {
       isActive: course.isActive,
       demoAvailable: course.demoAvailable || false,
     });
+    // Scroll to form after setting the data
+    scrollToSection(courseFormRef);
   };
 
   const handleDeleteCourse = async (id: string) => {
@@ -205,6 +207,16 @@ const Admin = () => {
 
   // Service Handlers
   const handleSaveService = async () => {
+    // Validate required fields
+    if (!serviceForm.title.trim()) {
+      toast({ title: "Error", description: "Please enter a service title", variant: "destructive" });
+      return;
+    }
+    if (!serviceForm.slug.trim()) {
+      toast({ title: "Error", description: "Please enter a slug", variant: "destructive" });
+      return;
+    }
+
     try {
       const serviceData: any = {
         title: serviceForm.title,
@@ -219,8 +231,10 @@ const Admin = () => {
       if (editingService) {
         await updateService(editingService.id, serviceData);
         setEditingService(null);
+        toast({ title: "Success", description: "Service updated successfully!" });
       } else {
         await addService(serviceData);
+        toast({ title: "Success", description: "Service added successfully!" });
       }
 
       setServiceForm({
@@ -229,6 +243,7 @@ const Admin = () => {
       });
     } catch (error) {
       console.error("Error saving service:", error);
+      toast({ title: "Error", description: "Failed to save service", variant: "destructive" });
     }
   };
 
@@ -243,6 +258,8 @@ const Admin = () => {
       details: Array.isArray(service.details) ? service.details.join('\n') : (service.details || ""),
       isActive: service.isActive,
     });
+    // Scroll to form after setting the data
+    scrollToSection(serviceFormRef);
   };
 
   const handleDeleteService = async (id: string) => {
@@ -256,6 +273,20 @@ const Admin = () => {
 
   // Review Handlers
   const handleSaveReview = async () => {
+    // Validate required fields
+    if (!reviewForm.name.trim()) {
+      toast({ title: "Error", description: "Please enter a name", variant: "destructive" });
+      return;
+    }
+    if (!reviewForm.role.trim()) {
+      toast({ title: "Error", description: "Please enter a role", variant: "destructive" });
+      return;
+    }
+    if (!reviewForm.comment.trim()) {
+      toast({ title: "Error", description: "Please enter a comment", variant: "destructive" });
+      return;
+    }
+
     try {
       const reviewData: any = {
         name: reviewForm.name,
@@ -270,8 +301,10 @@ const Admin = () => {
       if (editingReview) {
         await updateReview(editingReview.id, reviewData);
         setEditingReview(null);
+        toast({ title: "Success", description: "Review updated successfully!" });
       } else {
         await addReview(reviewData);
+        toast({ title: "Success", description: "Review added successfully!" });
       }
 
       setReviewForm({
@@ -281,6 +314,7 @@ const Admin = () => {
       });
     } catch (error) {
       console.error("Error saving review:", error);
+      toast({ title: "Error", description: "Failed to save review", variant: "destructive" });
     }
   };
 
@@ -295,6 +329,8 @@ const Admin = () => {
       avatar: review.avatar || "",
       isActive: review.isActive,
     });
+    // Scroll to form after setting the data
+    scrollToSection(reviewFormRef);
   };
 
   const handleDeleteReview = async (id: string) => {
@@ -308,6 +344,16 @@ const Admin = () => {
 
   // Banner Handlers
   const handleSaveBanner = async () => {
+    // Validate required fields
+    if (!bannerForm.title.trim()) {
+      toast({ title: "Error", description: "Please enter a banner title", variant: "destructive" });
+      return;
+    }
+    if (!bannerForm.image.trim()) {
+      toast({ title: "Error", description: "Please enter an image URL", variant: "destructive" });
+      return;
+    }
+
     try {
       const bannerData: any = {
         title: bannerForm.title,
@@ -327,8 +373,10 @@ const Admin = () => {
       if (editingBanner) {
         await updateBanner(editingBanner.id, bannerData);
         setEditingBanner(null);
+        toast({ title: "Success", description: "Banner updated successfully!" });
       } else {
         await addBanner(bannerData);
+        toast({ title: "Success", description: "Banner added successfully!" });
       }
 
       setBannerForm({
@@ -337,6 +385,7 @@ const Admin = () => {
       });
     } catch (error) {
       console.error("Error saving banner:", error);
+      toast({ title: "Error", description: "Failed to save banner", variant: "destructive" });
     }
   };
 
@@ -351,6 +400,8 @@ const Admin = () => {
       countdownEndDate: banner.countdown?.endDate ? new Date(banner.countdown.endDate).toISOString().split('T')[0] : "",
       isActive: banner.isActive,
     });
+    // Scroll to form after setting the data
+    scrollToSection(bannerFormRef);
   };
 
   const handleDeleteBanner = async (id: string) => {

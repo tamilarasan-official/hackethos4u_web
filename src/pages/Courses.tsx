@@ -178,17 +178,17 @@ const Courses = () => {
                   {/* Meta Info */}
                   <div className="space-y-2.5 mb-6 pb-6 border-b border-white/10 flex-grow">
                     <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                      <div className="p-1.5 rounded-lg bg-white/5 border border-white/10">
+                      <div className="p-1.5 rounded-lg bg-white/5 border border-white/10 flex-shrink-0">
                         <Icons.Clock className="w-3.5 h-3.5 text-white/60" />
                       </div>
-                      <span>{course.duration}</span>
+                      <span className="flex-1">{course.duration}</span>
                     </div>
                     {course.recordingsCount && (
                       <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                        <div className="p-1.5 rounded-lg bg-white/5 border border-white/10">
+                        <div className="p-1.5 rounded-lg bg-white/5 border border-white/10 flex-shrink-0">
                           <Icons.Video className="w-3.5 h-3.5 text-white/60" />
                         </div>
-                        <span>{course.recordingsCount} Video Lessons</span>
+                        <span className="flex-1">{course.recordingsCount} Video Lessons</span>
                       </div>
                     )}
                   </div>
@@ -277,17 +277,17 @@ const Courses = () => {
                   {/* Meta Info */}
                   <div className="space-y-2.5 mb-6 pb-6 border-b border-white/10">
                     <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                      <div className="p-1.5 rounded-lg bg-white/5 border border-white/10">
+                      <div className="p-1.5 rounded-lg bg-white/5 border border-white/10 flex-shrink-0">
                         <Icons.Clock className="w-3.5 h-3.5 text-white/60" />
                       </div>
-                      <span>{course.duration}</span>
+                      <span className="flex-1">{course.duration}</span>
                     </div>
                     {course.sessionType && (
                       <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                        <div className="p-1.5 rounded-lg bg-white/5 border border-white/10">
+                        <div className="p-1.5 rounded-lg bg-white/5 border border-white/10 flex-shrink-0">
                           <Icons.Users className="w-3.5 h-3.5 text-white/60" />
                         </div>
-                        <span>{course.sessionType === 'both' ? 'One-to-One & Group' : course.sessionType}</span>
+                        <span className="flex-1">{course.sessionType === 'both' ? 'One-to-One & Group' : course.sessionType}</span>
                       </div>
                     )}
                   </div>

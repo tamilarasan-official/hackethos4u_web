@@ -228,7 +228,7 @@ const HeroSlider = () => {
                     )}
 
                     {/* CTA Buttons */}
-                    <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3 relative z-20 mb-12 sm:mb-0">
                       {banner.ctaLink ? (
                         <Link to={banner.ctaLink}>
                           <Button size="default" className="rounded-full px-6 md:px-8 py-2 md:py-3 bg-white text-primary hover:bg-white/90 shadow-xl font-semibold text-sm md:text-base lg:text-lg w-full sm:w-auto">
@@ -278,7 +278,7 @@ const HeroSlider = () => {
 
           {/* Slide Indicators */}
           {activeBanners.length > 1 && (
-            <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+            <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
               {activeBanners.map((_, index) => (
                 <button
                   key={index}

@@ -307,7 +307,7 @@ const Services = () => {
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      placeholder="John Doe"
+                      placeholder="Enter your full name"
                       required
                       className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary"
                     />
@@ -322,7 +322,7 @@ const Services = () => {
                       type="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      placeholder="john@company.com"
+                      placeholder="Enter your email address"
                       required
                       className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary"
                     />
@@ -339,7 +339,7 @@ const Services = () => {
                       name="company"
                       value={formData.company}
                       onChange={handleInputChange}
-                      placeholder="Your Company"
+                      placeholder="Enter your company name"
                       className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary"
                     />
                   </div>
