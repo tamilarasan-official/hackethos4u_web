@@ -45,6 +45,13 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
+  // IMPORTANT: Only cache GET requests (POST/PUT/DELETE can't be cached)
+  if (request.method !== 'GET') {
+    // Let POST/PUT/DELETE requests pass through to network
+    event.respondWith(fetch(request));
+    return;
+  }
+
   // Check if it's a Firebase resource
   const isFirebaseResource = FIREBASE_DOMAINS.some(domain => url.hostname.includes(domain));
 
@@ -56,8 +63,8 @@ self.addEventListener('fetch', (event) => {
           if (cachedResponse) {
             // Return cached response and update in background
             const fetchPromise = fetch(request).then((networkResponse) => {
-              // Only cache successful responses
-              if (networkResponse && networkResponse.status === 200) {
+              // Only cache successful GET responses
+              if (networkResponse && networkResponse.status === 200 && request.method === 'GET') {
                 cache.put(request, networkResponse.clone());
               }
               return networkResponse;
@@ -68,8 +75,8 @@ self.addEventListener('fetch', (event) => {
 
           // Not in cache, fetch from network
           return fetch(request).then((networkResponse) => {
-            // Cache successful responses for 1 year (max-age)
-            if (networkResponse && networkResponse.status === 200) {
+            // Cache successful GET responses for 1 year (max-age)
+            if (networkResponse && networkResponse.status === 200 && request.method === 'GET') {
               cache.put(request, networkResponse.clone());
             }
             return networkResponse;
