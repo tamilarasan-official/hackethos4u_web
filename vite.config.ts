@@ -35,33 +35,8 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          // Split heavy vendor libraries into separate chunks for better caching
           if (id.includes('node_modules')) {
-            // React core libraries
-            if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
-              return 'react-vendor';
-            }
-            // React Router
-            if (id.includes('react-router')) {
-              return 'router-vendor';
-            }
-            // React Query
-            if (id.includes('@tanstack/react-query')) {
-              return 'query-vendor';
-            }
-            // UI libraries (Radix UI, etc.)
-            if (id.includes('@radix-ui') || id.includes('lucide-react')) {
-              return 'ui-vendor';
-            }
-            // Firebase
-            if (id.includes('firebase') || id.includes('@firebase')) {
-              return 'firebase-vendor';
-            }
-            // Form libraries
-            if (id.includes('react-hook-form') || id.includes('zod')) {
-              return 'form-vendor';
-            }
-            // Other vendor libraries
+            // Keep ALL node_modules together to prevent module loading issues
             return 'vendor';
           }
         },
