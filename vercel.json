@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build:no-snap",
+  "buildCommand": "npm run build",
   "rewrites": [
     {
       "source": "/(.*)",
