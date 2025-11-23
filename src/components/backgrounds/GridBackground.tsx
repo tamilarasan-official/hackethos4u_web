@@ -35,8 +35,14 @@ const GridBackground: React.FC<GridBackgroundProps> = ({ variant = 'default', cl
   const config = getGridConfig();
 
   return (
-    <div className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}>
-      <svg className={`absolute inset-0 w-full h-full ${config.opacity}`}>
+    <div
+      className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}
+      style={{ contain: 'layout style paint' }}
+    >
+      <svg
+        className={`absolute inset-0 w-full h-full ${config.opacity}`}
+        style={{ willChange: 'transform' }}
+      >
         <defs>
           {/* Main Grid Pattern */}
           <pattern

@@ -18,8 +18,10 @@ export default defineConfig(({ mode }) => ({
   build: {
     target: 'es2015', // Modern browsers only for smaller bundle
     minify: 'esbuild', // Fast and effective minification
+    cssMinify: 'esbuild', // Minify CSS as well
     esbuild: {
       drop: ['console', 'debugger'], // Remove console.logs and debuggers
+      legalComments: 'none', // Remove license comments
     },
     rollupOptions: {
       output: {
@@ -31,10 +33,25 @@ export default defineConfig(({ mode }) => ({
           'query-vendor': ['@tanstack/react-query'],
           'firebase-vendor': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
         },
+        // Optimize asset file names
+        assetFileNames: (assetInfo) => {
+          const info = assetInfo.name.split('.');
+          const ext = info[info.length - 1];
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
+            return `assets/images/[name]-[hash][extname]`;
+          } else if (/css/i.test(ext)) {
+            return `assets/css/[name]-[hash][extname]`;
+          }
+          return `assets/[name]-[hash][extname]`;
+        },
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js',
       },
     },
     chunkSizeWarningLimit: 1000, // Increase limit to 1000kb to reduce warnings
     cssCodeSplit: true, // Split CSS into separate chunks
     sourcemap: false, // Disable sourcemaps in production for smaller size
+    reportCompressedSize: false, // Faster builds
+    assetsInlineLimit: 4096, // Inline assets smaller than 4kb
   },
 }));

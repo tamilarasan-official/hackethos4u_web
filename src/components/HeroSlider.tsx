@@ -155,7 +155,10 @@ const HeroSlider = () => {
                     src={banner.image}
                     alt={banner.title}
                     loading={index === 0 ? "eager" : "lazy"}
+                    width="1200"
+                    height="520"
                     className="w-full h-full object-cover"
+                    style={{ aspectRatio: '1200/520' }}
                   />
                   {/* Moderate gradient overlay - darker on left for text readability */}
                   <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent" />

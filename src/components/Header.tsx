@@ -72,7 +72,12 @@ const Header = () => {
             <img
               src={logo}
               alt="Hackethos4U Logo"
+              width="56"
+              height="63"
               className="h-10 md:h-12 w-auto rounded-lg bg-white p-1"
+              loading="eager"
+              fetchpriority="high"
+              decoding="async"
             />
             <div className="text-xl md:text-2xl font-bold">
               <span className={isOverLightBg ? "text-black" : "text-white"}>Hackethos</span>

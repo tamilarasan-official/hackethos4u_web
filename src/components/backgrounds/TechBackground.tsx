@@ -37,12 +37,15 @@ const TechBackground: React.FC<TechBackgroundProps> = ({ variant = 'section', cl
   const { orbs } = getOrbConfig();
 
   return (
-    <div className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}>
+    <div
+      className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}
+      style={{ contain: 'layout style paint' }}
+    >
       {orbs.map((orb, index) => (
         <div
           key={index}
           className={`absolute ${orb.size} ${orb.position} ${orb.color} rounded-full blur-3xl animate-pulse-slow`}
-          style={{ animationDelay: orb.delay }}
+          style={{ animationDelay: orb.delay, willChange: 'transform, opacity' }}
         />
       ))}
     </div>

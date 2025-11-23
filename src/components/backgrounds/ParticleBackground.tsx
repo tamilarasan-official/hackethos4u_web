@@ -102,8 +102,15 @@ const ParticleBackground: React.FC<ParticleBackgroundProps> = ({ particleCount =
   }, [particleCount]);
 
   return (
-    <div className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}>
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full opacity-30" />
+    <div
+      className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}
+      style={{ contain: 'layout style paint' }}
+    >
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full opacity-30"
+        style={{ willChange: 'transform' }}
+      />
     </div>
   );
 };

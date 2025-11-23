@@ -14,12 +14,15 @@ const CyberGrid: React.FC<CyberGridProps> = ({ intensity = 'medium', className =
   }[intensity];
 
   return (
-    <div className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`} style={{ zIndex: 0 }}>
+    <div
+      className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}
+      style={{ zIndex: 0, contain: 'layout style paint' }}
+    >
       {/* Main Tech Grid - MUCH MORE VISIBLE */}
       <svg
         className={`absolute inset-0 w-full h-full ${config.opacity}`}
         xmlns="http://www.w3.org/2000/svg"
-        style={{ mixBlendMode: 'screen' }}
+        style={{ mixBlendMode: 'screen', willChange: 'transform' }}
       >
         <defs>
           {/* Large Grid Pattern - 40px squares - THICKER LINES */}

@@ -191,35 +191,39 @@
     animation-play-state: paused;
   }
 
-  /* Tech Background Animations */
+  /* Tech Background Animations - GPU Accelerated */
   @keyframes pulse-slow {
     0%, 100% {
       opacity: 0.3;
-      transform: scale(1);
+      transform: scale3d(1, 1, 1);
     }
     50% {
       opacity: 0.6;
-      transform: scale(1.05);
+      transform: scale3d(1.05, 1.05, 1);
     }
   }
 
   .animate-pulse-slow {
     animation: pulse-slow 8s ease-in-out infinite;
+    will-change: transform, opacity;
+    transform: translateZ(0); /* Force GPU acceleration */
   }
 
   @keyframes grid-glow {
     0%, 100% {
       opacity: 0.2;
-      r: 2;
+      transform: scale3d(0.5, 0.5, 1);
     }
     50% {
       opacity: 0.6;
-      r: 4;
+      transform: scale3d(1, 1, 1);
     }
   }
 
   .animate-grid-glow {
     animation: grid-glow 3s ease-in-out infinite;
+    will-change: transform, opacity;
+    transform: translateZ(0);
   }
 
   @keyframes data-flow {
@@ -241,6 +245,8 @@
 
   .animate-data-flow {
     animation: data-flow 4s linear infinite;
+    will-change: opacity;
+    transform: translateZ(0);
   }
 
   @keyframes data-flow-reverse {
@@ -262,24 +268,28 @@
 
   .animate-data-flow-reverse {
     animation: data-flow-reverse 4s linear infinite;
+    will-change: opacity;
+    transform: translateZ(0);
   }
 
   @keyframes scan-line {
     0% {
-      transform: translateY(-100%);
+      transform: translate3d(0, -100%, 0);
       opacity: 0;
     }
     50% {
       opacity: 0.3;
     }
     100% {
-      transform: translateY(100%);
+      transform: translate3d(0, 100%, 0);
       opacity: 0;
     }
   }
 
   .animate-scan-line {
     animation: scan-line 6s linear infinite;
+    will-change: transform, opacity;
+    transform: translateZ(0);
   }
 
   /* Reduced motion support */
