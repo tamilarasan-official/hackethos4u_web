@@ -1,15 +1,22 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import {
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  updatePassword,
-  reauthenticateWithCredential,
-  EmailAuthProvider,
-  User,
-} from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import type { User } from 'firebase/auth';
 import { toast } from 'sonner';
+
+// Lazy load Firebase auth to reduce initial bundle size
+let firebaseAuthModule: any = null;
+let authInstance: any = null;
+
+const getAuth = async () => {
+  if (!firebaseAuthModule) {
+    const [authFunctions, firebaseConfig] = await Promise.all([
+      import('firebase/auth'),
+      import('@/lib/firebase')
+    ]);
+    firebaseAuthModule = authFunctions;
+    authInstance = firebaseConfig.auth;
+  }
+  return { ...firebaseAuthModule, auth: authInstance };
+};
 
 interface AuthContextType {
   currentUser: User | null;
@@ -40,6 +47,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Login function
   const login = async (email: string, password: string) => {
     try {
+      const { signInWithEmailAndPassword, auth } = await getAuth();
       await signInWithEmailAndPassword(auth, email, password);
       toast.success('Login successful!');
     } catch (error: any) {
@@ -64,6 +72,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Logout function
   const logout = async () => {
     try {
+      const { signOut, auth } = await getAuth();
       await signOut(auth);
       toast.success('Logged out successfully!');
     } catch (error) {
@@ -79,6 +88,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (!currentUser || !currentUser.email) {
         throw new Error('No user logged in');
       }
+
+      const { EmailAuthProvider, reauthenticateWithCredential, updatePassword } = await getAuth();
 
       // Re-authenticate user before password change
       const credential = EmailAuthProvider.credential(
@@ -107,14 +118,31 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  // Listen to auth state changes
+  // Listen to auth state changes - lazy load only when auth is actually needed
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-      setLoading(false);
-    });
+    let unsubscribe: (() => void) | undefined;
 
-    return unsubscribe;
+    // Check if we're on a protected route that needs auth
+    const needsAuth = window.location.pathname.startsWith('/admin');
+
+    if (needsAuth) {
+      // Only load Firebase auth for protected routes
+      getAuth().then(({ onAuthStateChanged, auth }) => {
+        unsubscribe = onAuthStateChanged(auth, (user) => {
+          setCurrentUser(user);
+          setLoading(false);
+        });
+      });
+    } else {
+      // For public routes, skip Firebase loading
+      setLoading(false);
+    }
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, []);
 
   const value: AuthContextType = {
