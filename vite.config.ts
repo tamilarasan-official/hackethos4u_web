@@ -22,12 +22,15 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     target: 'es2015',
-    minify: 'terser',
+    minify: 'esbuild', // Use esbuild - safer and faster than terser for React
     cssMinify: 'esbuild',
     esbuild: {
       drop: ['console', 'debugger'],
       legalComments: 'none',
       treeShaking: true,
+      minifyIdentifiers: true,
+      minifySyntax: true,
+      minifyWhitespace: true,
     },
     rollupOptions: {
       output: {
@@ -82,24 +85,5 @@ export default defineConfig(({ mode }) => ({
     sourcemap: false, // Disable sourcemaps in production for smaller size
     reportCompressedSize: false, // Faster builds
     assetsInlineLimit: 4096, // Inline assets smaller than 4kb
-    // Safe terser options that don't break React
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn'],
-        passes: 2, // Two passes for better compression
-        dead_code: true,
-        // IMPORTANT: Do NOT use toplevel, unsafe_*, or aggressive mangling - breaks React
-      },
-      mangle: {
-        safari10: true, // Safari 10 compatibility
-        properties: false, // Don't mangle properties - safer for libraries
-      },
-      format: {
-        comments: false, // Remove comments
-        ecma: 2015,
-      },
-    },
   },
 }));
