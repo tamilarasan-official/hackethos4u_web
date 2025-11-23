@@ -55,6 +55,17 @@ self.addEventListener('fetch', (event) => {
   // Check if it's a Firebase resource
   const isFirebaseResource = FIREBASE_DOMAINS.some(domain => url.hostname.includes(domain));
 
+  // Don't cache Firestore streaming/websocket connections or long-polling requests
+  const isFirestoreStream = url.pathname.includes('/Listen/channel') ||
+                           url.pathname.includes('/Write/channel') ||
+                           url.searchParams.has('VER'); // Firestore streaming uses VER param
+
+  // Firestore streaming requests should go directly to network (no caching)
+  if (isFirestoreStream) {
+    event.respondWith(fetch(request));
+    return;
+  }
+
   if (isFirebaseResource) {
     // Cache-first strategy for Firebase resources with long lifetime
     event.respondWith(
