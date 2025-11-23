@@ -22,43 +22,39 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     target: 'es2015', // Modern browsers only for smaller bundle
-    minify: 'terser', // More aggressive minification than esbuild
+    minify: 'esbuild', // Use esbuild - safer than terser for React
     cssMinify: 'esbuild', // Minify CSS as well
-    terserOptions: {
-      compress: {
-        drop_console: true, // Remove all console.* calls
-        drop_debugger: true, // Remove debugger statements
-        pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn'], // Remove specific console methods
-        passes: 2, // Run compression twice for better results
-        // Removed unsafe options that break React
-        dead_code: true, // Remove dead code
-        // Removed toplevel: true - this breaks React exports
-        keep_infinity: false, // Replace Infinity with 1/0
-      },
-      mangle: {
-        // Removed toplevel: true - this breaks React's forwardRef and other exports
-        safari10: true, // Safari 10 support
-        properties: false, // Don't mangle property names (safer)
-      },
-      format: {
-        comments: false, // Remove all comments
-        ecma: 2015, // Use ES2015 syntax
-        safari10: true, // Safari 10 compatibility
-      },
-    },
     esbuild: {
-      drop: ['console', 'debugger'], // Fallback for dev mode
+      drop: ['console', 'debugger'], // Remove console and debugger
       legalComments: 'none', // Remove license comments
+      minifyIdentifiers: true, // Safe minification
+      minifySyntax: true, // Safe syntax minification
+      minifyWhitespace: true, // Remove whitespace
+      treeShaking: true, // Tree shake unused code
     },
     rollupOptions: {
       treeshake: {
         preset: 'recommended', // Safe tree-shaking (not 'smallest')
+        moduleSideEffects: 'no-external', // Preserve side effects for external modules
       },
       output: {
+        // Ensure proper module format for better compatibility
+        format: 'es',
+        // Preserve module structure to avoid breaking React
+        preserveModules: false,
+        // Generate interop helpers for better compatibility
+        interop: 'auto',
         manualChunks: (id) => {
-          // Core React - keep together
-          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router')) {
-            return 'react-vendor';
+          // Core React - MUST be together and loaded first
+          if (id.includes('node_modules/react/') ||
+              id.includes('node_modules/react-dom/') ||
+              id.includes('node_modules/scheduler/')) {
+            return 'react-core';
+          }
+
+          // React Router - separate but depends on react-core
+          if (id.includes('node_modules/react-router')) {
+            return 'react-router';
           }
 
           // Firebase - split into smaller chunks loaded on demand
@@ -66,13 +62,13 @@ export default defineConfig(({ mode }) => ({
             return 'firebase-core';
           }
           if (id.includes('firebase/auth')) {
-            return 'firebase-auth'; // Loaded only when auth is needed
+            return 'firebase-auth';
           }
           if (id.includes('firebase/firestore')) {
-            return 'firebase-firestore'; // Loaded only when firestore is needed
+            return 'firebase-firestore';
           }
           if (id.includes('firebase/analytics')) {
-            return 'firebase-analytics'; // Already lazy loaded
+            return 'firebase-analytics';
           }
           if (id.includes('firebase')) {
             return 'firebase-other';
@@ -80,18 +76,18 @@ export default defineConfig(({ mode }) => ({
 
           // Radix UI - split by usage
           if (id.includes('@radix-ui/react-dialog') || id.includes('@radix-ui/react-tabs')) {
-            return 'ui-admin'; // Only for admin pages
+            return 'ui-admin';
           }
           if (id.includes('@radix-ui')) {
-            return 'ui-core'; // Common UI components
+            return 'ui-core';
           }
 
-          // Form libraries - only for forms
+          // Form libraries
           if (id.includes('react-hook-form') || id.includes('@hookform')) {
             return 'form-vendor';
           }
 
-          // React Query - keep separate
+          // React Query
           if (id.includes('@tanstack/react-query')) {
             return 'query-vendor';
           }
