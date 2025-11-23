@@ -1,4 +1,4 @@
-# Netlify headers for security and caching
+# Netlify/Cloudflare headers for security, caching, and performance
 
 /*
   X-Frame-Options: DENY
@@ -6,11 +6,34 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(), microphone=(), camera=()
 
+  # Early Hints / Link headers for preconnect (saves 200-400ms on initial connection)
+  Link: <https://hackthous4u-website.firebaseapp.com>; rel=preconnect; crossorigin
+  Link: <https://www.googleapis.com>; rel=preconnect; crossorigin
+  Link: <https://firestore.googleapis.com>; rel=preconnect; crossorigin
+  Link: <https://firebase.googleapis.com>; rel=preconnect; crossorigin
+
 /sitemap.xml
   Content-Type: application/xml
 
 /robots.txt
   Content-Type: text/plain
 
+# Long cache for static assets (1 year)
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Cache for JavaScript files (1 year for hashed files)
+/assets/js/*.js
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cache for CSS files (1 year for hashed files)
+/assets/css/*.css
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cache for images (1 year)
+/assets/images/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML files - short cache with revalidation
+/*.html
+  Cache-Control: public, max-age=3600, must-revalidate

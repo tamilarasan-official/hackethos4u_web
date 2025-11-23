@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/Logo.png";
+import Logo from "@/components/Logo";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -69,17 +69,7 @@ const Header = () => {
             to="/"
             className="flex items-center gap-3 group"
           >
-            <img
-              src={logo}
-              alt="Hackethos4U Logo"
-              width="56"
-              height="63"
-              className="rounded-lg bg-white p-1"
-              style={{ width: '56px', height: '63px', objectFit: 'contain' }}
-              loading="eager"
-              fetchpriority="high"
-              decoding="async"
-            />
+            <Logo width={40} height={45} priority={true} />
             <div className="text-xl md:text-2xl font-bold">
               <span className={isOverLightBg ? "text-black" : "text-white"}>Hackethos</span>
               <span className="text-primary">4U</span>

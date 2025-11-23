@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => ({
           'query-vendor': ['@tanstack/react-query'],
           'firebase-vendor': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
         },
-        // Optimize asset file names
+        // Optimize asset file names with content hash for better caching
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name.split('.');
           const ext = info[info.length - 1];

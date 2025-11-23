@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useData } from "@/contexts/DataContext";
 import { Link } from "react-router-dom";
 import { FlowingLinesBackground } from "@/components/backgrounds";
+import OptimizedImage from "@/components/OptimizedImage";
 
 interface TimeRemaining {
   days: number;
@@ -149,16 +150,18 @@ const HeroSlider = () => {
               }`}
             >
               <div className="relative h-[450px] sm:h-[470px] md:h-[500px] lg:h-[520px]">
-                {/* Background Image - Keep image bright and visible */}
+                {/* Background Image - Optimized for performance (WebP/AVIF, quality 65) */}
                 <div className="absolute inset-0">
-                  <img
+                  <OptimizedImage
                     src={banner.image}
                     alt={banner.title}
+                    priority={index === 0}
                     loading={index === 0 ? "eager" : "lazy"}
-                    width="1200"
-                    height="520"
-                    className="w-full h-full object-cover"
-                    style={{ aspectRatio: '1200/520' }}
+                    width={1200}
+                    height={520}
+                    type="hero"
+                    quality={65}
+                    className="w-full h-full"
                   />
                   {/* Moderate gradient overlay - darker on left for text readability */}
                   <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent" />

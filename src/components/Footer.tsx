@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Facebook, Linkedin, Instagram, Youtube, AtSign } from "lucide-react";
-import logo from "@/assets/Logo.png";
+import Logo from "@/components/Logo";
 import { useData } from "@/contexts/DataContext";
 
 const Footer = () => {
@@ -14,11 +14,7 @@ const Footer = () => {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <img
-                src={logo}
-                alt="Hackethos4U Logo"
-                className="h-12 w-auto rounded-lg bg-white p-1.5"
-              />
+              <Logo width={48} height={54} priority={false} />
               <h3 className="text-2xl font-bold">
                 Hackethos<span className="font-normal">4U</span>
               </h3>

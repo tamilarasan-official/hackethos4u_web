@@ -1,0 +1,13 @@
+# Early Hints Configuration
+# For servers that support HTTP 103 Early Hints (Cloudflare, Fastly, etc.)
+# This sends preconnect hints before the HTML response, saving 200-400ms
+
+/*
+  Link: <https://hackthous4u-website.firebaseapp.com>; rel=preconnect; crossorigin
+  Link: <https://www.googleapis.com>; rel=preconnect; crossorigin
+  Link: <https://firestore.googleapis.com>; rel=preconnect; crossorigin
+  Link: <https://firebase.googleapis.com>; rel=preconnect; crossorigin
+  Link: <https://identitytoolkit.googleapis.com>; rel=preconnect; crossorigin
+  Link: <https://securetoken.googleapis.com>; rel=preconnect; crossorigin
+  Link: <https://fonts.googleapis.com>; rel=preconnect
+  Link: <https://fonts.gstatic.com>; rel=preconnect; crossorigin
