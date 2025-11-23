@@ -64,12 +64,55 @@ const CoursePage = () => {
     { name: course.title, url: `https://hackethos4u.com/courses/${course.slug}` }
   ]);
 
+  // Generate rich SEO keywords dynamically from course data
+  const generateCourseKeywords = () => {
+    const baseKeywords = [
+      course.title,
+      `${course.title} course`,
+      `${course.title} training`,
+      `${course.title} certification`,
+      course.slug,
+      `${course.category} course India`,
+      `${course.level || 'professional'} level course`,
+      `${course.duration} ${course.title.toLowerCase()} program`,
+    ];
+
+    const locationKeywords = [
+      'Hyderabad',
+      'Telangana',
+      'India',
+      'online training India',
+    ];
+
+    const formatKeywords = course.category === 'recording'
+      ? ['pre-recorded course', 'self-paced learning', 'video training', 'recorded sessions']
+      : ['live training', 'interactive sessions', 'live online course', 'real-time training'];
+
+    const curriculumKeywords = course.curriculum?.slice(0, 5) || [];
+
+    const priceKeywords = course.pricing?.oneToOne
+      ? [`₹${course.pricing.oneToOne} course`, 'affordable cybersecurity training']
+      : [];
+
+    return [
+      ...baseKeywords,
+      ...locationKeywords.map(loc => `${course.title} ${loc}`),
+      ...formatKeywords,
+      ...curriculumKeywords,
+      ...priceKeywords,
+      'cybersecurity training',
+      'ethical hacking course',
+      'VAPT certification',
+      'penetration testing training',
+    ].join(', ');
+  };
+
   return (
     <div className="min-h-screen bg-background grid-background">
       <SEO
-        title={`${course.title} ${course.category === 'recording' ? '- Pre-Recorded' : '- Live Training'} Course`}
-        description={`${course.description} ${course.category === 'recording' ? 'Download our comprehensive pre-recorded course' : 'Join live interactive training sessions'}. ${course.duration} duration. Expert-led cybersecurity training in India.`}
-        keywords={`${course.title}, ${course.slug}, ${course.category} course, cybersecurity training, ${course.level || 'professional'} level, ${course.curriculum?.slice(0, 5).join(', ')}`}
+        title={`${course.title} ${course.category === 'recording' ? '- Pre-Recorded' : '- Live Training'} Course | Hyderabad, India`}
+        description={`${course.description} ${course.category === 'recording' ? 'Download our comprehensive pre-recorded course' : 'Join live interactive training sessions'}. ${course.duration} duration. Expert-led cybersecurity training in Hyderabad, India. ${course.level || 'Professional'} level. ${course.pricing?.oneToOne ? `Starting at ₹${course.pricing.oneToOne.toLocaleString()}` : 'Affordable pricing available'}.`}
+        keywords={generateCourseKeywords()}
         canonical={`https://hackethos4u.com/courses/${course.slug}`}
         structuredData={[organizationSchema, courseSchema, breadcrumbs]}
       />

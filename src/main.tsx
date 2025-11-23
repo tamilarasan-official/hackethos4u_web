@@ -1,4 +1,4 @@
-import { createRoot } from "react-dom/client";
+import { createRoot, hydrateRoot } from "react-dom/client";
 import { HelmetProvider } from 'react-helmet-async';
 import App from "./App.tsx";
 import ErrorBoundary from "./components/ErrorBoundary.tsx";
@@ -18,10 +18,24 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
   });
 }
 
-createRoot(document.getElementById("root")!).render(
-  <ErrorBoundary>
-    <HelmetProvider>
-      <App />
-    </HelmetProvider>
-  </ErrorBoundary>
-);
+const rootElement = document.getElementById("root")!;
+
+// Use hydration for pre-rendered pages, normal render for development
+if (rootElement.hasChildNodes()) {
+  hydrateRoot(
+    rootElement,
+    <ErrorBoundary>
+      <HelmetProvider>
+        <App />
+      </HelmetProvider>
+    </ErrorBoundary>
+  );
+} else {
+  createRoot(rootElement).render(
+    <ErrorBoundary>
+      <HelmetProvider>
+        <App />
+      </HelmetProvider>
+    </ErrorBoundary>
+  );
+}

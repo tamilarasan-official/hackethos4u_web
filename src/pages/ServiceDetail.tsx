@@ -41,12 +41,55 @@ const ServiceDetail = () => {
     { name: service.title, url: `https://hackethos4u.com/services/${service.slug}` }
   ]);
 
+  // Generate rich SEO keywords dynamically from service data
+  const generateServiceKeywords = () => {
+    const baseKeywords = [
+      service.title,
+      `${service.title} services`,
+      `${service.title} India`,
+      `${service.title} Hyderabad`,
+      service.slug,
+      'professional security testing',
+    ];
+
+    const locationKeywords = [
+      'Hyderabad',
+      'Telangana',
+      'India',
+      'Dilsukhnagar',
+    ];
+
+    const industryKeywords = [
+      'VAPT services',
+      'penetration testing',
+      'vulnerability assessment',
+      'security audit',
+      'cybersecurity testing',
+      'ethical hacking services',
+      'application security testing',
+      'security compliance',
+      'ISO certified testing',
+    ];
+
+    const featureKeywords = service.features?.slice(0, 5) || [];
+
+    return [
+      ...baseKeywords,
+      ...locationKeywords.map(loc => `${service.title} ${loc}`),
+      ...industryKeywords,
+      ...featureKeywords,
+      'professional VAPT company',
+      'certified security auditors',
+      'enterprise security testing',
+    ].join(', ');
+  };
+
   return (
     <div className="min-h-screen bg-background grid-background">
       <SEO
-        title={`${service.title} - Professional Security Testing`}
-        description={`${service.details || service.description} Professional ${service.title.toLowerCase()} services in India. Get expert vulnerability assessment and penetration testing for your business.`}
-        keywords={`${service.title}, ${service.slug}, cybersecurity testing, security assessment, penetration testing, VAPT services, ${service.features?.slice(0, 3).join(', ')}`}
+        title={`${service.title} Services | Professional VAPT in Hyderabad, India`}
+        description={`${service.details || service.description} Professional ${service.title.toLowerCase()} services in Hyderabad, India. ISO certified security experts. Get expert vulnerability assessment and penetration testing for your business. Free consultation available.`}
+        keywords={generateServiceKeywords()}
         canonical={`https://hackethos4u.com/services/${service.slug}`}
         structuredData={[organizationSchema, serviceSchema, breadcrumbs]}
       />

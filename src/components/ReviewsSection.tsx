@@ -321,7 +321,7 @@ const ReviewsSection = () => {
                 <Input
                   value={reviewForm.name}
                   onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
-                  placeholder="John Doe"
+                  placeholder="Enter your name"
                   required
                   className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary"
                 />
@@ -332,7 +332,7 @@ const ReviewsSection = () => {
                 <Input
                   value={reviewForm.role}
                   onChange={(e) => setReviewForm({ ...reviewForm, role: e.target.value })}
-                  placeholder="e.g., Security Analyst, Student, Pentester"
+                  placeholder="Enter your role or title"
                   className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
@@ -343,7 +343,7 @@ const ReviewsSection = () => {
                   type="email"
                   value={reviewForm.email}
                   onChange={(e) => setReviewForm({ ...reviewForm, email: e.target.value })}
-                  placeholder="your.email@example.com"
+                  placeholder="Enter your email address"
                   className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
