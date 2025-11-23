@@ -77,7 +77,7 @@ const Header = () => {
               className="rounded-lg bg-white p-1"
               style={{ width: '56px', height: '63px', objectFit: 'contain' }}
               loading="eager"
-              fetchPriority="high"
+              fetchpriority="high"
               decoding="async"
             />
             <div className="text-xl md:text-2xl font-bold">
