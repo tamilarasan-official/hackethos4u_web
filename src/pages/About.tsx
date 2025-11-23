@@ -3,17 +3,22 @@ import Footer from "@/components/Footer";
 import { Shield, Award, Users, TrendingUp, Target, Heart, Lightbulb, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TechBackground, GridBackground, FlowingLinesBackground, ParticleBackground } from "@/components/backgrounds";
-import SEO, { organizationSchema } from "@/components/SEO";
+import SEO, { organizationSchema, localBusinessSchema, createBreadcrumbSchema } from "@/components/SEO";
 
 const About = () => {
+  const breadcrumbs = createBreadcrumbSchema([
+    { name: "Home", url: "https://hackethos4u.com/" },
+    { name: "About", url: "https://hackethos4u.com/about" }
+  ]);
+
   return (
     <div className="min-h-screen bg-background grid-background">
       <SEO
-        title="About Hackethos4U - Leading Cybersecurity Training & VAPT Services"
-        description="Hackethos4U is a premier cybersecurity training institute and VAPT service provider in Hyderabad, India. Since 2018, we've been empowering security professionals with expert-led ethical hacking courses and professional penetration testing services."
-        keywords="about hackethos4u, cybersecurity training institute, VAPT company India, ethical hacking institute Hyderabad, security training experts, penetration testing company, cybersecurity education"
+        title="About Hackethos4U - Leading Cybersecurity Training & VAPT Services in India"
+        description="Hackethos4U is a premier cybersecurity training institute and VAPT service provider in Hyderabad, India. Since 2018, we've been empowering 3000+ security professionals with expert-led ethical hacking courses and 500+ professional penetration testing services. ⭐ 4.8/5 rating. 🎯 Industry-recognized certifications. 🛡️ ISO certified security experts."
+        keywords="about hackethos4u, cybersecurity training institute Hyderabad, VAPT company India, ethical hacking institute, security training experts, penetration testing company India, cybersecurity education, CEH training center, OSCP preparation, cyber security bootcamp, hacking training institute, security certification center Hyderabad"
         canonical="https://hackethos4u.com/about"
-        structuredData={organizationSchema}
+        structuredData={[organizationSchema, localBusinessSchema, breadcrumbs]}
       />
       <Header />
 

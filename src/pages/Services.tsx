@@ -10,7 +10,7 @@ import { useData } from "@/contexts/DataContext";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { TechBackground, GridBackground, FlowingLinesBackground, ParticleBackground } from "@/components/backgrounds";
-import SEO, { organizationSchema, createBreadcrumbSchema } from "@/components/SEO";
+import SEO, { organizationSchema, createBreadcrumbSchema, professionalServiceSchema } from "@/components/SEO";
 
 const Services = () => {
   const { services, clients, addContact } = useData();
@@ -100,11 +100,11 @@ const Services = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Professional Cybersecurity & VAPT Services"
-        description="Expert penetration testing services: WPAT (Web Application), Mobile Security Testing, API Security Assessment, and OWASP Top 10 Vulnerability Testing. Secure your business with professional security audits in India."
-        keywords="VAPT services, penetration testing India, web application security testing, mobile app security, API security testing, OWASP testing, security audit, vulnerability assessment, cybersecurity services Hyderabad"
+        title="Professional VAPT & Cybersecurity Services India | Hackethos4U"
+        description="Expert penetration testing services: WPAT (Web Application), Mobile Security Testing, API Security Assessment, and OWASP Top 10 Vulnerability Testing. 🛡️ ISO certified security audits. 🎯 100+ successful pentests. Secure your business with professional security experts in Hyderabad, India. Get free security consultation."
+        keywords="VAPT services India, penetration testing company Hyderabad, web application penetration testing, mobile app security testing, API security assessment, OWASP top 10 testing, vulnerability assessment services, security audit India, ethical hacking services, red team assessment, security compliance testing, PCI DSS compliance testing, GDPR security audit, application security testing, network penetration testing, cloud security testing"
         canonical="https://hackethos4u.com/services"
-        structuredData={[organizationSchema, breadcrumbs]}
+        structuredData={[organizationSchema, breadcrumbs, professionalServiceSchema]}
       />
       <Header />
 

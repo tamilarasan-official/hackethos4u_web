@@ -8,11 +8,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { TechBackground, GridBackground, FlowingLinesBackground, ParticleBackground } from "@/components/backgrounds";
 import { useData } from "@/contexts/DataContext";
-import SEO, { organizationSchema } from "@/components/SEO";
+import SEO, { organizationSchema, localBusinessSchema, createBreadcrumbSchema } from "@/components/SEO";
 
 const Contact = () => {
   const { toast } = useToast();
   const { addContact } = useData();
+
+  const breadcrumbs = createBreadcrumbSchema([
+    { name: "Home", url: "https://hackethos4u.com/" },
+    { name: "Contact", url: "https://hackethos4u.com/contact" }
+  ]);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -75,11 +80,11 @@ const Contact = () => {
   return (
     <div className="min-h-screen bg-background grid-background">
       <SEO
-        title="Contact Us - Get Expert Cybersecurity Solutions"
-        description="Contact Hackethos4U for professional VAPT services, cybersecurity training inquiries, or security consulting. Located in Hyderabad, India. Call +91-8008593735 or email maniteja.thagaram@hackethos4u.com"
-        keywords="contact hackethos4u, cybersecurity contact, VAPT inquiry, security training contact, penetration testing quote, Hyderabad cybersecurity, security consultation"
+        title="Contact Us - Expert Cybersecurity Solutions in Hyderabad | Hackethos4U"
+        description="Contact Hackethos4U for professional VAPT services, cybersecurity training inquiries, or security consulting. 📍 Located in Dilsukhnagar, Hyderabad, India. 📞 Call +91-8008593735 or ✉️ email maniteja.thagaram@hackethos4u.com. 🕐 Available Mon-Sat, 9 AM - 6 PM. Get free security consultation and course guidance."
+        keywords="contact hackethos4u, cybersecurity contact Hyderabad, VAPT inquiry India, security training contact, penetration testing quote, Hyderabad cybersecurity company, security consultation, cyber security course inquiry, ethical hacking training contact, VAPT services quote, security audit contact"
         canonical="https://hackethos4u.com/contact"
-        structuredData={organizationSchema}
+        structuredData={[organizationSchema, localBusinessSchema, breadcrumbs]}
       />
       <Header />
 

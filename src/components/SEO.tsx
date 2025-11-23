@@ -178,3 +178,100 @@ export const websiteSchema = {
     "query-input": "required name=search_term_string"
   }
 };
+
+// FAQ Schema for rich snippets in search results
+export const createFAQSchema = (faqs: { question: string; answer: string }[]) => ({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map(faq => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+});
+
+// Review/Rating Schema for courses and services
+export const createReviewSchema = (reviews: {
+  author: string;
+  rating: number;
+  reviewBody: string;
+  datePublished: string;
+}[]) => ({
+  "@context": "https://schema.org",
+  "@type": "AggregateRating",
+  "ratingValue": reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length,
+  "reviewCount": reviews.length,
+  "bestRating": "5",
+  "worstRating": "1"
+});
+
+// Video Course Schema (for courses with video content)
+export const createVideoCourseSchema = (course: any) => ({
+  "@context": "https://schema.org",
+  "@type": "VideoObject",
+  "name": `${course.title} - Course Preview`,
+  "description": course.description,
+  "thumbnailUrl": `https://hackethos4u.com/course-${course.slug}.jpg`,
+  "uploadDate": new Date().toISOString(),
+  "duration": course.duration || "PT3M",
+  "contentUrl": `https://hackethos4u.com/courses/${course.slug}`,
+  "embedUrl": `https://hackethos4u.com/courses/${course.slug}/preview`
+});
+
+// Local Business Schema (for better local SEO)
+export const localBusinessSchema = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Hackethos4U",
+  "image": "https://hackethos4u.com/logo.png",
+  "url": "https://hackethos4u.com",
+  "telephone": "+91-8008593735",
+  "email": "maniteja.thagaram@hackethos4u.com",
+  "priceRange": "₹₹",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "9G8C+PRQ, Dilsukhnagar",
+    "addressLocality": "Hyderabad",
+    "addressRegion": "Telangana",
+    "postalCode": "500036",
+    "addressCountry": "IN"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": "17.3697",
+    "longitude": "78.5209"
+  },
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+      "opens": "09:00",
+      "closes": "18:00"
+    }
+  ],
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.8",
+    "reviewCount": "127"
+  }
+};
+
+// Professional Service Schema
+export const professionalServiceSchema = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  "name": "Hackethos4U - Cybersecurity Training & VAPT Services",
+  "url": "https://hackethos4u.com",
+  "logo": "https://hackethos4u.com/logo.png",
+  "description": "Expert cybersecurity training, ethical hacking courses, VAPT testing, penetration testing, and security auditing services",
+  "areaServed": {
+    "@type": "Country",
+    "name": "India"
+  },
+  "serviceType": ["Cybersecurity Training", "VAPT Testing", "Penetration Testing", "Security Auditing"],
+  "telephone": "+91-8008593735",
+  "email": "maniteja.thagaram@hackethos4u.com"
+};

@@ -47,9 +47,9 @@ const Courses = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Cybersecurity Courses - Ethical Hacking, VAPT, Bug Bounty Training"
-        description="Master cybersecurity with expert-led courses: Ethical Hacking, VAPT Professional Training, Bug Bounty Hunting, and AR/VR Security. Recording sessions and live interactive classes available. Learn from industry professionals in Hyderabad."
-        keywords="ethical hacking course, VAPT training, bug bounty course, cybersecurity certification, penetration testing course, security training India, online cybersecurity courses, ethical hacking certification, VAPT course Hyderabad, AR VR security"
+        title="Cybersecurity Courses India - Ethical Hacking, VAPT, Bug Bounty Training | Hackethos4U"
+        description="Master cybersecurity with expert-led courses: Ethical Hacking, VAPT Professional Training, Bug Bounty Hunting, and AR/VR Security. Recording sessions and live interactive classes available. ⭐ 4.8/5 rated courses. 🎯 Hands-on labs, industry certifications, job assistance. Learn from top cybersecurity professionals in Hyderabad, India."
+        keywords="ethical hacking course India, VAPT training certification, bug bounty hunter course, cybersecurity bootcamp Hyderabad, penetration testing certification online, CEH training India, OSCP preparation course, web application security course, mobile app penetration testing, API security training, OWASP top 10 course, cyber security expert training, hacking course with certificate, offensive security training, red team training India"
         canonical="https://hackethos4u.com/courses"
         structuredData={[organizationSchema, breadcrumbs]}
       />
