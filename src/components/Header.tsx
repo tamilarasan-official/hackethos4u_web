@@ -74,9 +74,10 @@ const Header = () => {
               alt="Hackethos4U Logo"
               width="56"
               height="63"
-              className="h-10 md:h-12 w-auto rounded-lg bg-white p-1"
+              className="rounded-lg bg-white p-1"
+              style={{ width: '56px', height: '63px', objectFit: 'contain' }}
               loading="eager"
-              fetchpriority="high"
+              fetchPriority="high"
               decoding="async"
             />
             <div className="text-xl md:text-2xl font-bold">

@@ -53,14 +53,10 @@ const ContactSection = () => {
     <section
       id="contact"
       className="relative py-20 md:py-28 bg-secondary/30"
-      style={{
-        minHeight: '1400px',
-        contain: 'layout paint',
-      }}
     >
       <div className="container mx-auto px-4 relative z-10">
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-16" style={{ height: '180px' }}>
           <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
             <Mail className="w-4 h-4 text-primary" />
             <span className="text-primary text-sm font-semibold tracking-wide">
@@ -73,9 +69,9 @@ const ContactSection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 max-w-6xl mx-auto" style={{ minHeight: '700px' }}>
           {/* Contact Form */}
-          <div className="card-sleek p-8 md:p-10">
+          <div className="card-sleek p-8 md:p-10" style={{ minHeight: '650px' }}>
             <h3 className="text-2xl font-bold mb-6 text-white">Send us a message</h3>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
