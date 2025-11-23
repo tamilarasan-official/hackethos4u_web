@@ -30,17 +30,13 @@ export default defineConfig(({ mode }) => ({
         drop_debugger: true, // Remove debugger statements
         pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn'], // Remove specific console methods
         passes: 2, // Run compression twice for better results
-        unsafe: true, // Enable unsafe optimizations for smaller output
-        unsafe_comps: true, // Optimize comparisons
-        unsafe_math: true, // Optimize math operations
-        unsafe_methods: true, // Optimize method calls
-        unsafe_proto: true, // Optimize prototype access
+        // Removed unsafe options that break React
         dead_code: true, // Remove dead code
-        toplevel: true, // Mangle top-level variable names
+        // Removed toplevel: true - this breaks React exports
         keep_infinity: false, // Replace Infinity with 1/0
       },
       mangle: {
-        toplevel: true, // Mangle top-level variable names
+        // Removed toplevel: true - this breaks React's forwardRef and other exports
         safari10: true, // Safari 10 support
         properties: false, // Don't mangle property names (safer)
       },
