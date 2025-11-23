@@ -21,68 +21,16 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    target: 'es2015', // Modern browsers only for smaller bundle
-    minify: 'esbuild', // Use esbuild - safer than terser for React
-    cssMinify: 'esbuild', // Minify CSS as well
+    target: 'es2015',
+    minify: 'esbuild',
+    cssMinify: 'esbuild',
     esbuild: {
-      drop: ['console', 'debugger'], // Remove console and debugger
-      legalComments: 'none', // Remove license comments
-      minifyIdentifiers: true, // Safe minification
-      minifySyntax: true, // Safe syntax minification
-      minifyWhitespace: true, // Remove whitespace
-      treeShaking: true, // Tree shake unused code
+      drop: ['console', 'debugger'],
+      legalComments: 'none',
     },
     rollupOptions: {
-      treeshake: {
-        preset: 'recommended', // Safe tree-shaking
-        moduleSideEffects: true, // Preserve all side effects to avoid initialization errors
-      },
       output: {
-        // Ensure proper module format for better compatibility
-        format: 'es',
-        // Generate interop helpers for better compatibility
-        interop: 'auto',
-        manualChunks: (id) => {
-          // Core React - MUST be together and loaded first
-          if (id.includes('node_modules/react/') ||
-              id.includes('node_modules/react-dom/') ||
-              id.includes('node_modules/scheduler/')) {
-            return 'react-core';
-          }
-
-          // React Router - separate but depends on react-core
-          if (id.includes('node_modules/react-router')) {
-            return 'react-router';
-          }
-
-          // Firebase - keep together to avoid circular dependency issues
-          if (id.includes('firebase') || id.includes('@firebase')) {
-            return 'firebase';
-          }
-
-          // Radix UI - split by usage
-          if (id.includes('@radix-ui/react-dialog') || id.includes('@radix-ui/react-tabs')) {
-            return 'ui-admin';
-          }
-          if (id.includes('@radix-ui')) {
-            return 'ui-core';
-          }
-
-          // Form libraries
-          if (id.includes('react-hook-form') || id.includes('@hookform')) {
-            return 'form-vendor';
-          }
-
-          // React Query
-          if (id.includes('@tanstack/react-query')) {
-            return 'query-vendor';
-          }
-
-          // Other large dependencies
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
-        },
+        manualChunks: undefined, // Let Vite handle chunking automatically
         // Optimize asset file names with content hash for better caching
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name.split('.');
