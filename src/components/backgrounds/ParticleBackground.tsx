@@ -15,13 +15,22 @@ const ParticleBackground: React.FC<ParticleBackgroundProps> = ({ particleCount =
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size
+    // Set canvas size using ResizeObserver to avoid forced reflows
     const resizeCanvas = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
+      const parent = canvas.parentElement;
+      if (!parent) return;
+      const rect = parent.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
     };
+
+    // Use ResizeObserver for better performance
+    const resizeObserver = new ResizeObserver(() => {
+      requestAnimationFrame(resizeCanvas);
+    });
+
     resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+    resizeObserver.observe(canvas.parentElement!);
 
     // Particle class
     class Particle {
@@ -96,7 +105,7 @@ const ParticleBackground: React.FC<ParticleBackgroundProps> = ({ particleCount =
     animate();
 
     return () => {
-      window.removeEventListener('resize', resizeCanvas);
+      resizeObserver.disconnect();
       cancelAnimationFrame(animationId);
     };
   }, [particleCount]);

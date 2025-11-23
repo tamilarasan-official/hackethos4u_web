@@ -54,12 +54,10 @@ const ContactSection = () => {
       id="contact"
       className="relative py-20 md:py-28 bg-secondary/30"
       style={{
-        minHeight: '800px',
-        contain: 'layout',
-        contentVisibility: 'auto',
+        minHeight: '1400px',
+        contain: 'layout paint',
       }}
     >
-      <FlowingLinesBackground variant="circuit" direction="ltr" />
       <div className="container mx-auto px-4 relative z-10">
         {/* Section Header */}
         <div className="text-center mb-16">
