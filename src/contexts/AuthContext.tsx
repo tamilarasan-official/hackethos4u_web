@@ -42,17 +42,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       toast.success('Login successful!');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login error:', error);
       let errorMessage = 'Failed to login. Please try again.';
+      const firebaseError = error as { code?: string };
 
-      if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+      if (firebaseError.code === 'auth/invalid-credential' || firebaseError.code === 'auth/wrong-password') {
         errorMessage = 'Invalid email or password.';
-      } else if (error.code === 'auth/user-not-found') {
+      } else if (firebaseError.code === 'auth/user-not-found') {
         errorMessage = 'No account found with this email.';
-      } else if (error.code === 'auth/too-many-requests') {
+      } else if (firebaseError.code === 'auth/too-many-requests') {
         errorMessage = 'Too many failed attempts. Please try again later.';
-      } else if (error.code === 'auth/network-request-failed') {
+      } else if (firebaseError.code === 'auth/network-request-failed') {
         errorMessage = 'Network error. Please check your connection.';
       }
 
@@ -90,15 +91,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // Update password
       await updatePassword(currentUser, newPassword);
       toast.success('Password changed successfully!');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Change password error:', error);
       let errorMessage = 'Failed to change password.';
+      const firebaseError = error as { code?: string };
 
-      if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+      if (firebaseError.code === 'auth/wrong-password' || firebaseError.code === 'auth/invalid-credential') {
         errorMessage = 'Current password is incorrect.';
-      } else if (error.code === 'auth/weak-password') {
+      } else if (firebaseError.code === 'auth/weak-password') {
         errorMessage = 'New password is too weak. Use at least 6 characters.';
-      } else if (error.code === 'auth/requires-recent-login') {
+      } else if (firebaseError.code === 'auth/requires-recent-login') {
         errorMessage = 'Please logout and login again before changing password.';
       }
 

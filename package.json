@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && react-snap",
+    "build": "vite build",
+    "build:snap": "vite build && react-snap",
     "build:dev": "vite build --mode development",
     "build:no-snap": "vite build",
     "lint": "eslint .",

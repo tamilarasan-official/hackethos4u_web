@@ -107,7 +107,7 @@ export const organizationSchema = {
   }
 };
 
-export const createCourseSchema = (course: any) => ({
+export const createCourseSchema = (course: { title: string; description: string; slug: string; pricing?: { oneToOne?: number; groupMin?: number; groupMax?: number } }) => ({
   "@context": "https://schema.org",
   "@type": "Course",
   "name": course.title,
@@ -135,7 +135,7 @@ export const createCourseSchema = (course: any) => ({
   })
 });
 
-export const createServiceSchema = (service: any) => ({
+export const createServiceSchema = (service: { title: string; description: string; slug: string }) => ({
   "@context": "https://schema.org",
   "@type": "Service",
   "name": service.title,
@@ -209,7 +209,7 @@ export const createReviewSchema = (reviews: {
 });
 
 // Video Course Schema (for courses with video content)
-export const createVideoCourseSchema = (course: any) => ({
+export const createVideoCourseSchema = (course: { title: string; description: string; demoVideoUrl?: string }) => ({
   "@context": "https://schema.org",
   "@type": "VideoObject",
   "name": `${course.title} - Course Preview`,
