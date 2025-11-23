@@ -214,7 +214,7 @@ const Services = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto items-center">
+            <div className="flex flex-wrap justify-center gap-8 max-w-5xl mx-auto items-center">
               {clients.map((client) => {
                 const CardContent = (
                   <>
@@ -235,14 +235,14 @@ const Services = () => {
                     href={client.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex flex-col items-center justify-center p-6 bg-card rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 hover:scale-105 gap-3 cursor-pointer"
+                    className="flex flex-col items-center justify-center p-6 bg-card rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 hover:scale-105 gap-3 cursor-pointer w-40 sm:w-48"
                   >
                     {CardContent}
                   </a>
                 ) : (
                   <div
                     key={client.id}
-                    className="flex flex-col items-center justify-center p-6 bg-card rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 hover:scale-105 gap-3"
+                    className="flex flex-col items-center justify-center p-6 bg-card rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 hover:scale-105 gap-3 w-40 sm:w-48"
                   >
                     {CardContent}
                   </div>

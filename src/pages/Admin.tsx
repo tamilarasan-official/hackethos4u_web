@@ -1138,7 +1138,7 @@ const Admin = () => {
                       <Input
                         value={reviewForm.name}
                         onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
-                        placeholder="John Doe"
+                        placeholder="Enter reviewer name"
                         className="bg-white/5 border-white/10 text-white h-12 text-base"
                       />
                     </div>
@@ -1147,7 +1147,7 @@ const Admin = () => {
                       <Input
                         value={reviewForm.role}
                         onChange={(e) => setReviewForm({ ...reviewForm, role: e.target.value })}
-                        placeholder="Security Engineer"
+                        placeholder="Enter reviewer role or title"
                         className="bg-white/5 border-white/10 text-white h-12 text-base"
                       />
                     </div>
