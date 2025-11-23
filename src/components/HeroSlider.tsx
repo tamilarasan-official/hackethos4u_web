@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, memo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useData } from "@/contexts/DataContext";
@@ -282,20 +282,21 @@ const HeroSlider = () => {
             </>
           )}
 
-          {/* Slide Indicators */}
+          {/* Slide Indicators - Fixed width containers to prevent layout shift */}
           {activeBanners.length > 1 && (
             <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
               {activeBanners.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => goToSlide(index)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    index === currentSlide
-                      ? "bg-white w-10 md:w-12 shadow-lg"
-                      : "bg-white/40 w-2 hover:bg-white/60"
-                  }`}
-                  aria-label={`Go to slide ${index + 1}`}
-                />
+                <div key={index} className="w-10 md:w-12 flex justify-center">
+                  <button
+                    onClick={() => goToSlide(index)}
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      index === currentSlide
+                        ? "bg-white w-10 md:w-12 shadow-lg"
+                        : "bg-white/40 w-2 hover:bg-white/60"
+                    }`}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                </div>
               ))}
             </div>
           )}
@@ -305,4 +306,5 @@ const HeroSlider = () => {
   );
 };
 
-export default HeroSlider;
+// Memoize component to prevent unnecessary re-renders
+export default memo(HeroSlider);

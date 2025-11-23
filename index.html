@@ -33,11 +33,18 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" as="style">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    </noscript>
 
     <!-- Additional DNS prefetch for fonts -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+
+    <!-- Preload critical JavaScript modules -->
+    <link rel="modulepreload" href="/src/main.tsx" />
+    <link rel="modulepreload" href="/src/App.tsx" />
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
@@ -45,10 +52,10 @@
     <!-- Theme color for mobile browsers (Orange brand color) -->
     <meta name="theme-color" content="#ff6600" />
 
-    <!-- Critical CSS - Inline minimal styles to prevent render blocking -->
+    <!-- Critical CSS - Inline minimal styles to prevent render blocking and layout shift -->
     <style>
-      /* Critical CSS for fastest first paint */
-      :root{--background:0 0% 100%;--foreground:222.2 84% 4.9%;--primary:217 91% 60%;--primary-foreground:210 40% 98%;--accent:189 94% 43%;--border:214.3 31.8% 91.4%;--radius:0.5rem}*{border-color:hsl(var(--border))}body{margin:0;background-color:hsl(var(--background));color:hsl(var(--foreground));font-family:Inter,system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}header{position:sticky;top:0;z-index:50;width:100%;backdrop-filter:blur(8px)}.container{width:100%;margin-left:auto;margin-right:auto;padding-left:1rem;padding-right:1rem}#root{min-height:100vh}
+      /* Critical CSS for fastest first paint and zero layout shift */
+      :root{--background:0 0% 100%;--foreground:222.2 84% 4.9%;--primary:217 91% 60%;--primary-foreground:210 40% 98%;--accent:189 94% 43%;--border:214.3 31.8% 91.4%;--radius:0.5rem}*{border-color:hsl(var(--border));box-sizing:border-box}body{margin:0;background-color:hsl(var(--background));color:hsl(var(--foreground));font-family:Inter,system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.5;min-height:100vh;overflow-x:hidden}header{position:sticky;top:0;z-index:50;width:100%;backdrop-filter:blur(8px)}.container{width:100%;margin-left:auto;margin-right:auto;padding-left:1rem;padding-right:1rem;max-width:1280px}#root{min-height:100vh;display:flex;flex-direction:column}img,video,iframe{max-width:100%;height:auto;display:block}button{cursor:pointer}
     </style>
   </head>
 

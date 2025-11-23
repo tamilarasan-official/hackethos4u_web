@@ -81,6 +81,11 @@
     overflow-x: hidden;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE and Edge */
+    /* Prevent layout shift from font loading */
+    font-display: swap;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body::-webkit-scrollbar {

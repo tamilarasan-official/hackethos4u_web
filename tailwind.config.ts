@@ -3,7 +3,18 @@ import tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
   darkMode: ["class"],
-  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  content: {
+    files: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
+    options: {
+      safelist: [
+        // Preserve dynamic gradient classes used in the app
+        'from-orange-500', 'to-red-500',
+        'from-blue-500', 'to-cyan-500',
+        'from-purple-500', 'to-pink-500',
+        'from-green-500', 'to-emerald-500',
+      ],
+    },
+  },
   prefix: "",
   theme: {
     container: {

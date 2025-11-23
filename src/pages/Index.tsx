@@ -1,9 +1,6 @@
+import { lazy, Suspense } from "react";
 import Header from "@/components/Header";
 import HeroSlider from "@/components/HeroSlider";
-import ServicesSection from "@/components/ServicesSection";
-import CoursesSection from "@/components/CoursesSection";
-import ReviewsSection from "@/components/ReviewsSection";
-import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 import SEO, {
   organizationSchema,
@@ -11,6 +8,19 @@ import SEO, {
   localBusinessSchema,
   professionalServiceSchema
 } from "@/components/SEO";
+
+// Lazy load below-the-fold sections to reduce initial bundle size
+const ServicesSection = lazy(() => import("@/components/ServicesSection"));
+const CoursesSection = lazy(() => import("@/components/CoursesSection"));
+const ReviewsSection = lazy(() => import("@/components/ReviewsSection"));
+const ContactSection = lazy(() => import("@/components/ContactSection"));
+
+// Minimal loading placeholder for sections
+const SectionLoader = () => (
+  <div className="py-20 flex justify-center">
+    <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>
+  </div>
+);
 
 const Index = () => {
   return (
@@ -24,11 +34,22 @@ const Index = () => {
       />
       <Header />
       <main className="pt-16 md:pt-20">
+        {/* Above-the-fold: Load immediately */}
         <HeroSlider />
-        <ServicesSection />
-        <CoursesSection />
-        <ReviewsSection />
-        <ContactSection />
+
+        {/* Below-the-fold: Lazy load for better initial performance */}
+        <Suspense fallback={<SectionLoader />}>
+          <ServicesSection />
+        </Suspense>
+        <Suspense fallback={<SectionLoader />}>
+          <CoursesSection />
+        </Suspense>
+        <Suspense fallback={<SectionLoader />}>
+          <ReviewsSection />
+        </Suspense>
+        <Suspense fallback={<SectionLoader />}>
+          <ContactSection />
+        </Suspense>
       </main>
       <Footer />
     </div>
