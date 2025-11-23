@@ -34,14 +34,12 @@ export default defineConfig(({ mode }) => ({
     },
     rollupOptions: {
       treeshake: {
-        preset: 'recommended', // Safe tree-shaking (not 'smallest')
-        moduleSideEffects: 'no-external', // Preserve side effects for external modules
+        preset: 'recommended', // Safe tree-shaking
+        moduleSideEffects: true, // Preserve all side effects to avoid initialization errors
       },
       output: {
         // Ensure proper module format for better compatibility
         format: 'es',
-        // Preserve module structure to avoid breaking React
-        preserveModules: false,
         // Generate interop helpers for better compatibility
         interop: 'auto',
         manualChunks: (id) => {
@@ -57,21 +55,9 @@ export default defineConfig(({ mode }) => ({
             return 'react-router';
           }
 
-          // Firebase - split into smaller chunks loaded on demand
-          if (id.includes('firebase/app')) {
-            return 'firebase-core';
-          }
-          if (id.includes('firebase/auth')) {
-            return 'firebase-auth';
-          }
-          if (id.includes('firebase/firestore')) {
-            return 'firebase-firestore';
-          }
-          if (id.includes('firebase/analytics')) {
-            return 'firebase-analytics';
-          }
-          if (id.includes('firebase')) {
-            return 'firebase-other';
+          // Firebase - keep together to avoid circular dependency issues
+          if (id.includes('firebase') || id.includes('@firebase')) {
+            return 'firebase';
           }
 
           // Radix UI - split by usage
