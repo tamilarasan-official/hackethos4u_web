@@ -26,6 +26,23 @@ export const COLLECTIONS = {
   CONTACTS: 'contacts',
 };
 
+// Helper function to remove undefined values from objects (Firestore doesn't support undefined)
+const removeUndefinedFields = (obj: any): any => {
+  const cleaned: any = {};
+  Object.keys(obj).forEach((key) => {
+    const value = obj[key];
+    if (value !== undefined) {
+      if (value && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Timestamp)) {
+        // Recursively clean nested objects
+        cleaned[key] = removeUndefinedFields(value);
+      } else {
+        cleaned[key] = value;
+      }
+    }
+  });
+  return cleaned;
+};
+
 // Generic CRUD operations
 export const firestoreService = {
   // Get all documents from a collection
@@ -84,11 +101,11 @@ export const firestoreService = {
   async create<T>(collectionName: string, data: Omit<T, 'id'>): Promise<string> {
     try {
       const collectionRef = collection(db, collectionName);
-      const docData = {
+      const docData = removeUndefinedFields({
         ...data,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
-      };
+      });
       const docRef = await addDoc(collectionRef, docData);
       return docRef.id;
     } catch (error) {
@@ -105,10 +122,10 @@ export const firestoreService = {
   ): Promise<void> {
     try {
       const docRef = doc(db, collectionName, id);
-      const updateData = {
+      const updateData = removeUndefinedFields({
         ...data,
         updatedAt: Timestamp.now(),
-      };
+      });
       await updateDoc(docRef, updateData);
     } catch (error) {
       console.error(`Error updating document ${id} in ${collectionName}:`, error);

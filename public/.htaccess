@@ -3,20 +3,21 @@
   RewriteBase /
 
   # Redirect old website URLs to new React routes (case-insensitive)
-  RewriteCond %{REQUEST_URI} ^/Contact$ [NC]
-  RewriteRule ^.*$ /contact [R=301,L]
+  # COMMENTED OUT - These can cause redirect loops with React Router
+  # RewriteCond %{REQUEST_URI} ^/Contact$ [NC]
+  # RewriteRule ^.*$ /contact [R=301,L]
 
-  RewriteCond %{REQUEST_URI} ^/About$ [NC]
-  RewriteRule ^.*$ /about [R=301,L]
+  # RewriteCond %{REQUEST_URI} ^/About$ [NC]
+  # RewriteRule ^.*$ /about [R=301,L]
 
-  RewriteCond %{REQUEST_URI} ^/Our[\ ]Team$ [NC]
-  RewriteRule ^.*$ /about [R=301,L]
+  # RewriteCond %{REQUEST_URI} ^/Our[\ ]Team$ [NC]
+  # RewriteRule ^.*$ /about [R=301,L]
 
-  RewriteCond %{REQUEST_URI} ^/ETHICAL[\ ]HACKING$ [NC]
-  RewriteRule ^.*$ /courses/ethical-hacking-live [R=301,L]
+  # RewriteCond %{REQUEST_URI} ^/ETHICAL[\ ]HACKING$ [NC]
+  # RewriteRule ^.*$ /courses/ethical-hacking-live [R=301,L]
 
-  RewriteCond %{REQUEST_URI} ^/Signup[\ ]terminal$ [NC]
-  RewriteRule ^.*$ /course-selection [R=301,L]
+  # RewriteCond %{REQUEST_URI} ^/Signup[\ ]terminal$ [NC]
+  # RewriteRule ^.*$ /course-selection [R=301,L]
 
   # Redirect any old PHP or HTML pages to home
   RewriteCond %{REQUEST_URI} \.(php|html|htm)$ [NC]

@@ -5,8 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FlowingLinesBackground } from "@/components/backgrounds";
 import { useData } from "@/contexts/DataContext";
+import { useToast } from "@/hooks/use-toast";
 
 const ContactSection = () => {
+  const { toast } = useToast();
   const { addContact } = useData();
   const [formData, setFormData] = useState({
     name: "",
@@ -20,6 +22,11 @@ const ContactSection = () => {
     e.preventDefault();
 
     if (!formData.name || !formData.email || !formData.message) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -35,6 +42,11 @@ const ContactSection = () => {
         date: new Date().toISOString(),
       });
 
+      toast({
+        title: "Message Sent!",
+        description: "We'll get back to you within 24 hours.",
+      });
+
       // Reset form
       setFormData({
         name: "",
@@ -44,6 +56,11 @@ const ContactSection = () => {
       });
     } catch (error) {
       console.error('Error submitting contact form:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -79,7 +96,7 @@ const ContactSection = () => {
                 <Input
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Your name"
+                  placeholder="Enter your full name"
                   className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary h-10"
                   required
                 />
@@ -90,7 +107,7 @@ const ContactSection = () => {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="your.email@example.com"
+                  placeholder="Enter your email address"
                   className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary h-10"
                   required
                 />
@@ -101,7 +118,7 @@ const ContactSection = () => {
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="+91 XXXXX XXXXX"
+                  placeholder="Enter your phone number"
                   className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary h-10"
                 />
               </div>
@@ -110,7 +127,7 @@ const ContactSection = () => {
                 <Textarea
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  placeholder="Tell us about your requirements..."
+                  placeholder="Enter your message or inquiry"
                   className="rounded-lg bg-black border-white/10 focus:border-primary focus:ring-1 focus:ring-primary resize-none h-[120px]"
                   required
                 />
