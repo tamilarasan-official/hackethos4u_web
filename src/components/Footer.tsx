@@ -99,6 +99,15 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-background/20 pt-8 text-center text-sm opacity-80">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4 mb-2">
+            <Link to="/privacy-policy" className="hover:text-primary transition-colors">
+              Privacy Policy
+            </Link>
+            <span className="hidden md:inline">|</span>
+            <Link to="/terms-and-conditions" className="hover:text-primary transition-colors">
+              Terms and Conditions
+            </Link>
+          </div>
           <p>© 2024 Hackethos4U. All rights reserved.</p>
         </div>
       </div>
