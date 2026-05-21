@@ -22,6 +22,7 @@ const CoursePage = lazy(() => import("./pages/CoursePage"));
 const CourseSelection = lazy(() => import("./pages/CourseSelection"));
 const Admin = lazy(() => import("./pages/Admin"));
 const Login = lazy(() => import("./pages/Login"));
+const AdminOtp = lazy(() => import("./pages/AdminOtp"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsAndConditions = lazy(() => import("./pages/TermsAndConditions"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -63,6 +64,7 @@ const App = () => (
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/admin-access" element={<Login />} />
+                <Route path="/admin-access/otp" element={<AdminOtp />} />
                 <Route
                   path="/admin"
                   element={
