@@ -59,6 +59,18 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- Firebase Auth and Firestore
+
+## Admin access
+
+The admin panel is available at `/admin` and is protected by Firebase authentication. Local Firebase values should be provided through Vite environment variables, using `.env.example` as the reference.
+
+For development:
+
+```sh
+npm install
+npm run dev
+```
 
 ## How can I deploy this project?
 
