@@ -1,7 +1,7 @@
 import {
   assertMethod,
   buildOtpCookiePayload,
-  getAuthenticatedAdmin,
+  getPendingOtpAdmin,
   getOtpState,
   json,
   maskEmail,
@@ -15,7 +15,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    const user = await getAuthenticatedAdmin(req);
+    const user = getPendingOtpAdmin(req);
+    if (!user) {
+      json(res, 400, { error: "No active OTP session found." });
+      return;
+    }
+
     const now = Date.now();
     const currentState = getOtpState(req);
 

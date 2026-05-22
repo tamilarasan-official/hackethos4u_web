@@ -1,11 +1,11 @@
 import {
   assertMethod,
   buildOtpCookiePayload,
-  getAuthenticatedAdmin,
   json,
   maskEmail,
   sendOtpEmail,
   setOtpCookie,
+  verifyPasswordLogin,
 } from "../_lib/admin-otp.js";
 
 export default async function handler(req, res) {
@@ -14,7 +14,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const user = await getAuthenticatedAdmin(req);
+    const email = String(req.body?.email || "");
+    const password = String(req.body?.password || "");
+    const user = await verifyPasswordLogin(email, password);
     const otp = Math.floor(Math.random() * 1000000).toString().padStart(6, "0");
     const now = Date.now();
     const payload = buildOtpCookiePayload(user, otp, now);

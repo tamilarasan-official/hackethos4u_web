@@ -1,9 +1,9 @@
 import {
   SESSION_TTL_MS,
   assertMethod,
-  getAuthenticatedAdmin,
   getSessionState,
   json,
+  verifyFirebaseUser,
 } from "../_lib/admin-otp.js";
 
 export default async function handler(req, res) {
@@ -12,7 +12,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    const user = await getAuthenticatedAdmin(req);
+    const header = req.headers.authorization || "";
+    if (!header.startsWith("Bearer ")) {
+      json(res, 200, { verified: false });
+      return;
+    }
+
+    const user = await verifyFirebaseUser(header.slice(7));
     const state = getSessionState(req);
     const now = Date.now();
 
@@ -20,7 +26,6 @@ export default async function handler(req, res) {
       !state ||
       state.uid !== user.uid ||
       state.email !== user.email ||
-      state.authTime !== user.authTime ||
       state.expiresAt <= now
     ) {
       json(res, 200, { verified: false });

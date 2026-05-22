@@ -24,6 +24,10 @@ function getAdminEmails() {
     .filter(Boolean);
 }
 
+function normalizeEmail(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
 function json(res, status, payload) {
   res.status(status).setHeader("Content-Type", "application/json");
   res.end(JSON.stringify(payload));
@@ -169,7 +173,49 @@ async function verifyFirebaseUser(idToken) {
   return {
     uid: user.localId,
     email: String(user.email || "").toLowerCase(),
-    authTime: Number(user.lastLoginAt || Date.now()),
+  };
+}
+
+async function verifyPasswordLogin(email, password) {
+  const apiKey = getEnv("VITE_FIREBASE_API_KEY");
+  if (!apiKey) {
+    throw new Error("VITE_FIREBASE_API_KEY is not configured.");
+  }
+
+  const normalizedEmail = normalizeEmail(email);
+  const normalizedPassword = String(password || "");
+  if (!normalizedEmail || !normalizedPassword) {
+    throw new Error("Email and password are required.");
+  }
+
+  const allowedEmails = getAdminEmails();
+  if (!allowedEmails.includes(normalizedEmail)) {
+    throw new Error("This account is not allowed to access the admin panel.");
+  }
+
+  const response = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: normalizedEmail,
+        password: normalizedPassword,
+        returnSecureToken: true,
+      }),
+    },
+  );
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error("Invalid email or password.");
+  }
+
+  return {
+    uid: String(data.localId || ""),
+    email: normalizeEmail(data.email),
   };
 }
 
@@ -260,7 +306,6 @@ function buildOtpCookiePayload(user, otp, now, failedAttempts = 0) {
     expiresAt: now + OTP_TTL_MS,
     canResendAt: now + RESEND_COOLDOWN_MS,
     failedAttempts,
-    authTime: user.authTime,
   };
 }
 
@@ -276,7 +321,6 @@ function setSessionCookie(res, user, now) {
   const payload = {
     uid: user.uid,
     email: user.email,
-    authTime: user.authTime,
     verifiedAt: now,
     expiresAt: now + SESSION_TTL_MS,
   };
@@ -299,6 +343,18 @@ function getOtpState(req) {
   }
 
   return payload;
+}
+
+function getPendingOtpAdmin(req) {
+  const payload = getOtpState(req);
+  if (!payload?.uid || !payload?.email) {
+    return null;
+  }
+
+  return {
+    uid: String(payload.uid),
+    email: normalizeEmail(payload.email),
+  };
 }
 
 function getSessionState(req) {
@@ -328,12 +384,16 @@ export {
   buildOtpCookiePayload,
   clearAuthCookies,
   getAuthenticatedAdmin,
+  getPendingOtpAdmin,
   getOtpState,
   getSessionState,
   hashOtp,
   json,
   maskEmail,
+  normalizeEmail,
   sendOtpEmail,
   setOtpCookie,
   setSessionCookie,
+  verifyFirebaseUser,
+  verifyPasswordLogin,
 };

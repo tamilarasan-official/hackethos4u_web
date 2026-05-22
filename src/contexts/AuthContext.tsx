@@ -14,12 +14,18 @@ import { toast } from 'sonner';
 
 const ADMIN_OTP_SESSION_KEY = 'hackethos4u-admin-otp';
 const ADMIN_OTP_PENDING_KEY = 'hackethos4u-admin-otp-pending';
+const ADMIN_PENDING_LOGIN_KEY = 'hackethos4u-admin-pending-login';
 
 type AdminOtpSession = {
   email: string;
   maskedEmail?: string;
   expiresAt: number;
   canResendAt: number;
+};
+
+type PendingAdminLogin = {
+  email: string;
+  password: string;
 };
 
 type LoginResult = {
@@ -76,6 +82,41 @@ const storeAdminOtpSession = (session: AdminOtpSession | null) => {
   window.sessionStorage.setItem(ADMIN_OTP_SESSION_KEY, JSON.stringify(session));
 };
 
+const getPendingAdminLogin = (): PendingAdminLogin | null => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    const raw = window.sessionStorage.getItem(ADMIN_PENDING_LOGIN_KEY);
+    if (!raw) {
+      return null;
+    }
+
+    const parsed = JSON.parse(raw) as PendingAdminLogin;
+    if (!parsed?.email || !parsed?.password) {
+      return null;
+    }
+
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
+const storePendingAdminLogin = (value: PendingAdminLogin | null) => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  if (!value) {
+    window.sessionStorage.removeItem(ADMIN_PENDING_LOGIN_KEY);
+    return;
+  }
+
+  window.sessionStorage.setItem(ADMIN_PENDING_LOGIN_KEY, JSON.stringify(value));
+};
+
 const getOtpPending = () => {
   if (typeof window === 'undefined') {
     return false;
@@ -96,12 +137,12 @@ const setOtpPending = (pending: boolean) => {
   }
 };
 
-async function apiRequest<T>(path: string, idToken: string, body?: Record<string, unknown>, method = 'POST'): Promise<T> {
+async function apiRequest<T>(path: string, idToken?: string, body?: Record<string, unknown>, method = 'POST'): Promise<T> {
   const response = await fetch(path, {
     method,
     credentials: 'include',
     headers: {
-      Authorization: `Bearer ${idToken}`,
+      ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
       ...(method !== 'GET' ? { 'Content-Type': 'application/json' } : {}),
     },
     ...(method !== 'GET' ? { body: JSON.stringify(body || {}) } : {}),
@@ -156,6 +197,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsAdmin(false);
     setAdminTwoFactorVerified(false);
     syncAdminOtpSession(null);
+    storePendingAdminLogin(null);
     setOtpPending(false);
   };
 
@@ -173,7 +215,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const applyUserState = async (user: User | null) => {
     if (!user) {
       setCurrentUser(null);
-      clearAuthState();
+      setIsAdmin(false);
+      setAdminTwoFactorVerified(false);
+      if (!getOtpPending()) {
+        syncAdminOtpSession(null);
+        storePendingAdminLogin(null);
+      }
       setLoading(false);
       return;
     }
@@ -188,6 +235,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (!nextIsAdmin) {
         setAdminTwoFactorVerified(false);
         syncAdminOtpSession(null);
+        storePendingAdminLogin(null);
       } else {
         if (getOtpPending()) {
           setAdminTwoFactorVerified(false);
@@ -196,6 +244,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           setAdminTwoFactorVerified(verified);
           if (verified) {
             syncAdminOtpSession(null);
+            storePendingAdminLogin(null);
           }
         }
       }
@@ -221,6 +270,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     if (message.includes('not allowed for admin OTP')) {
       return 'This account is not allowed to access the admin panel.';
     }
+    if (message.includes('This account is not allowed to access the admin panel.')) {
+      return message;
+    }
     if (message.includes('Please wait before requesting another OTP')) {
       return message;
     }
@@ -240,23 +292,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         method: 'POST',
         credentials: 'include',
       });
-      setOtpPending(true);
-
-      const credential = await signInWithEmailAndPassword(auth, email, password);
-      const role = await resolveRole(credential.user);
-
-      if (role !== 'admin') {
+      if (auth.currentUser) {
         await signOut(auth);
-        setOtpPending(false);
-        throw new Error('This account is not allowed to access the admin panel.');
       }
+      setOtpPending(true);
+      storePendingAdminLogin({ email, password });
 
-      const idToken = await credential.user.getIdToken();
-      const data = await apiRequest<AdminOtpSession>('/api/admin/start-otp', idToken);
+      const data = await apiRequest<AdminOtpSession>('/api/admin/start-otp', undefined, { email, password });
 
       syncAdminOtpSession(data);
-      setCurrentUser(credential.user);
-      setIsAdmin(true);
+      setCurrentUser(null);
+      setIsAdmin(false);
       setAdminTwoFactorVerified(false);
       toast.success('OTP sent to your admin email.');
 
@@ -264,6 +310,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } catch (error: unknown) {
       console.error('Login error:', error);
       setOtpPending(false);
+      syncAdminOtpSession(null);
+      storePendingAdminLogin(null);
       toast.error(normalizeAuthError(error));
       throw error;
     }
@@ -271,12 +319,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const resendAdminOtp = async () => {
     try {
-      if (!auth.currentUser) {
-        throw new Error('No user logged in');
+      if (!adminOtpSession) {
+        throw new Error('No active OTP session found.');
       }
 
-      const idToken = await auth.currentUser.getIdToken();
-      const data = await apiRequest<AdminOtpSession>('/api/admin/resend-otp', idToken);
+      const data = await apiRequest<AdminOtpSession>('/api/admin/resend-otp');
 
       syncAdminOtpSession(data);
       toast.success('A new OTP has been sent.');
@@ -289,14 +336,31 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const verifyAdminOtp = async (otp: string) => {
     try {
-      if (!auth.currentUser) {
-        throw new Error('No user logged in');
+      const pendingLogin = getPendingAdminLogin();
+      if (!pendingLogin) {
+        throw new Error('Your login session expired. Please sign in again.');
       }
 
-      const idToken = await auth.currentUser.getIdToken(true);
-      await apiRequest('/api/admin/verify-otp', idToken, { otp });
+      await apiRequest('/api/admin/verify-otp', undefined, { otp });
+      const credential = await signInWithEmailAndPassword(auth, pendingLogin.email, pendingLogin.password);
+      const role = await resolveRole(credential.user);
+
+      if (role !== 'admin') {
+        await signOut(auth);
+        throw new Error('This account is not allowed to access the admin panel.');
+      }
+
+      const verified = await checkAdminSession(credential.user);
+      if (!verified) {
+        await signOut(auth);
+        throw new Error('OTP verification was not completed correctly. Please try again.');
+      }
+
+      setCurrentUser(credential.user);
+      setIsAdmin(true);
       setAdminTwoFactorVerified(true);
       syncAdminOtpSession(null);
+      storePendingAdminLogin(null);
       setOtpPending(false);
       toast.success('Admin verification successful.');
     } catch (error: unknown) {

@@ -1,8 +1,7 @@
 import {
   MAX_FAILED_ATTEMPTS,
   assertMethod,
-  buildOtpCookiePayload,
-  getAuthenticatedAdmin,
+  getPendingOtpAdmin,
   getOtpState,
   hashOtp,
   json,
@@ -16,7 +15,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    const user = await getAuthenticatedAdmin(req);
+    const user = getPendingOtpAdmin(req);
+    if (!user) {
+      json(res, 400, { error: "No active OTP session found." });
+      return;
+    }
+
     const otp = String(req.body?.otp || "").trim();
     if (!/^\d{6}$/.test(otp)) {
       json(res, 400, { error: "A valid 6-digit OTP is required." });
@@ -27,11 +31,6 @@ export default async function handler(req, res) {
     const now = Date.now();
     if (!state || state.uid !== user.uid || state.email !== user.email) {
       json(res, 400, { error: "No active OTP session found." });
-      return;
-    }
-
-    if (state.authTime !== user.authTime) {
-      json(res, 400, { error: "This OTP belongs to a different login session." });
       return;
     }
 

@@ -17,7 +17,6 @@ const AdminOtp = () => {
   const navigate = useNavigate();
   const {
     currentUser,
-    isAdmin,
     loading,
     adminTwoFactorVerified,
     adminOtpSession,
@@ -55,15 +54,11 @@ const AdminOtp = () => {
     );
   }
 
-  if (!currentUser) {
+  if (!adminOtpSession) {
     return <Navigate to="/admin-access" replace />;
   }
 
-  if (!isAdmin) {
-    return <Navigate to="/admin-access" replace />;
-  }
-
-  if (adminTwoFactorVerified) {
+  if (adminTwoFactorVerified && currentUser) {
     return <Navigate to="/admin" replace />;
   }
 
@@ -129,7 +124,7 @@ const AdminOtp = () => {
             <div className="mb-6 rounded-lg border border-white/10 bg-white/5 p-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-2 text-white">
                 <Mail className="w-4 h-4 text-primary" />
-                <span>{adminOtpSession?.email || currentUser.email}</span>
+                <span>{adminOtpSession.maskedEmail || adminOtpSession.email}</span>
               </div>
               <p className="mt-2">
                 Use the latest OTP email. The code expires in 5 minutes.
