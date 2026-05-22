@@ -4,7 +4,7 @@ import nodemailer from "nodemailer";
 const ADMIN_OTP_COOKIE = "hackethos_admin_otp";
 const ADMIN_SESSION_COOKIE = "hackethos_admin_session";
 const OTP_LENGTH = 6;
-const OTP_TTL_MS = 5 * 60 * 1000;
+const OTP_TTL_MS = 60 * 1000;
 const RESEND_COOLDOWN_MS = 60 * 1000;
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 const MAX_FAILED_ATTEMPTS = 5;
@@ -285,13 +285,13 @@ async function sendOtpEmail(email, otp) {
     from,
     to: email,
     subject: "Hackethos4u Admin Login OTP",
-    text: `Your Hackethos4u admin login OTP is ${otp}. It expires in 5 minutes.`,
+    text: `Your Hackethos4u admin login OTP is ${otp}. It expires in 1 minute.`,
     html: `
       <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
         <h2>Hackethos4u Admin Login OTP</h2>
         <p>Your one-time password is:</p>
         <p style="font-size: 28px; font-weight: 700; letter-spacing: 6px;">${otp}</p>
-        <p>This code expires in 5 minutes.</p>
+        <p>This code expires in 1 minute.</p>
         <p>If you did not attempt to sign in, change your password immediately.</p>
       </div>
     `,

@@ -127,7 +127,7 @@ const AdminOtp = () => {
                 <span>{adminOtpSession.maskedEmail || adminOtpSession.email}</span>
               </div>
               <p className="mt-2">
-                Use the latest OTP email. The code expires in 5 minutes.
+                Use the latest OTP email. The code expires in 1 minute.
               </p>
             </div>
 

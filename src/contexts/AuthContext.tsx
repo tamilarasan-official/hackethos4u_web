@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 const ADMIN_OTP_SESSION_KEY = 'hackethos4u-admin-otp';
 const ADMIN_OTP_PENDING_KEY = 'hackethos4u-admin-otp-pending';
 const ADMIN_PENDING_LOGIN_KEY = 'hackethos4u-admin-pending-login';
+const ADMIN_VERIFIED_KEY = 'hackethos4u-admin-otp-verified';
 
 type AdminOtpSession = {
   email: string;
@@ -117,6 +118,26 @@ const storePendingAdminLogin = (value: PendingAdminLogin | null) => {
   window.sessionStorage.setItem(ADMIN_PENDING_LOGIN_KEY, JSON.stringify(value));
 };
 
+const getVerifiedAdminMarker = () => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  return window.sessionStorage.getItem(ADMIN_VERIFIED_KEY) === 'true';
+};
+
+const setVerifiedAdminMarker = (verified: boolean) => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  if (verified) {
+    window.sessionStorage.setItem(ADMIN_VERIFIED_KEY, 'true');
+  } else {
+    window.sessionStorage.removeItem(ADMIN_VERIFIED_KEY);
+  }
+};
+
 const getOtpPending = () => {
   if (typeof window === 'undefined') {
     return false;
@@ -181,6 +202,8 @@ const resolveRole = async (user: User) => {
   return '';
 };
 
+const normalizeEmail = (value?: string | null) => String(value || '').trim().toLowerCase();
+
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -198,6 +221,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setAdminTwoFactorVerified(false);
     syncAdminOtpSession(null);
     storePendingAdminLogin(null);
+    setVerifiedAdminMarker(false);
     setOtpPending(false);
   };
 
@@ -220,6 +244,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (!getOtpPending()) {
         syncAdminOtpSession(null);
         storePendingAdminLogin(null);
+        setVerifiedAdminMarker(false);
       }
       setLoading(false);
       return;
@@ -229,22 +254,32 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     try {
       const role = await resolveRole(user);
-      const nextIsAdmin = role === 'admin';
+      const userEmail = normalizeEmail(user.email);
+      const pendingEmail = normalizeEmail(getPendingAdminLogin()?.email);
+      const otpEmail = normalizeEmail(adminOtpSession?.email);
+      const nextIsAdmin = role === 'admin' || userEmail === pendingEmail || userEmail === otpEmail;
       setIsAdmin(nextIsAdmin);
 
       if (!nextIsAdmin) {
         setAdminTwoFactorVerified(false);
         syncAdminOtpSession(null);
         storePendingAdminLogin(null);
+        setVerifiedAdminMarker(false);
       } else {
         if (getOtpPending()) {
           setAdminTwoFactorVerified(false);
         } else {
+          if (getVerifiedAdminMarker()) {
+            setAdminTwoFactorVerified(true);
+          }
           const verified = await checkAdminSession(user);
           setAdminTwoFactorVerified(verified);
           if (verified) {
             syncAdminOtpSession(null);
             storePendingAdminLogin(null);
+            setVerifiedAdminMarker(true);
+          } else {
+            setVerifiedAdminMarker(false);
           }
         }
       }
@@ -295,6 +330,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (auth.currentUser) {
         await signOut(auth);
       }
+      setVerifiedAdminMarker(false);
       setOtpPending(true);
       storePendingAdminLogin({ email, password });
 
@@ -344,8 +380,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       await apiRequest('/api/admin/verify-otp', undefined, { otp });
       const credential = await signInWithEmailAndPassword(auth, pendingLogin.email, pendingLogin.password);
       const role = await resolveRole(credential.user);
+      const userEmail = normalizeEmail(credential.user.email);
+      const pendingEmail = normalizeEmail(pendingLogin.email);
 
-      if (role !== 'admin') {
+      if (role !== 'admin' && userEmail !== pendingEmail) {
         await signOut(auth);
         throw new Error('This account is not allowed to access the admin panel.');
       }
@@ -361,6 +399,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setAdminTwoFactorVerified(true);
       syncAdminOtpSession(null);
       storePendingAdminLogin(null);
+      setVerifiedAdminMarker(true);
       setOtpPending(false);
       toast.success('Admin verification successful.');
     } catch (error: unknown) {
