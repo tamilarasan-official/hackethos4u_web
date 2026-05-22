@@ -29,6 +29,8 @@ export default async function handler(req, res) {
       maskedEmail: maskEmail(user.email),
       expiresAt: payload.expiresAt,
       canResendAt: payload.canResendAt,
+      expiresInMs: payload.expiresAt - now,
+      resendInMs: payload.canResendAt - now,
     });
   } catch (error) {
     console.error("start-otp error:", error);

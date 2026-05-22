@@ -22,6 +22,8 @@ type AdminOtpSession = {
   maskedEmail?: string;
   expiresAt: number;
   canResendAt: number;
+  expiresInMs?: number;
+  resendInMs?: number;
 };
 
 type PendingAdminLogin = {
@@ -81,6 +83,22 @@ const storeAdminOtpSession = (session: AdminOtpSession | null) => {
   }
 
   window.sessionStorage.setItem(ADMIN_OTP_SESSION_KEY, JSON.stringify(session));
+};
+
+const normalizeAdminOtpSession = (session: AdminOtpSession): AdminOtpSession => {
+  const now = Date.now();
+  const expiresAt = typeof session.expiresInMs === 'number'
+    ? now + Math.max(0, session.expiresInMs)
+    : session.expiresAt;
+  const canResendAt = typeof session.resendInMs === 'number'
+    ? now + Math.max(0, session.resendInMs)
+    : session.canResendAt;
+
+  return {
+    ...session,
+    expiresAt,
+    canResendAt,
+  };
 };
 
 const getPendingAdminLogin = (): PendingAdminLogin | null => {
@@ -212,8 +230,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [adminOtpSession, setAdminOtpSession] = useState<AdminOtpSession | null>(getStoredAdminOtpSession());
 
   const syncAdminOtpSession = (session: AdminOtpSession | null) => {
-    setAdminOtpSession(session);
-    storeAdminOtpSession(session);
+    const normalizedSession = session ? normalizeAdminOtpSession(session) : null;
+    setAdminOtpSession(normalizedSession);
+    storeAdminOtpSession(normalizedSession);
   };
 
   const clearAuthState = () => {
