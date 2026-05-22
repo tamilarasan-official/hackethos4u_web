@@ -13,6 +13,7 @@ import { auth, db } from '@/lib/firebase';
 import { toast } from 'sonner';
 
 const ADMIN_OTP_SESSION_KEY = 'hackethos4u-admin-otp';
+const ADMIN_OTP_PENDING_KEY = 'hackethos4u-admin-otp-pending';
 
 type AdminOtpSession = {
   email: string;
@@ -75,6 +76,26 @@ const storeAdminOtpSession = (session: AdminOtpSession | null) => {
   window.sessionStorage.setItem(ADMIN_OTP_SESSION_KEY, JSON.stringify(session));
 };
 
+const getOtpPending = () => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  return window.sessionStorage.getItem(ADMIN_OTP_PENDING_KEY) === 'true';
+};
+
+const setOtpPending = (pending: boolean) => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  if (pending) {
+    window.sessionStorage.setItem(ADMIN_OTP_PENDING_KEY, 'true');
+  } else {
+    window.sessionStorage.removeItem(ADMIN_OTP_PENDING_KEY);
+  }
+};
+
 async function apiRequest<T>(path: string, idToken: string, body?: Record<string, unknown>, method = 'POST'): Promise<T> {
   const response = await fetch(path, {
     method,
@@ -135,6 +156,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsAdmin(false);
     setAdminTwoFactorVerified(false);
     syncAdminOtpSession(null);
+    setOtpPending(false);
   };
 
   const checkAdminSession = async (user: User) => {
@@ -167,10 +189,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setAdminTwoFactorVerified(false);
         syncAdminOtpSession(null);
       } else {
-        const verified = await checkAdminSession(user);
-        setAdminTwoFactorVerified(verified);
-        if (verified) {
-          syncAdminOtpSession(null);
+        if (getOtpPending()) {
+          setAdminTwoFactorVerified(false);
+        } else {
+          const verified = await checkAdminSession(user);
+          setAdminTwoFactorVerified(verified);
+          if (verified) {
+            syncAdminOtpSession(null);
+          }
         }
       }
     } finally {
@@ -210,11 +236,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const login = async (email: string, password: string): Promise<LoginResult> => {
     try {
+      await fetch('/api/admin/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      setOtpPending(true);
+
       const credential = await signInWithEmailAndPassword(auth, email, password);
       const role = await resolveRole(credential.user);
 
       if (role !== 'admin') {
         await signOut(auth);
+        setOtpPending(false);
         throw new Error('This account is not allowed to access the admin panel.');
       }
 
@@ -230,6 +263,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return { requiresTwoFactor: true };
     } catch (error: unknown) {
       console.error('Login error:', error);
+      setOtpPending(false);
       toast.error(normalizeAuthError(error));
       throw error;
     }
@@ -263,6 +297,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       await apiRequest('/api/admin/verify-otp', idToken, { otp });
       setAdminTwoFactorVerified(true);
       syncAdminOtpSession(null);
+      setOtpPending(false);
       toast.success('Admin verification successful.');
     } catch (error: unknown) {
       console.error('Verify OTP error:', error);
