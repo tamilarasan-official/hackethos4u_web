@@ -228,7 +228,7 @@ const About = () => {
                 Be part of a network of security professionals and learners passionate about cybersecurity
               </p>
               <Button size="lg" className="rounded-full bg-black text-white hover:bg-black/90 shadow-xl font-semibold">
-                Get Started Today
+                Explore Our Programs
               </Button>
             </div>
           </div>
