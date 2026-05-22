@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
 import {
   signInWithEmailAndPassword,
   signOut,
@@ -246,6 +246,7 @@ const resolveRole = async (user: User) => {
 const normalizeEmail = (value?: string | null) => String(value || '').trim().toLowerCase();
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
+  const otpVerificationInProgressRef = useRef(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [authTransitioning, setAuthTransitioning] = useState(false);
@@ -291,7 +292,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setVerifiedAdminMarker(false);
         setVerifiedAdminEmail('');
       }
-      setAuthTransitioning(false);
+      if (!otpVerificationInProgressRef.current) {
+        setAuthTransitioning(false);
+      }
       setLoading(false);
       return;
     }
@@ -338,7 +341,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
       }
     } finally {
-      setAuthTransitioning(false);
+      if (!otpVerificationInProgressRef.current) {
+        setAuthTransitioning(false);
+      }
       setLoading(false);
     }
   };
@@ -428,9 +433,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const verifyAdminOtp = async (otp: string) => {
     try {
+      otpVerificationInProgressRef.current = true;
       setAuthTransitioning(true);
       const pendingLogin = getPendingAdminLogin();
       if (!pendingLogin) {
+        otpVerificationInProgressRef.current = false;
         setAuthTransitioning(false);
         throw new Error('Your login session expired. Please sign in again.');
       }
@@ -462,10 +469,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setOtpPending(false);
       toast.success('Admin verification successful.');
     } catch (error: unknown) {
+      otpVerificationInProgressRef.current = false;
       setAuthTransitioning(false);
       console.error('Verify OTP error:', error);
       toast.error(normalizeAuthError(error));
       throw error;
+    } finally {
+      otpVerificationInProgressRef.current = false;
+      setAuthTransitioning(false);
     }
   };
 
