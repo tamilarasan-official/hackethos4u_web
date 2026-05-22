@@ -29,6 +29,7 @@ const AdminOtp = () => {
   const [otp, setOtp] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [resending, setResending] = useState(false);
+  const [redirectingToAdmin, setRedirectingToAdmin] = useState(false);
   const [secondsUntilResend, setSecondsUntilResend] = useState(0);
   const [secondsUntilExpiry, setSecondsUntilExpiry] = useState(0);
 
@@ -57,10 +58,13 @@ const AdminOtp = () => {
     return () => window.clearInterval(interval);
   }, [adminOtpSession?.canResendAt, adminOtpSession?.expiresAt]);
 
-  if (loading || authTransitioning) {
+  if (loading || authTransitioning || redirectingToAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
-        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Completing secure admin sign-in...</p>
+        </div>
       </div>
     );
   }
@@ -83,8 +87,10 @@ const AdminOtp = () => {
     setSubmitting(true);
     try {
       await verifyAdminOtp(otp);
+      setRedirectingToAdmin(true);
       navigate('/admin', { replace: true });
     } catch {
+      setRedirectingToAdmin(false);
       setOtp('');
     } finally {
       setSubmitting(false);
