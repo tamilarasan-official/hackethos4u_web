@@ -28,23 +28,33 @@ const AdminOtp = () => {
   const [otp, setOtp] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [resending, setResending] = useState(false);
-  const [secondsLeft, setSecondsLeft] = useState(0);
+  const [secondsUntilResend, setSecondsUntilResend] = useState(0);
+  const [secondsUntilExpiry, setSecondsUntilExpiry] = useState(0);
 
   useEffect(() => {
-    if (!adminOtpSession?.canResendAt) {
-      setSecondsLeft(0);
+    if (!adminOtpSession?.canResendAt && !adminOtpSession?.expiresAt) {
+      setSecondsUntilResend(0);
+      setSecondsUntilExpiry(0);
       return;
     }
 
     const updateTimer = () => {
-      const nextValue = Math.max(0, Math.ceil((adminOtpSession.canResendAt - Date.now()) / 1000));
-      setSecondsLeft(nextValue);
+      const now = Date.now();
+      const nextResendValue = adminOtpSession?.canResendAt
+        ? Math.max(0, Math.ceil((adminOtpSession.canResendAt - now) / 1000))
+        : 0;
+      const nextExpiryValue = adminOtpSession?.expiresAt
+        ? Math.max(0, Math.ceil((adminOtpSession.expiresAt - now) / 1000))
+        : 0;
+
+      setSecondsUntilResend(nextResendValue);
+      setSecondsUntilExpiry(nextExpiryValue);
     };
 
     updateTimer();
     const interval = window.setInterval(updateTimer, 1000);
     return () => window.clearInterval(interval);
-  }, [adminOtpSession?.canResendAt]);
+  }, [adminOtpSession?.canResendAt, adminOtpSession?.expiresAt]);
 
   if (loading) {
     return (
@@ -73,7 +83,7 @@ const AdminOtp = () => {
     try {
       await verifyAdminOtp(otp);
       navigate('/admin', { replace: true });
-    } catch (error) {
+    } catch {
       setOtp('');
     } finally {
       setSubmitting(false);
@@ -105,7 +115,10 @@ const AdminOtp = () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black p-4">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          <div
+            className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-accent/10 rounded-full blur-3xl animate-pulse"
+            style={{ animationDelay: '1s' }}
+          />
         </div>
 
         <Card className="w-full max-w-md relative z-10 border-white/10 bg-black/50 backdrop-blur-xl">
@@ -127,7 +140,7 @@ const AdminOtp = () => {
                 <span>{adminOtpSession.maskedEmail || adminOtpSession.email}</span>
               </div>
               <p className="mt-2">
-                Use the latest OTP email. The code expires in 1 minute.
+                Use the latest OTP email. The code expires in {formatSeconds(secondsUntilExpiry)}.
               </p>
             </div>
 
@@ -137,7 +150,7 @@ const AdminOtp = () => {
                   maxLength={6}
                   value={otp}
                   onChange={setOtp}
-                  disabled={submitting}
+                  disabled={submitting || secondsUntilExpiry === 0}
                   containerClassName="justify-center"
                 >
                   <InputOTPGroup>
@@ -154,13 +167,15 @@ const AdminOtp = () => {
               <Button
                 type="submit"
                 className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white"
-                disabled={submitting || otp.length !== 6}
+                disabled={submitting || otp.length !== 6 || secondsUntilExpiry === 0}
               >
                 {submitting ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Verifying OTP...
                   </>
+                ) : secondsUntilExpiry === 0 ? (
+                  'OTP Expired'
                 ) : (
                   'Verify and Login'
                 )}
@@ -169,14 +184,16 @@ const AdminOtp = () => {
 
             <div className="mt-6 space-y-3 text-center">
               <p className="text-sm text-muted-foreground">
-                {secondsLeft > 0 ? `Resend available in ${formatSeconds(secondsLeft)}` : 'Didn’t receive the code?'}
+                {secondsUntilResend > 0
+                  ? `Resend available in ${formatSeconds(secondsUntilResend)}`
+                  : 'Need a fresh code?'}
               </p>
               <Button
                 type="button"
                 variant="outline"
                 className="w-full border-white/10 hover:bg-white/5 text-white"
                 onClick={handleResend}
-                disabled={resending || secondsLeft > 0}
+                disabled={resending || secondsUntilResend > 0}
               >
                 {resending ? (
                   <>
