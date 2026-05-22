@@ -85,9 +85,9 @@ const AdminOtp = () => {
     }
 
     setSubmitting(true);
+    setRedirectingToAdmin(true);
     try {
       await verifyAdminOtp(otp);
-      setRedirectingToAdmin(true);
       navigate('/admin', { replace: true });
     } catch {
       setRedirectingToAdmin(false);
