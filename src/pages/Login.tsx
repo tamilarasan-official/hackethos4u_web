@@ -133,6 +133,9 @@ const Login = () => {
             <p className="mt-4 text-center text-sm text-muted-foreground">
               After password validation, a one-time code will be sent to your admin email.
             </p>
+            <p className="mt-2 text-center text-xs text-muted-foreground/80">
+              Secure admin sign-in uses email OTP verification.
+            </p>
 
             <div className="mt-6 text-center">
               <Button
