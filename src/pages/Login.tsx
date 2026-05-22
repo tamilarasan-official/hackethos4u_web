@@ -1,32 +1,56 @@
-import { useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { signOut } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, Loader2 } from 'lucide-react';
 import SEO from '@/components/SEO';
+import { auth } from '@/lib/firebase';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login, currentUser, isAdmin, adminTwoFactorVerified } = useAuth();
+  const [resettingSession, setResettingSession] = useState(true);
+  const { login, currentUser } = useAuth();
   const navigate = useNavigate();
 
-  if (currentUser && isAdmin && adminTwoFactorVerified) {
-    return <Navigate to="/admin" replace />;
-  }
+  useEffect(() => {
+    let active = true;
 
-  if (currentUser && isAdmin) {
-    return <Navigate to="/admin-access/otp" replace />;
-  }
+    const resetSession = async () => {
+      try {
+        await fetch('/api/admin/logout', {
+          method: 'POST',
+          credentials: 'include',
+        });
+
+        if (auth.currentUser) {
+          await signOut(auth);
+        }
+      } catch (error) {
+        console.error('Failed to reset admin session:', error);
+      } finally {
+        if (active) {
+          setResettingSession(false);
+        }
+      }
+    };
+
+    void resetSession();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !password) {
+    if (!email || !password || resettingSession || currentUser) {
       return;
     }
 
@@ -67,6 +91,12 @@ const Login = () => {
             </div>
           </CardHeader>
           <CardContent>
+            {resettingSession ? (
+              <div className="py-8 text-center text-muted-foreground">
+                <Loader2 className="w-5 h-5 mx-auto mb-3 animate-spin" />
+                Resetting previous admin session...
+              </div>
+            ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-white">
@@ -113,6 +143,7 @@ const Login = () => {
                 )}
               </Button>
             </form>
+            )}
 
             <p className="mt-4 text-center text-sm text-muted-foreground">
               After password validation, a one-time code will be sent to your admin email.
