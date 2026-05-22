@@ -58,7 +58,7 @@ const AdminOtp = () => {
     return () => window.clearInterval(interval);
   }, [adminOtpSession?.canResendAt, adminOtpSession?.expiresAt]);
 
-  if (loading || authTransitioning || redirectingToAdmin) {
+  if (loading || authTransitioning || redirectingToAdmin || submitting) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="text-center">
