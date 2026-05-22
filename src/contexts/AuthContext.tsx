@@ -16,6 +16,7 @@ const ADMIN_OTP_SESSION_KEY = 'hackethos4u-admin-otp';
 const ADMIN_OTP_PENDING_KEY = 'hackethos4u-admin-otp-pending';
 const ADMIN_PENDING_LOGIN_KEY = 'hackethos4u-admin-pending-login';
 const ADMIN_VERIFIED_KEY = 'hackethos4u-admin-otp-verified';
+const ADMIN_VERIFIED_EMAIL_KEY = 'hackethos4u-admin-verified-email';
 
 type AdminOtpSession = {
   email: string;
@@ -156,6 +157,27 @@ const setVerifiedAdminMarker = (verified: boolean) => {
   }
 };
 
+const getVerifiedAdminEmail = () => {
+  if (typeof window === 'undefined') {
+    return '';
+  }
+
+  return normalizeEmail(window.sessionStorage.getItem(ADMIN_VERIFIED_EMAIL_KEY));
+};
+
+const setVerifiedAdminEmail = (email?: string | null) => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const normalizedEmail = normalizeEmail(email);
+  if (normalizedEmail) {
+    window.sessionStorage.setItem(ADMIN_VERIFIED_EMAIL_KEY, normalizedEmail);
+  } else {
+    window.sessionStorage.removeItem(ADMIN_VERIFIED_EMAIL_KEY);
+  }
+};
+
 const getOtpPending = () => {
   if (typeof window === 'undefined') {
     return false;
@@ -241,6 +263,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     syncAdminOtpSession(null);
     storePendingAdminLogin(null);
     setVerifiedAdminMarker(false);
+    setVerifiedAdminEmail('');
     setOtpPending(false);
   };
 
@@ -264,6 +287,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         syncAdminOtpSession(null);
         storePendingAdminLogin(null);
         setVerifiedAdminMarker(false);
+        setVerifiedAdminEmail('');
       }
       setLoading(false);
       return;
@@ -276,7 +300,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const userEmail = normalizeEmail(user.email);
       const pendingEmail = normalizeEmail(getPendingAdminLogin()?.email);
       const otpEmail = normalizeEmail(adminOtpSession?.email);
-      const nextIsAdmin = role === 'admin' || userEmail === pendingEmail || userEmail === otpEmail;
+      const verifiedEmail = getVerifiedAdminEmail();
+      const nextIsAdmin =
+        role === 'admin' ||
+        userEmail === pendingEmail ||
+        userEmail === otpEmail ||
+        userEmail === verifiedEmail;
       setIsAdmin(nextIsAdmin);
 
       if (!nextIsAdmin) {
@@ -284,6 +313,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         syncAdminOtpSession(null);
         storePendingAdminLogin(null);
         setVerifiedAdminMarker(false);
+        setVerifiedAdminEmail('');
       } else {
         if (getOtpPending()) {
           setAdminTwoFactorVerified(false);
@@ -297,8 +327,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             syncAdminOtpSession(null);
             storePendingAdminLogin(null);
             setVerifiedAdminMarker(true);
+            setVerifiedAdminEmail(user.email);
           } else {
             setVerifiedAdminMarker(false);
+            setVerifiedAdminEmail('');
           }
         }
       }
@@ -350,6 +382,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         await signOut(auth);
       }
       setVerifiedAdminMarker(false);
+      setVerifiedAdminEmail('');
       setOtpPending(true);
       storePendingAdminLogin({ email, password });
 
@@ -419,6 +452,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       syncAdminOtpSession(null);
       storePendingAdminLogin(null);
       setVerifiedAdminMarker(true);
+      setVerifiedAdminEmail(credential.user.email);
       setOtpPending(false);
       toast.success('Admin verification successful.');
     } catch (error: unknown) {
