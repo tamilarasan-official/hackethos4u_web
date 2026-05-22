@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,7 @@ const Login = () => {
   const {
     login,
     loading: authLoading,
+    authTransitioning,
     currentUser,
     isAdmin,
     adminTwoFactorVerified,
@@ -22,20 +23,21 @@ const Login = () => {
   } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (authLoading) {
-      return;
-    }
+  if (authLoading || authTransitioning) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+      </div>
+    );
+  }
 
-    if (currentUser && isAdmin && adminTwoFactorVerified) {
-      navigate('/admin', { replace: true });
-      return;
-    }
+  if (currentUser && isAdmin && adminTwoFactorVerified) {
+    return <Navigate to="/admin" replace />;
+  }
 
-    if (adminOtpSession && !adminTwoFactorVerified) {
-      navigate('/admin-access/otp', { replace: true });
-    }
-  }, [authLoading, currentUser, isAdmin, adminTwoFactorVerified, adminOtpSession, navigate]);
+  if (adminOtpSession && !adminTwoFactorVerified) {
+    return <Navigate to="/admin-access/otp" replace />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

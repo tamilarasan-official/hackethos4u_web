@@ -39,6 +39,7 @@ type LoginResult = {
 interface AuthContextType {
   currentUser: User | null;
   loading: boolean;
+  authTransitioning: boolean;
   isAdmin: boolean;
   adminTwoFactorVerified: boolean;
   adminOtpSession: AdminOtpSession | null;
@@ -247,6 +248,7 @@ const normalizeEmail = (value?: string | null) => String(value || '').trim().toL
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authTransitioning, setAuthTransitioning] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminTwoFactorVerified, setAdminTwoFactorVerified] = useState(false);
   const [adminOtpSession, setAdminOtpSession] = useState<AdminOtpSession | null>(getStoredAdminOtpSession());
@@ -289,6 +291,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setVerifiedAdminMarker(false);
         setVerifiedAdminEmail('');
       }
+      setAuthTransitioning(false);
       setLoading(false);
       return;
     }
@@ -335,6 +338,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
       }
     } finally {
+      setAuthTransitioning(false);
       setLoading(false);
     }
   };
@@ -424,8 +428,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const verifyAdminOtp = async (otp: string) => {
     try {
+      setAuthTransitioning(true);
       const pendingLogin = getPendingAdminLogin();
       if (!pendingLogin) {
+        setAuthTransitioning(false);
         throw new Error('Your login session expired. Please sign in again.');
       }
 
@@ -456,6 +462,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setOtpPending(false);
       toast.success('Admin verification successful.');
     } catch (error: unknown) {
+      setAuthTransitioning(false);
       console.error('Verify OTP error:', error);
       toast.error(normalizeAuthError(error));
       throw error;
@@ -521,6 +528,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const value: AuthContextType = {
     currentUser,
     loading,
+    authTransitioning,
     isAdmin,
     adminTwoFactorVerified,
     adminOtpSession,

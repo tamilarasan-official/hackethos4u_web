@@ -18,6 +18,7 @@ const AdminOtp = () => {
   const {
     currentUser,
     loading,
+    authTransitioning,
     adminTwoFactorVerified,
     adminOtpSession,
     verifyAdminOtp,
@@ -56,7 +57,7 @@ const AdminOtp = () => {
     return () => window.clearInterval(interval);
   }, [adminOtpSession?.canResendAt, adminOtpSession?.expiresAt]);
 
-  if (loading) {
+  if (loading || authTransitioning) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
         <Loader2 className="w-12 h-12 text-primary animate-spin" />
@@ -82,6 +83,7 @@ const AdminOtp = () => {
     setSubmitting(true);
     try {
       await verifyAdminOtp(otp);
+      navigate('/admin', { replace: true });
     } catch {
       setOtp('');
     } finally {

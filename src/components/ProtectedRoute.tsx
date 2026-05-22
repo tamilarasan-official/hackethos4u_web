@@ -7,9 +7,9 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { currentUser, loading, isAdmin, adminTwoFactorVerified } = useAuth();
+  const { currentUser, loading, authTransitioning, isAdmin, adminTwoFactorVerified } = useAuth();
 
-  if (loading) {
+  if (loading || authTransitioning) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="text-center">
