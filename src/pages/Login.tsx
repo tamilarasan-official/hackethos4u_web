@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -12,8 +12,30 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const {
+    login,
+    loading: authLoading,
+    currentUser,
+    isAdmin,
+    adminTwoFactorVerified,
+    adminOtpSession,
+  } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (authLoading) {
+      return;
+    }
+
+    if (currentUser && isAdmin && adminTwoFactorVerified) {
+      navigate('/admin', { replace: true });
+      return;
+    }
+
+    if (adminOtpSession && !adminTwoFactorVerified) {
+      navigate('/admin-access/otp', { replace: true });
+    }
+  }, [authLoading, currentUser, isAdmin, adminTwoFactorVerified, adminOtpSession, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
