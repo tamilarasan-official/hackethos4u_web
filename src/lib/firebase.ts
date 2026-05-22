@@ -1,6 +1,5 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
-import { getFunctions } from "firebase/functions";
 import {
   initializeFirestore,
   persistentLocalCache,
@@ -24,10 +23,6 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Auth with persistence for better caching
 export const auth = getAuth(app);
-export const functions = getFunctions(
-  app,
-  import.meta.env.VITE_FIREBASE_FUNCTIONS_REGION || "us-central1",
-);
 
 // Set auth persistence to LOCAL for better caching across sessions
 // This reduces the need for repeated getProjectConfig calls

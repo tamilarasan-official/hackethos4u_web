@@ -7,17 +7,16 @@ import {
   reauthenticateWithCredential,
   EmailAuthProvider,
   User,
-  IdTokenResult,
 } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-import { httpsCallable } from 'firebase/functions';
-import { auth, db, functions } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { toast } from 'sonner';
 
 const ADMIN_OTP_SESSION_KEY = 'hackethos4u-admin-otp';
 
 type AdminOtpSession = {
   email: string;
+  maskedEmail?: string;
   expiresAt: number;
   canResendAt: number;
 };
@@ -76,6 +75,25 @@ const storeAdminOtpSession = (session: AdminOtpSession | null) => {
   window.sessionStorage.setItem(ADMIN_OTP_SESSION_KEY, JSON.stringify(session));
 };
 
+async function apiRequest<T>(path: string, idToken: string, body?: Record<string, unknown>, method = 'POST'): Promise<T> {
+  const response = await fetch(path, {
+    method,
+    credentials: 'include',
+    headers: {
+      Authorization: `Bearer ${idToken}`,
+      ...(method !== 'GET' ? { 'Content-Type': 'application/json' } : {}),
+    },
+    ...(method !== 'GET' ? { body: JSON.stringify(body || {}) } : {}),
+  });
+
+  const data = (await response.json()) as T & { error?: string };
+  if (!response.ok) {
+    throw new Error(data.error || 'Request failed.');
+  }
+
+  return data;
+}
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -87,11 +105,6 @@ export const useAuth = () => {
 interface AuthProviderProps {
   children: ReactNode;
 }
-
-type AuthMetadata = {
-  isAdmin: boolean;
-  adminTwoFactorVerified: boolean;
-};
 
 const resolveRole = async (user: User) => {
   try {
@@ -106,28 +119,12 @@ const resolveRole = async (user: User) => {
   return '';
 };
 
-const deriveAdminMetadata = async (user: User, tokenResult: IdTokenResult): Promise<AuthMetadata> => {
-  const role = await resolveRole(user);
-  const isAdmin = role === 'admin' || tokenResult.claims.admin === true;
-  const verifiedAt = Number(tokenResult.claims.adminTwoFactorVerifiedAt || 0);
-  const authTimeMs = Number(tokenResult.claims.auth_time || 0) * 1000;
-  const adminTwoFactorVerified = isAdmin && verifiedAt >= authTimeMs;
-
-  return {
-    isAdmin,
-    adminTwoFactorVerified,
-  };
-};
-
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminTwoFactorVerified, setAdminTwoFactorVerified] = useState(false);
   const [adminOtpSession, setAdminOtpSession] = useState<AdminOtpSession | null>(getStoredAdminOtpSession());
-
-  const startAdminEmailOtp = httpsCallable(functions, 'startAdminEmailOtp');
-  const verifyAdminEmailOtp = httpsCallable(functions, 'verifyAdminEmailOtp');
 
   const syncAdminOtpSession = (session: AdminOtpSession | null) => {
     setAdminOtpSession(session);
@@ -140,7 +137,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     syncAdminOtpSession(null);
   };
 
-  const applyUserState = async (user: User | null, forceRefresh = false) => {
+  const checkAdminSession = async (user: User) => {
+    const idToken = await user.getIdToken();
+    const response = await apiRequest<{ verified: boolean }>(
+      '/api/admin/session',
+      idToken,
+      undefined,
+      'GET',
+    );
+    return response.verified === true;
+  };
+
+  const applyUserState = async (user: User | null) => {
     if (!user) {
       setCurrentUser(null);
       clearAuthState();
@@ -151,13 +159,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setCurrentUser(user);
 
     try {
-      const tokenResult = await user.getIdTokenResult(forceRefresh);
-      const metadata = await deriveAdminMetadata(user, tokenResult);
-      setIsAdmin(metadata.isAdmin);
-      setAdminTwoFactorVerified(metadata.adminTwoFactorVerified);
+      const role = await resolveRole(user);
+      const nextIsAdmin = role === 'admin';
+      setIsAdmin(nextIsAdmin);
 
-      if (metadata.adminTwoFactorVerified) {
+      if (!nextIsAdmin) {
+        setAdminTwoFactorVerified(false);
         syncAdminOtpSession(null);
+      } else {
+        const verified = await checkAdminSession(user);
+        setAdminTwoFactorVerified(verified);
+        if (verified) {
+          syncAdminOtpSession(null);
+        }
       }
     } finally {
       setLoading(false);
@@ -167,6 +181,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const normalizeAuthError = (error: unknown) => {
     const firebaseError = error as { code?: string; message?: string };
     const code = firebaseError.code || '';
+    const message = firebaseError.message || '';
 
     if (code === 'auth/invalid-credential' || code === 'auth/wrong-password') {
       return 'Invalid email or password.';
@@ -177,40 +192,36 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     if (code === 'auth/too-many-requests') {
       return 'Too many failed attempts. Please try again later.';
     }
-    if (code === 'functions/permission-denied') {
+    if (message.includes('not allowed for admin OTP')) {
       return 'This account is not allowed to access the admin panel.';
     }
-    if (code === 'functions/resource-exhausted') {
-      return firebaseError.message || 'Too many OTP requests. Please wait before trying again.';
+    if (message.includes('Please wait before requesting another OTP')) {
+      return message;
     }
-    if (code === 'functions/unavailable') {
-      return 'OTP service is unavailable right now. Please try again shortly.';
+    if (message.includes('OTP')) {
+      return message;
     }
     if (code === 'auth/network-request-failed') {
       return 'Network error. Please check your connection.';
     }
 
-    return firebaseError.message || 'Authentication failed. Please try again.';
+    return message || 'Authentication failed. Please try again.';
   };
 
   const login = async (email: string, password: string): Promise<LoginResult> => {
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
-      const tokenResult = await credential.user.getIdTokenResult(true);
-      const metadata = await deriveAdminMetadata(credential.user, tokenResult);
+      const role = await resolveRole(credential.user);
 
-      if (!metadata.isAdmin) {
+      if (role !== 'admin') {
         await signOut(auth);
-        throw { code: 'functions/permission-denied' };
+        throw new Error('This account is not allowed to access the admin panel.');
       }
 
-      const result = await startAdminEmailOtp();
-      const data = result.data as { email: string; expiresAt: number; canResendAt: number };
-      syncAdminOtpSession({
-        email: data.email,
-        expiresAt: data.expiresAt,
-        canResendAt: data.canResendAt,
-      });
+      const idToken = await credential.user.getIdToken();
+      const data = await apiRequest<AdminOtpSession>('/api/admin/start-otp', idToken);
+
+      syncAdminOtpSession(data);
       setCurrentUser(credential.user);
       setIsAdmin(true);
       setAdminTwoFactorVerified(false);
@@ -219,49 +230,53 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return { requiresTwoFactor: true };
     } catch (error: unknown) {
       console.error('Login error:', error);
-      const message = normalizeAuthError(error);
-      toast.error(message);
+      toast.error(normalizeAuthError(error));
       throw error;
     }
   };
 
   const resendAdminOtp = async () => {
     try {
-      const result = await startAdminEmailOtp();
-      const data = result.data as { email: string; expiresAt: number; canResendAt: number };
-      syncAdminOtpSession({
-        email: data.email,
-        expiresAt: data.expiresAt,
-        canResendAt: data.canResendAt,
-      });
+      if (!auth.currentUser) {
+        throw new Error('No user logged in');
+      }
+
+      const idToken = await auth.currentUser.getIdToken();
+      const data = await apiRequest<AdminOtpSession>('/api/admin/resend-otp', idToken);
+
+      syncAdminOtpSession(data);
       toast.success('A new OTP has been sent.');
     } catch (error: unknown) {
       console.error('Resend OTP error:', error);
-      const message = normalizeAuthError(error);
-      toast.error(message);
+      toast.error(normalizeAuthError(error));
       throw error;
     }
   };
 
   const verifyAdminOtp = async (otp: string) => {
     try {
-      await verifyAdminEmailOtp({ otp });
       if (!auth.currentUser) {
         throw new Error('No user logged in');
       }
 
-      await applyUserState(auth.currentUser, true);
+      const idToken = await auth.currentUser.getIdToken(true);
+      await apiRequest('/api/admin/verify-otp', idToken, { otp });
+      setAdminTwoFactorVerified(true);
+      syncAdminOtpSession(null);
       toast.success('Admin verification successful.');
     } catch (error: unknown) {
       console.error('Verify OTP error:', error);
-      const message = normalizeAuthError(error);
-      toast.error(message);
+      toast.error(normalizeAuthError(error));
       throw error;
     }
   };
 
   const logout = async () => {
     try {
+      await fetch('/api/admin/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
       await signOut(auth);
       clearAuthState();
       toast.success('Logged out successfully!');
