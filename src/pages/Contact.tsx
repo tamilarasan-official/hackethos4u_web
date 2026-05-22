@@ -273,7 +273,7 @@ const Contact = () => {
                 </p>
                 <div className="flex items-center gap-2 text-sm text-primary">
                   <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                  <span className="font-medium">Available now</span>
+                  <span className="font-medium">Support team available now</span>
                 </div>
               </div>
             </div>
