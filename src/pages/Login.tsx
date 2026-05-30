@@ -207,19 +207,9 @@ const Login = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between gap-3">
-                      <Label htmlFor="password" className="text-white">
-                        Password
-                      </Label>
-                      <Button
-                        type="button"
-                        variant="link"
-                        className="h-auto p-0 text-xs text-muted-foreground hover:text-primary"
-                        onClick={openResetMode}
-                      >
-                        Forgot password?
-                      </Button>
-                    </div>
+                    <Label htmlFor="password" className="text-white">
+                      Password
+                    </Label>
                     <Input
                       id="password"
                       type="password"
@@ -245,6 +235,16 @@ const Login = () => {
                       'Continue'
                     )}
                   </Button>
+                  <div className="text-center">
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="h-auto p-0 text-sm text-muted-foreground hover:text-primary"
+                      onClick={openResetMode}
+                    >
+                      Forgot password?
+                    </Button>
+                  </div>
                 </form>
 
                 <p className="mt-4 text-center text-sm text-muted-foreground">
