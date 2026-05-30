@@ -24,6 +24,39 @@ function getAdminEmails() {
     .filter(Boolean);
 }
 
+async function sendPasswordResetEmail(email, continueUrl) {
+  const apiKey = getEnv("VITE_FIREBASE_API_KEY");
+  if (!apiKey) {
+    throw new Error("VITE_FIREBASE_API_KEY is not configured.");
+  }
+
+  const requestBody = {
+    requestType: "PASSWORD_RESET",
+    email: normalizeEmail(email),
+  };
+
+  if (continueUrl) {
+    requestBody.continueUrl = continueUrl;
+  }
+
+  const response = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    },
+  );
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    const message = data?.error?.message || "Unable to send password reset email.";
+    throw new Error(message);
+  }
+}
+
 function normalizeEmail(value) {
   return String(value || "").trim().toLowerCase();
 }
@@ -383,6 +416,7 @@ export {
   assertMethod,
   buildOtpCookiePayload,
   clearAuthCookies,
+  getAdminEmails,
   getAuthenticatedAdmin,
   getPendingOtpAdmin,
   getOtpState,
@@ -391,6 +425,7 @@ export {
   json,
   maskEmail,
   normalizeEmail,
+  sendPasswordResetEmail,
   sendOtpEmail,
   setOtpCookie,
   setSessionCookie,
