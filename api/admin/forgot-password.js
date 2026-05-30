@@ -6,21 +6,6 @@ import {
   sendPasswordResetEmail,
 } from "../_lib/admin-otp.js";
 
-function getContinueUrl(req) {
-  const configured = process.env.ADMIN_PASSWORD_RESET_CONTINUE_URL || "";
-  if (configured) {
-    return configured;
-  }
-
-  const host = req.headers["x-forwarded-host"] || req.headers.host;
-  if (!host) {
-    return "";
-  }
-
-  const proto = req.headers["x-forwarded-proto"] || "https";
-  return `${proto}://${host}/admin-access`;
-}
-
 export default async function handler(req, res) {
   if (!assertMethod(req, res, "POST")) {
     return;
@@ -44,7 +29,7 @@ export default async function handler(req, res) {
       return;
     }
 
-    await sendPasswordResetEmail(email, getContinueUrl(req));
+    await sendPasswordResetEmail(email, process.env.ADMIN_PASSWORD_RESET_CONTINUE_URL || "");
     json(res, 200, successPayload);
   } catch (error) {
     console.error("forgot-password error:", error);
