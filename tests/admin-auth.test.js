@@ -45,12 +45,12 @@ function challenge(user, now = Date.now(), failedAttempts = 0) {
   setOtpCookie(res, buildOtpCookiePayload(user, "123456", now, failedAttempts));
   return cookieHeader(res);
 }
-async function account(role = "admin") {
+async function account(role = null) {
   const uid = randomUUID();
   const email = `${uid}@example.test`;
   const password = "Emulator-only-password1!";
   await adminAuth.createUser({ uid, email, password });
-  await db.collection("users").doc(uid).set({ role });
+  if (role !== null) await db.collection("users").doc(uid).set({ role });
   process.env.ADMIN_OTP_EMAILS = [process.env.ADMIN_OTP_EMAILS, email].filter(Boolean).join(",");
   const client = initializeApp({ projectId, apiKey: "fake-api-key" }, uid);
   clients.push(client);
@@ -140,11 +140,18 @@ test("admin content writes require a matching verified OTP session", async (t) =
     assert.equal(result.statusCode, 403);
     assert.equal((await adminAuth.getUser(other.uid)).customClaims?.adminTwoFactorVerifiedAt, undefined);
   });
-  await t.test("non-admin is denied even when email is on the OTP allowlist", async () => {
+  await t.test("allowlisted account needs no Firestore admin role", async () => {
     const user = await account("user");
     const result = await verify(user);
-    assert.notEqual(result.statusCode, 200);
+    assert.equal(result.statusCode, 200);
+    assert.equal(await checkSession(await user.user.getIdToken(), cookieHeader(result)), true);
     assert.equal((await adminAuth.getUser(user.uid)).customClaims?.adminTwoFactorVerifiedAt, undefined);
+  });
+  await t.test("a Firestore admin role cannot bypass the email allowlist", async () => {
+    const user = await account("admin");
+    process.env.ADMIN_OTP_EMAILS = process.env.ADMIN_OTP_EMAILS.split(",").filter(email => email !== user.email).join(",");
+    const result = await verify(user);
+    assert.notEqual(result.statusCode, 200);
   });
   await t.test("expired or exhausted challenges cannot grant a claim", async () => {
     const user = await account();
@@ -176,11 +183,11 @@ test("admin content writes require a matching verified OTP session", async (t) =
       })).statusCode, 403);
     }
   });
-  await t.test("permission removal makes an existing verified session invalid", async () => {
+  await t.test("allowlist removal makes an existing verified session invalid", async () => {
     const user = await account();
     const verified = await verify(user);
     const token = await user.user.getIdToken(true);
-    await db.collection("users").doc(user.uid).update({ role: "user" });
+    process.env.ADMIN_OTP_EMAILS = process.env.ADMIN_OTP_EMAILS.split(",").filter(email => email !== user.email).join(",");
     assert.equal(await checkSession(token, cookieHeader(verified)), false);
     assert.equal((await updateCourse(token, randomUUID())).status, 403);
     assert.equal((await writeContent(token, cookieHeader(verified), {

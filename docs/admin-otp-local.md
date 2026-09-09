@@ -9,8 +9,12 @@ that the token and OTP challenge belong to the same allowed admin. The signed
 session cookie is bound to that account and Firebase authentication time.
 Existing cookies without that binding must sign in again.
 
+Admin membership comes from the existing server `ADMIN_OTP_EMAILS` allowlist.
+No `users` collection or Firestore `role` field is required for website login
+or server content writes.
+
 Admin create/update/delete operations use `/api/admin/content`. The server checks
-the ID token (including revocation), current admin role, email allowlist, and
+the ID token (including revocation), server email allowlist, and
 matching unexpired OTP cookie on every write. Only CMS collections are allowed;
 the endpoint cannot change user roles or arbitrary Firestore paths. The server
 sets timestamps and writes through the Admin SDK. Public contact submissions
@@ -47,9 +51,9 @@ loopback emulator endpoints.
 
 The test reproduces the denied direct course update and confirms that the server
 endpoint saves it with a verified session. It also covers a second password-only
-session, OTP retry, missing/invalid tokens, mismatched accounts, non-admins,
+session, OTP retry, missing/invalid tokens, mismatched accounts, unlisted emails,
 expired/exhausted challenges, expired/wrong-session cookies, preservation of
-existing claims, removal of the admin role, content CRUD, server timestamps,
+existing claims, removal from the allowlist, content CRUD, server timestamps,
 collection/path validation, and missing documents.
 
 Firebase references: [custom claims](https://firebase.google.com/docs/auth/admin/custom-claims)

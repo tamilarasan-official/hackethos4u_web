@@ -8,8 +8,7 @@ import {
   EmailAuthProvider,
   User,
 } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase';
+import { auth } from '@/lib/firebase';
 import { toast } from 'sonner';
 
 const ADMIN_OTP_SESSION_KEY = 'hackethos4u-admin-otp';
@@ -222,19 +221,6 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-const resolveRole = async (user: User) => {
-  try {
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
-    if (userDoc.exists()) {
-      return String(userDoc.data().role || '');
-    }
-  } catch (error) {
-    console.error('Failed to resolve user role:', error);
-  }
-
-  return '';
-};
-
 const normalizeEmail = (value?: string | null) => String(value || '').trim().toLowerCase();
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
@@ -294,33 +280,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setCurrentUser(user);
 
     try {
-      const role = await resolveRole(user);
-      const nextIsAdmin = role === 'admin';
-      setIsAdmin(nextIsAdmin);
-
-      if (!nextIsAdmin) {
-        setAdminTwoFactorVerified(false);
+      const verified = !getOtpPending() && await checkAdminSession(user);
+      setIsAdmin(verified);
+      setAdminTwoFactorVerified(verified);
+      if (verified) {
         syncAdminOtpSession(null);
         storePendingAdminLogin(null);
+        setVerifiedAdminMarker(true);
+        setVerifiedAdminEmail(user.email);
+      } else {
         setVerifiedAdminMarker(false);
         setVerifiedAdminEmail('');
-      } else {
-        if (getOtpPending()) {
-          setAdminTwoFactorVerified(false);
-        } else {
-          const verified = await checkAdminSession(user);
-          setAdminTwoFactorVerified(verified);
-          if (verified) {
-            syncAdminOtpSession(null);
-            storePendingAdminLogin(null);
-            setVerifiedAdminMarker(true);
-            setVerifiedAdminEmail(user.email);
-          } else {
-            setVerifiedAdminMarker(false);
-            setVerifiedAdminEmail('');
-          }
-        }
       }
+    } catch (error) {
+      setIsAdmin(false);
+      setAdminTwoFactorVerified(false);
+      setVerifiedAdminMarker(false);
+      setVerifiedAdminEmail('');
+      console.error('Failed to verify admin session:', error);
     } finally {
       if (!otpVerificationInProgressRef.current) {
         setAuthTransitioning(false);
@@ -427,13 +404,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const credential = await signInWithEmailAndPassword(auth, pendingLogin.email, pendingLogin.password);
       await apiRequest('/api/admin/verify-otp', await credential.user.getIdToken(), { otp });
       otpConsumed = true;
-      const role = await resolveRole(credential.user);
-
-      if (role !== 'admin') {
-        await signOut(auth);
-        throw new Error('This account is not allowed to access the admin panel.');
-      }
-
       const verified = await checkAdminSession(credential.user);
       if (!verified) {
         await signOut(auth);

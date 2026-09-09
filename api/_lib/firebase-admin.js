@@ -34,10 +34,6 @@ export async function getFirebaseAdminUser(req) {
   if (!email || !getAdminEmails().includes(email)) {
     throw new Error("This account is not allowed to access the admin panel.");
   }
-  const profile = await getFirestore(app).collection("users").doc(token.uid).get();
-  if (profile.data()?.role !== "admin") {
-    throw new Error("This account does not have the Firebase admin role.");
-  }
   return { uid: token.uid, email, authTime: token.auth_time, token };
 }
 
