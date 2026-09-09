@@ -1,0 +1,20 @@
+// Regression fixture matching the website's active CMS write requirements.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isVerifiedAdmin() {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin" &&
+        request.auth.token.adminTwoFactorVerifiedAt != null &&
+        request.auth.token.auth_time != null &&
+        request.auth.token.adminTwoFactorVerifiedAt >= request.auth.token.auth_time * 1000;
+    }
+    match /courses/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isVerifiedAdmin();
+    }
+    match /users/{userId} {
+      allow read: if request.auth != null;
+    }
+  }
+}

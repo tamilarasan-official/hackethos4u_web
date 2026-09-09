@@ -8,6 +8,7 @@ import {
   setOtpCookie,
   setSessionCookie,
 } from "../_lib/admin-otp.js";
+import { getFirebaseAdminUser } from "../_lib/firebase-admin.js";
 
 export default async function handler(req, res) {
   if (!assertMethod(req, res, "POST")) {
@@ -56,7 +57,12 @@ export default async function handler(req, res) {
       return;
     }
 
-    setSessionCookie(res, user, now);
+    const authenticatedUser = await getFirebaseAdminUser(req);
+    if (authenticatedUser.uid !== user.uid || authenticatedUser.email !== user.email) {
+      json(res, 403, { error: "OTP does not belong to this login. Please sign in again." });
+      return;
+    }
+    setSessionCookie(res, authenticatedUser, now);
     json(res, 200, { verified: true });
   } catch (error) {
     console.error("verify-otp error:", error);

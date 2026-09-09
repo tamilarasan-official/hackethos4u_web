@@ -4,8 +4,6 @@ import {
   getDoc,
   getDocs,
   addDoc,
-  updateDoc,
-  deleteDoc,
   query,
   where,
   orderBy,
@@ -13,7 +11,7 @@ import {
   Timestamp,
   QueryConstraint,
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { auth, db } from './firebase';
 
 // Collection names
 export const COLLECTIONS = {
@@ -42,6 +40,25 @@ const removeUndefinedFields = (obj: any): any => {
   });
   return cleaned;
 };
+
+async function writeAdminContent(action: 'create' | 'update' | 'delete', collection: string, id?: string, data?: unknown): Promise<{ id: string }> {
+  const user = auth.currentUser;
+  if (!user) throw new Error('Please sign in and verify your admin OTP again.');
+  const response = await fetch('/api/admin/content', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${await user.getIdToken()}`,
+    },
+    body: JSON.stringify({ action, collection, id, data }),
+  });
+  const result = await response.json();
+  if (!response.ok) {
+    throw Object.assign(new Error(result.error || 'Unable to save content.'), { code: result.code });
+  }
+  return result;
+}
 
 // Generic CRUD operations
 export const firestoreService = {
@@ -100,6 +117,10 @@ export const firestoreService = {
   // Create new document
   async create<T>(collectionName: string, data: Omit<T, 'id'>): Promise<string> {
     try {
+      // Public contact submissions retain their existing unauthenticated path.
+      if (collectionName !== COLLECTIONS.CONTACTS) {
+        return (await writeAdminContent('create', collectionName, undefined, data)).id;
+      }
       const collectionRef = collection(db, collectionName);
       const docData = removeUndefinedFields({
         ...data,
@@ -121,12 +142,7 @@ export const firestoreService = {
     data: Partial<Omit<T, 'id'>>
   ): Promise<void> {
     try {
-      const docRef = doc(db, collectionName, id);
-      const updateData = removeUndefinedFields({
-        ...data,
-        updatedAt: Timestamp.now(),
-      });
-      await updateDoc(docRef, updateData);
+      await writeAdminContent('update', collectionName, id, data);
     } catch (error) {
       console.error(`Error updating document ${id} in ${collectionName}:`, error);
       throw error;
@@ -136,8 +152,7 @@ export const firestoreService = {
   // Delete document
   async delete(collectionName: string, id: string): Promise<void> {
     try {
-      const docRef = doc(db, collectionName, id);
-      await deleteDoc(docRef);
+      await writeAdminContent('delete', collectionName, id);
     } catch (error) {
       console.error(`Error deleting document ${id} from ${collectionName}:`, error);
       throw error;

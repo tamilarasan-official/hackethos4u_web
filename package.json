@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "test:admin": "firebase emulators:exec --project demo-hackethos-admin --config tests/firebase.json --only auth,firestore \"node --test tests/admin-auth.test.js\"",
     "dev": "vite",
     "build": "vite build",
     "build:snap": "vite build && react-snap",
@@ -73,6 +74,7 @@
     "dotenv": "^17.2.3",
     "embla-carousel-react": "^8.6.0",
     "firebase": "^12.6.0",
+    "firebase-admin": "^13.10.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",

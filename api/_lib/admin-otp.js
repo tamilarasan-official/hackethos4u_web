@@ -354,6 +354,7 @@ function setSessionCookie(res, user, now) {
   const payload = {
     uid: user.uid,
     email: user.email,
+    authTime: user.authTime,
     verifiedAt: now,
     expiresAt: now + SESSION_TTL_MS,
   };

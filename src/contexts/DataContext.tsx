@@ -232,7 +232,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       toast.success('Course updated successfully!');
     } catch (error) {
       console.error('Error updating course:', error);
-      toast.error('Failed to update course');
+      toast.error(error instanceof Error ? error.message : 'Failed to update course');
       throw error;
     }
   };

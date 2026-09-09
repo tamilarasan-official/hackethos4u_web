@@ -158,14 +158,6 @@ const setVerifiedAdminMarker = (verified: boolean) => {
   }
 };
 
-const getVerifiedAdminEmail = () => {
-  if (typeof window === 'undefined') {
-    return '';
-  }
-
-  return normalizeEmail(window.sessionStorage.getItem(ADMIN_VERIFIED_EMAIL_KEY));
-};
-
 const setVerifiedAdminEmail = (email?: string | null) => {
   if (typeof window === 'undefined') {
     return;
@@ -303,15 +295,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     try {
       const role = await resolveRole(user);
-      const userEmail = normalizeEmail(user.email);
-      const pendingEmail = normalizeEmail(getPendingAdminLogin()?.email);
-      const otpEmail = normalizeEmail(adminOtpSession?.email);
-      const verifiedEmail = getVerifiedAdminEmail();
-      const nextIsAdmin =
-        role === 'admin' ||
-        userEmail === pendingEmail ||
-        userEmail === otpEmail ||
-        userEmail === verifiedEmail;
+      const nextIsAdmin = role === 'admin';
       setIsAdmin(nextIsAdmin);
 
       if (!nextIsAdmin) {
@@ -324,9 +308,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (getOtpPending()) {
           setAdminTwoFactorVerified(false);
         } else {
-          if (getVerifiedAdminMarker()) {
-            setAdminTwoFactorVerified(true);
-          }
           const verified = await checkAdminSession(user);
           setAdminTwoFactorVerified(verified);
           if (verified) {
@@ -432,6 +413,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const verifyAdminOtp = async (otp: string) => {
+    let otpConsumed = false;
     try {
       otpVerificationInProgressRef.current = true;
       setAuthTransitioning(true);
@@ -442,13 +424,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         throw new Error('Your login session expired. Please sign in again.');
       }
 
-      await apiRequest('/api/admin/verify-otp', undefined, { otp });
       const credential = await signInWithEmailAndPassword(auth, pendingLogin.email, pendingLogin.password);
+      await apiRequest('/api/admin/verify-otp', await credential.user.getIdToken(), { otp });
+      otpConsumed = true;
       const role = await resolveRole(credential.user);
-      const userEmail = normalizeEmail(credential.user.email);
-      const pendingEmail = normalizeEmail(pendingLogin.email);
 
-      if (role !== 'admin' && userEmail !== pendingEmail) {
+      if (role !== 'admin') {
         await signOut(auth);
         throw new Error('This account is not allowed to access the admin panel.');
       }
@@ -469,6 +450,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setOtpPending(false);
       toast.success('Admin verification successful.');
     } catch (error: unknown) {
+      // Invalid codes can be retried; a consumed challenge needs a new login.
+      if (otpConsumed) clearAuthState();
+      await signOut(auth).catch((signOutError) => console.error('Sign out error:', signOutError));
+      setCurrentUser(null);
+      setIsAdmin(false);
+      setAdminTwoFactorVerified(false);
       otpVerificationInProgressRef.current = false;
       setAuthTransitioning(false);
       console.error('Verify OTP error:', error);
@@ -477,6 +464,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } finally {
       otpVerificationInProgressRef.current = false;
       setAuthTransitioning(false);
+      setLoading(false);
     }
   };
 
@@ -529,6 +517,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   useEffect(() => {
     const unsubscribe = onIdTokenChanged(auth, (user) => {
+      if (otpVerificationInProgressRef.current) return;
       setLoading(true);
       void applyUserState(user);
     });
